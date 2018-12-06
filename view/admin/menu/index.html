@@ -1,0 +1,30 @@
+{% extends "./_base.html" %}
+{% import "../../_components/_pages.html" as pages %}
+{% import "../../_components/_cards.html" as cards %}
+{% import "../../_components/_dropdowns.html" as dropdowns %}
+
+{% block content %}
+    {% set toolbar = {
+        primary: [{
+            url: '/admin/menu/add',
+            toggle: true,
+            text: '添加菜单',
+            icon: 'icon-add'
+        }]
+    } %}
+    {% set theader = [
+        { html: '<input type="checkbox">' },
+        { html: 'ID'},
+        { html: '名称'},
+        { html: '上级菜单'},
+        { html: '分组'},
+        { html: 'URL'},
+        { html: '排序 '},
+        { html: '开发'},
+        { html: '隐藏'},
+        { width: '10%', classes: 'text-center', html: '操作'}] %}
+
+    {{ pages.content(toolbar, cards.datagrid(theader)) }}
+
+
+{% endblock %}

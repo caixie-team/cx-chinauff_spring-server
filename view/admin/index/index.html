@@ -1,0 +1,257 @@
+{% extends "../../_layouts/_main.html" %}
+{% import "../../_components/_pages.html" as pages %}
+{% import "../../_components/_cards.html" as cards %}
+{% import "../../_components/_dropdowns.html" as dropdowns %}
+
+{% block script %}
+    <script src="{{ GLOBAL_ASSETS }}/js/demo_pages/dashboard.js"></script>
+{% endblock %}
+
+{% block beforeAppScript %}
+    <script src="{{ GLOBAL_ASSETS }}/js/plugins/visualization/d3/d3.min.js"></script>
+    <script src="{{ GLOBAL_ASSETS }}/js/plugins/visualization/d3/d3_tooltip.js"></script>
+    <script src="{{ GLOBAL_ASSETS }}/js/plugins/forms/styling/switchery.min.js"></script>
+    <script src="{{ GLOBAL_ASSETS }}/js/plugins/forms/selects/bootstrap_multiselect.js"></script>
+    <script src="{{ GLOBAL_ASSETS }}/js/plugins/ui/moment/moment.min.js"></script>
+    <script src="{{ GLOBAL_ASSETS }}/js/plugins/pickers/daterangepicker.js"></script>
+{% endblock %}
+
+{% block content %}
+
+    <!-- Content area -->
+    <div class="content pt-0">
+
+        <!-- Dashboard content -->
+        <div class="row">
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-header header-elements-inline">
+                        <h5 class="card-title">
+                            <i class="icon-users2 mr-2 text-success"></i>
+                            用户
+                        </h5>
+                    </div>
+                    <div class="card-body ">
+                        <div class="row">
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-success border-top-3">
+                                    <h6 class="mb-0 mt-1">今日纳新</h6>
+                                    <h2 class="text-success font-weight-semibold  pt-1 mt-2 mb-1">1040 人</h2>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-success-300 border-top-3">
+                                    <h6 class="mb-0 mt-1">累计纳新</h6>
+                                    <h2 class="text-success-300 font-weight-semibold  pt-1 mt-2 mb-1">1040 人</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-header header-elements-inline">
+                        <h5 class="card-title">
+                            <i class="icon-pulse2 mr-2 text-primary"></i>
+                            活跃度</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-primary border-top-3">
+                                    <h6 class=" mb-0 mt-1">今日参与用户</h6>
+                                    <h2 class="text-primary font-weight-semibold  pt-1 mt-2 mb-1">73 人</h2>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-primary-300 border-top-3">
+                                    <h6 class=" mb-0 mt-1">累计参与用户</h6>
+                                    <h2 class="text-primary-300 font-weight-semibold  pt-1 mt-2 mb-1">1040 人</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-header header-elements-inline">
+                        <h5 class="card-title">
+                            <i class="icon-ticket mr-2 text-orange"></i>
+                            优惠劵</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-orange border-top-3">
+                                    <h6 class="mb-0 mt-1">今日发劵</h6>
+                                    <h2 class="text-orange font-weight-semibold pt-1 mt-2 mb-1">2373 份</h2>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-orange border-top-3">
+                                    <h6 class="mb-0 mt-1">累计发劵</h6>
+                                    <h2 class="text-orange-300 font-weight-semibold pt-1 mt-2 mb-1">50000 份</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-header header-elements-inline">
+                        <h5 class="card-title">
+                            <i class="icon-font mr-2 text-danger"></i>
+                            集福</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-danger border-top-3">
+                                    <h6 class="mb-0 mt-1">今日集福</h6>
+                                    <h2 class="text-danger font-weight-semibold pt-1 mt-2 mb-1">1040 人</h2>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-danger-300 border-top-3">
+                                    <h6 class=" mb-0 mt-1">累计集福</h6>
+                                    <h2 class="text-danger-300 font-weight-semibold pt-1 mt-2 mb-1">1040 人</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-header header-elements-inline">
+                        <h5 class="card-title">
+                            <i class="icon-gift mr-2 text-pink"></i>
+                            礼品
+                        </h5>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-pink border-top-3">
+                                    <h6 class="mb-0 mt-1">今日预约</h6>
+                                    <h2 class="font-weight-semibold text-pink pt-1 mt-2 mb-1">1040 人</h2>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-pink-300 border-top-3">
+                                    <h6 class="mb-0 mt-1">累计预约</h6>
+                                    <h2 class="font-weight-semibold text-pink-300 pt-1 mt-2 mb-1">1040 人</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-indigo border-top-3">
+                                    <h6 class="mb-0 mt-1">今日兑换</h6>
+                                    <h2 class="font-weight-semibold text-indigo pt-1 mt-2 mb-1">1040 人</h2>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-xl-6">
+                                <div class="card card-body text-center border-top-indigo-300 border-top-3">
+                                    <h6 class="mb-0 mt-1">累计兑换</h6>
+                                    <h2 class="font-weight-semibold text-indigo-300 pt-1 mt-2 mb-1">1040 人</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card">
+                    <div class="card-header header-elements-inline">
+                        <h5 class="card-title">
+                            <i class="icon-font-size2 mr-2 text-slate"></i>
+                            发字</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="card border-top-slate border-top-3">
+                                    <div class="card-header bg-light text-center">
+                                        <h6 class="card-title">今日发字</h6>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table text-nowrap table-bordered table-hover">
+                                            <thead>
+                                            <tr class="text-center">
+                                                <th>礻</th>
+                                                <th>一</th>
+                                                <th>口</th>
+                                                <th>田</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr class="text-center font-weight-semibold">
+                                                <td>123</td>
+                                                <td>456</td>
+                                                <td>789</td>
+                                                <td>200</td>
+                                            </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <div class="card border-top-slate-300 border-top-3">
+
+                                    <div class="card-header bg-light text-center">
+                                        <h6 class="card-title">累计发字</h6>
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table text-nowrap table-bordered table-hover ">
+                                            <thead>
+                                            <tr class="text-center">
+                                                <th>礻</th>
+                                                <th>一</th>
+                                                <th>口</th>
+                                                <th>田</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr class="text-center font-weight-semibold text-muted">
+                                                <td>123</td>
+                                                <td>456</td>
+                                                <td>789</td>
+                                                <td>200</td>
+                                            </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- /dashboard content -->
+
+    </div>
+    <!-- /content area -->
+
+{% endblock %}
+
+

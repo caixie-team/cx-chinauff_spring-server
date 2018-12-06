@@ -1,0 +1,68 @@
+{% extends "../../_layouts/_main.html" %}
+
+{% block content %}
+    {% for val in list %}
+
+        <div class="card {% if val.is_default == 1 %} border-top-lg border-primary{% else %} card-default{% endif %} ">
+            <div class="card-header bg-white header-elements-sm-inline">
+                <h6 class="card-title">                    {{ val.name }}
+
+                    {% if val.is_default == 1 %}
+                        <span class="label label-primary position-right">当前模板</span>
+                    {% else %}
+                        <a href="/admin/ecom/defaulffare/?id={{ val.id }}"
+                           class="position-right btn btn-link ajax-get"><i
+                                    class="fa fa-check"></i> 应用此模板</a>
+                    {% endif %}
+                </h6>
+                <div class="header-elements">
+                    <div class="list-icons">
+                        <a  href="/admin/ecom/editfare/?id={{ val.id }}" class="list-icons-item"><i
+                                    class="icon-pencil mr-2"></i></a>
+                        <a href="/admin/ecom/delfare/?id={{ val.id }}" class="list-icons-item"><i
+                                    class="icon-trash-alt mr-2"></i> </a>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="table-responsive">
+                <table class="table  b-t b-light" id="export-form">
+                    <thead>
+                    <tr>
+
+                        <th>运送到</th>
+
+                        <th class="active" style="width: 100px">首重(g)</th>
+                        <th class="active" style="width: 100px">运费(元)</th>
+                        <th class="warning" style="width: 100px">续重(g)</th>
+                        <th class="warning" style="width: 100px">运费(元)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="primary">
+                        <td>默认运费（指定城市以外的）</td>
+                        <td class="primary">{{ val.first_weight }}</td>
+                        <td class="primary">{{ val.first_price|formatCurrency }}</td>
+                        <td class="primary">{{ val.second_weight }}</td>
+                        <td class="primary">{{ val.second_price|formatCurrency }}</td>
+                    </tr>
+                    {% set zoning = val.zoning|strToJson %}
+                    {% for v in zoning %}
+                        <tr>
+                            <td>{{ v.title|safe }}</td>
+                            <td class="active">{{ v.f_weight }}</td>
+                            <td class="active">{{ v.f_price|formatCurrency }}</td>
+                            <td class="warning">{{ v.s_weight }}</td>
+                            <td class="warning">{{ v.s_price|formatCurrency }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    {% endfor %}
+
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "../../_layouts/_main.html" %}
+{% import "../../_components/_pages.html" as pages %}
+{% import "../../_components/_cards.html" as cards %}
+{% import "../../_components/_dropdowns.html" as dropdowns %}
+
+{% block content %}
+    {% set actions = {
+        primary: [{
+            text: '添加插件',
+            url: '/'+ ctx.module +'/'+ ctx.controller +'/add',
+            icon: 'icon-add'
+        }]} %}
+    {% set tabs = [{
+        url: '/'+ ctx.module +'/'+ ctx.controller +'/index',
+        active: true,
+        text: '已安装的插件'
+    }, {
+        url: '/'+ ctx.module +'/'+ ctx.controller +'/uninstall',
+        text: '未安装的插件'
+    }] %}
+
+    {% set theader =  [
+        { html: '<input type="checkbox">'},
+        { html: '排序', width: '8%'},
+        { html: '插件名称'},
+        { html: '插件目录'},
+        { html: '版本号'},
+        { html: '安装时间'},
+        { html: '更新时间'},
+        { html: '状态'},
+        { width: '10%', classes: 'text-center', html: '操作'}
+    ] %}
+
+    {% set rowItems = [] %}
+    {% for item in list %}
+        {% set rowItems = (rowItems.push({cells: [
+            { html: '<input class="ids" type="checkbox" name="ids" value="'+ item.ext +'">'},
+            { html: '<input class="form-control form-control-text sort" name="sort" value="'+ item.sort +'" data-id="'+ item.ext +'"/>'},
+            { html: item.name +('<i data-title="'+ item.description +'" data-placement="bottom"
+                                    data-popup="tooltip" class="fa fa-question-circle text-muted ml-1"
+                                    data-original-title="" title=""></i>')},
+            { html: item.ext } ,
+            { html: item.version } ,
+            { html: (item.installtime | moment('YYYY-MM-DD HH:mm'))},
+            { html: (item.updatetime | moment('YYYY-MM-DD HH:mm'))},
+            { html: '<a href="/admin/ext/setstatus/?ids/'+ item.ext +'&status/'+( 1-item.status )+'/pk/ext" class="active ajax-get" data-toggle="class">
+                                    <i class="fa '+ ('fa-check text-success text-active ' if item.status else 'fa-times text-danger text') +'"></i></a>'},
+            { classes: 'text-center',
+                html: dropdowns.menu([{
+                url: ('/addons/'+ item.ext +'/index/index' if item.isindex == 1 else 'limited'),
+                icon: 'icon-eye',
+                text: '访问'
+            }, {
+                url: ('/addons/'+ item.ext +'/admin/index' if item.isadm == 1 else 'limited'),
+                icon: 'icon-pencil7',
+                text: '管理'
+            }, {
+                url: ('/addons/'+ item.ext +'/admin/setting' if (item.setting|strToJson|length > 0) else 'limited'),
+                icon: 'icon-cog ',
+                text: '设置'
+            }, {
+                text: '重载',
+                url: 'addons/'+ item.ext +'/admin/reload/ext='+ item.ext,
+                icon: 'icon-sync',
+                classes: 'confirm ajax-get'
+            }, {
+                text: '卸载',
+                icon: 'icon-trash-alt',
+                url: '/addons/'+ item.ext +'/admin/uninstall/?ext='+ item.ext,
+                classes: 'confirm ajax-get'
+            }])}
+        ]}), rowItems) %}
+    {% endfor %}
+
+    {% if pagerData %}
+        {% set pager = (pagerData | safe) %}
+    {% endif %}
+    {% set content = cards.toolbarGrid(actions, theader, rowItems, pager) %}
+
+    {{ pages.tabContent(tabs, content) }}
+{% endblock %}
+
+{% block script %}
+    {#<script src="/static/admin/js/parsley/parsley.min.js"></script>#}
+    {#<script src="/static/admin/js/parsley/parsley.extend.js"></script>#}
+    {#<script src="/static/admin/js/datepicker/bootstrap-datetimepicker.min.js" type="text/javascript"></script>#}
+    {#<script src="/static/admin/js/datepicker/locales/bootstrap-datetimepicker.zh-CN.js" type="text/javascript"></script>#}
+    <script src="{{ GLOBAL_ASSETS }}/js/demo_pages/components_popups.js"></script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% from './_toolbars.html' import toolbar with context %}
+
+{% macro actionToolbar(actions) %}
+    {{ toolbar(actions) }}
+{% endmacro %}
+
+{% macro content(actions, content) %}
+    {% if actions %}
+        {{ toolbar(actions) }}
+    {% endif %}
+    {{ content }}
+{% endmacro %}
+
+{#<li class="nav-item dropdown">#}
+    {#<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false">Dropdown</a>#}
+    {#<div class="dropdown-menu dropdown-menu-right" x-placement="bottom-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(119px, 42px, 0px);">#}
+        {#<a href="#basic-tab3" class="dropdown-item" data-toggle="tab">Dropdown tab</a>#}
+        {#<a href="#basic-tab4" class="dropdown-item" data-toggle="tab">Another tab</a>#}
+    {#</div>#}
+{#</li>#}
+{% macro tabContent(tabs, content) %}
+    <div class="card">
+        <div class="nav-tabs-responsive">
+            <ul class="nav nav-tabs nav-tabs-bottom flex-nowrap mb-0">
+                {% for item in tabs %}
+                    {% if item.type == 'dropdown' %}
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                               aria-expanded="false">{{ item.text }}</a>
+                            <div class="dropdown-menu dropdown-menu-right" x-placement="bottom-end">
+                                {% for menu in item.items %}
+                                    <a href="{{ menu.url if menu.url else '#' }}" class="dropdown-item"
+                                       {% if not menu.url %}data-toggle="tab"{% endif %}>{{ menu.text }}</a>
+                                {% endfor %}
+                            </div>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a href="{{ item.url }}"
+                               class="nav-link  {{ item.classes }} {{ 'active' if item.active }}">
+                                {% if item.icon %}
+                                    <i class="{{ item.icon }} mr-2"></i>
+                                {% endif %}
+                                {{ item.text }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {{ content }}
+    </div>
+{% endmacro %}

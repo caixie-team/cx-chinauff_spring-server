@@ -1,0 +1,233 @@
+{% extends "../../_layouts/_main.html" %}
+{% import "../../_components/_pages.html" as pages %}
+{% import "../../_components/_cards.html" as cards %}
+{% import "../../_components/_dropdowns.html" as dropdowns %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ ASSETS }}/js/plugins/datepicker/bootstrap-datetimepicker.min.css" type="text/css">
+{% endblock %}
+
+{% block content %}
+    {% set toolbar = {
+        primary: [{
+            text: '添加用户',
+            url: '/admin/user/adduser',
+            icon: 'icon-add',
+            toggle: true
+        }],
+        secondary: [{
+            text: '启用',
+            url: '/admin/action/setstatus?status=0',
+            attribute: 'traget-form="ids"',
+            classes: 'ajax-post',
+            icon: 'icon-checkmark3'
+        }, {
+            text: '禁用',
+            url: '/admin/action/setstatus?status=1',
+            attribute: 'traget-form="ids"',
+            classes: 'ajax-post ',
+            icon: 'icon-cross2'
+        }, {
+            text: '删除',
+            url: '/admin/action/setstatus?status=-1',
+            attribute: 'target-form="items"',
+            classes: 'ajax-post confirm',
+            icon: 'icon-trash-alt'
+        }]} %}
+
+    {% set theader =  [
+        { html: '<input type="checkbox">' },
+        { html: 'ID'},
+        { html: '用户名'},
+        { html: '手机号'},
+        { html: '用户组'},
+        { html: 'IP'},
+        { html: '最后登录'},
+        { html: '金钱总数'},
+        { html: '积分点数'},
+        { html: '状态'},
+        { width: '10%', classes: 'text-center', html: '操作'}
+    ] %}
+
+    {% set rowItems = [] %}
+    {% for item in list %}
+        {% set group = (item.groupid|get_member_group) %}
+        {% set limited = (item.id|in_Array(controller.config('user_administrator'))) %}
+        {% set rowItems = (rowItems.push({cells: [
+            { html: '<input class="ids" type="checkbox" name="ids" value="'+ ('' if limited else item.id) +'"'+("disabled=true" if limited)+'">'},
+            { html: item.id},
+            { html: '<a class="text-primary" data-toggle="modal" data-target="#modal_remote"
+            href="/admin/user/showuser/?id='+ item.id +'">'+ item.username +' </a>'},
+            { html: item.email },
+            { html: group.name },
+            { html: item.reg_ip|int2ip },
+            { html: item.last_login_time | moment('YYYY-MM-DD HH:mm:ss') },
+            { html: item.amount },
+            { html: item.score },
+            { html: ('' if item.id|in_Array(controller.config('user_administrator'))
+            else '<a href="/admin/user/setstatus/?ids='+ item.id +'&status=1-item.status&model=member" class="active ajax-get" data-toggle="class">
+                            <i class="fa ' +( "fa-check text-success text-active" if item.status else "fa-times text-danger text") +'"></i></a>')},
+            { classes: 'text-center',
+                html: dropdowns.menu([{
+                url: '/admin/user/edituser?id='+ item.id,
+                icon: 'icon-pencil7',
+                attribute: 'data-toggle=modal data-target=#modal_remote' ,
+                text: '修改'
+            }, {
+                url: '/admin/user/recharge/?ids='+ item.id +'&status=-1',
+                icon: 'icon-coins',
+                attribute: 'data-toggle=modal data-target=#modal_remote' ,
+                text: '充值'
+            }, {
+                text: '删除',
+                icon: 'icon-trash-alt',
+                url: ('limited' if item.id|in_Array(controller.config('user_administrator')) else '/admin/user/userdel/?ids=' + item.id),
+                classes: 'confirm ajax-get'
+            }])}
+        ]}), rowItems) %}
+    {% endfor %}
+
+    {% set pager = (pagerData | safe) %}
+    {% set content = cards.grid(theader, rowItems, pager) %}
+
+    {{ pages.content(toolbar, content) }}
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th style="" colspan="2">
+                <div class="th-inner ">Item Detail</div>
+                <div class="fht-cell"></div>
+            </th>
+            <th style="vertical-align: middle; " rowspan="2" data-field="id">
+                <div class="th-inner ">Item ID</div>
+                <div class="fht-cell"></div>
+            </th>
+        </tr>
+        <tr>
+            <th style="" data-field="name">
+                <div class="th-inner ">Item Name</div>
+                <div class="fht-cell"></div>
+            </th>
+            <th style="" data-field="price">
+                <div class="th-inner ">Item Price</div>
+                <div class="fht-cell"></div>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr data-index="0">
+            <td style="">Item 0</td>
+            <td style="">$0</td>
+            <td style="vertical-align: middle; ">0</td>
+        </tr>
+        <tr data-index="1">
+            <td style="">Item 1</td>
+            <td style="">$1</td>
+            <td style="vertical-align: middle; ">1</td>
+        </tr>
+        <tr data-index="2">
+            <td style="">Item 2</td>
+            <td style="">$2</td>
+            <td style="vertical-align: middle; ">2</td>
+        </tr>
+        <tr data-index="3">
+            <td style="">Item 3</td>
+            <td style="">$3</td>
+            <td style="vertical-align: middle; ">3</td>
+        </tr>
+        <tr data-index="4">
+            <td style="">Item 4</td>
+            <td style="">$4</td>
+            <td style="vertical-align: middle; ">4</td>
+        </tr>
+        <tr data-index="5">
+            <td style="">Item 5</td>
+            <td style="">$5</td>
+            <td style="vertical-align: middle; ">5</td>
+        </tr>
+        <tr data-index="6">
+            <td style="">Item 6</td>
+            <td style="">$6</td>
+            <td style="vertical-align: middle; ">6</td>
+        </tr>
+        <tr data-index="7">
+            <td style="">Item 7</td>
+            <td style="">$7</td>
+            <td style="vertical-align: middle; ">7</td>
+        </tr>
+        <tr data-index="8">
+            <td style="">Item 8</td>
+            <td style="">$8</td>
+            <td style="vertical-align: middle; ">8</td>
+        </tr>
+        <tr data-index="9">
+            <td style="">Item 9</td>
+            <td style="">$9</td>
+            <td style="vertical-align: middle; ">9</td>
+        </tr>
+        <tr data-index="10">
+            <td style="">Item 10</td>
+            <td style="">$10</td>
+            <td style="vertical-align: middle; ">10</td>
+        </tr>
+        <tr data-index="11">
+            <td style="">Item 11</td>
+            <td style="">$11</td>
+            <td style="vertical-align: middle; ">11</td>
+        </tr>
+        <tr data-index="12">
+            <td style="">Item 12</td>
+            <td style="">$12</td>
+            <td style="vertical-align: middle; ">12</td>
+        </tr>
+        <tr data-index="13">
+            <td style="">Item 13</td>
+            <td style="">$13</td>
+            <td style="vertical-align: middle; ">13</td>
+        </tr>
+        <tr data-index="14">
+            <td style="">Item 14</td>
+            <td style="">$14</td>
+            <td style="vertical-align: middle; ">14</td>
+        </tr>
+        <tr data-index="15">
+            <td style="">Item 15</td>
+            <td style="">$15</td>
+            <td style="vertical-align: middle; ">15</td>
+        </tr>
+        <tr data-index="16">
+            <td style="">Item 16</td>
+            <td style="">$16</td>
+            <td style="vertical-align: middle; ">16</td>
+        </tr>
+        <tr data-index="17">
+            <td style="">Item 17</td>
+            <td style="">$17</td>
+            <td style="vertical-align: middle; ">17</td>
+        </tr>
+        <tr data-index="18">
+            <td style="">Item 18</td>
+            <td style="">$18</td>
+            <td style="vertical-align: middle; ">18</td>
+        </tr>
+        <tr data-index="19">
+            <td style="">Item 19</td>
+            <td style="">$19</td>
+            <td style="vertical-align: middle; ">19</td>
+        </tr>
+        <tr data-index="20">
+            <td style="">Item 20</td>
+            <td style="">$20</td>
+            <td style="vertical-align: middle; ">20</td>
+        </tr>
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block script %}
+    {#<script src="/static/admin/js/parsley/parsley.min.js"></script>#}
+    {#<script src="/static/admin/js/parsley/parsley.extend.js"></script>#}
+    <script src="{{ ASSETS }}/js/plugins/datepicker/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+    <script src="{{ ASSETS }}/js/plugins/datepicker/locales/bootstrap-datetimepicker.zh-CN.js"
+            type="text/javascript"></script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "../../_layouts/_main.html" %}
+{% import "../../_components/_pages.html" as pages %}
+{% import "../../_components/_cards.html" as cards %}
+{% import "../../_components/_dropdowns.html" as dropdowns %}
+    {% set actions = {
+        primary: [{
+            text: '添加独立模型',
+            url: '/'+ ctx.module +'/'+ ctx.controller +'/addext',
+            toggle: true,
+            icon: 'icon-add'
+        }],
+        secondary: [{
+            url: '/admin/'+ ctx.controller +'/setstatus?status=1',
+            text: '启用',
+            attribute: 'target-form=ids'
+        }, {
+            url: '/admin/'+ ctx.controller +'/setstatus?status=0',
+            text: '禁用',
+            attribute: 'target-form=ids'
+        }, {
+            url: '/admin/'+ ctx.controller +'/generate',
+            text: '生成'
+        }]} %}
+
+    {% set tabs = [{
+        url: '/'+ ctx.module +'/'+ ctx.controller +'/ext',
+        text: '已安装的模型'
+    }, {
+        url: '/'+ ctx.module +'/'+ ctx.controller +'/extun',
+        active: true,
+        text: '未安装的模型'
+    }] %}
+
+    {% set theader =  [
+        { html: '模型名称'},
+        { html: '模型目录'},
+        { html: '描述'},
+        { html: '版本号'},
+        { html: '作者'},
+        { width: '10%', classes: 'text-center', html: '操作'}
+    ] %}
+
+
+{% block content %}
+    {% set rowItems = [] %}
+    {% for item in list %}
+
+        {% set rowItems = (rowItems.push({cells: [
+            { html: item.title },
+            { html: item.name },
+            { html: item.description },
+            { html: item.version },
+            { html: item.author },
+
+            { classes: 'text-center',
+                html: dropdowns.menu([{
+                url: '/admin/'+ ctx.controller +'/installext/?mod='+ item.name,
+                icon: 'icon-pencil7',
+                classes: 'confirm ajax-get',
+                text: '安装'
+            }, {
+                text: '删除',
+                icon: 'icon-trash-alt',
+                url: ('/admin/'+ ctx.controller +'/delext?mod='+ item.name if item.name !== 'demo' else 'limited'),
+                classes: 'confirm ajax-get'
+            }])}
+        ]}), rowItems) %}
+
+    {% endfor %}
+
+    {% if pagerData %}
+        {% set pager = (pagerData | safe) %}
+    {% endif %}
+    {% set content = cards.toolbarGrid(actions, theader, rowItems, pager) %}
+
+    {{ pages.tabContent(tabs, content) }}
+
+{% endblock %}

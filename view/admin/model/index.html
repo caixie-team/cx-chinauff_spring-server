@@ -1,0 +1,77 @@
+{% extends "../../_layouts/_main.html" %}
+{% import "../../_components/_pages.html" as pages %}
+{% import "../../_components/_cards.html" as cards %}
+{% import "../../_components/_dropdowns.html" as dropdowns %}
+
+{% block content %}
+    {% set toolbar = {
+        primary: [{
+            text: '添加系统模型',
+            url: '/admin/model/add',
+            icon: 'icon-add'
+        },{
+            text: '添加独立模型',
+            url: '/admin/model/add',
+            icon: 'icon-add'
+        }],
+        secondary: [{
+            text: '启用',
+            url: '/admin/model/setstatus/?status=1',
+            attribute: 'target-form=ids',
+            classes: 'ajax-post',
+            icon: 'icon-checkmark3'
+        }, {
+            text: '禁用',
+            url: '/admin/model/setstatus/?status=0',
+            attribute: 'target-form=ids',
+            classes: 'ajax-post ',
+            icon: 'icon-cross2'
+        }, {
+            text: '生成',
+            url: '/admin/model/generate',
+            icon: 'icon-primitive-dot '
+        }]} %}
+
+    {% set theader =  [
+        { html: '<input type="checkbox">' },
+        { html: 'ID'},
+        { html: '标识'},
+        { html: '名称'},
+        { html: '创建时间'},
+        { html: '状态'},
+        { width: '10%', classes: 'text-center', html: '操作'}
+    ] %}
+
+    {% set rowItems = [] %}
+    {% for item in list %}
+        {% set group = (item.groupid|get_member_group) %}
+        {% set limited = (item.id|in_Array(controller.config('user_administrator'))) %}
+
+        {% set rowItems = (rowItems.push({cells: [
+            { html: '<input class="ids" type="checkbox" name="ids" value="'+ (item.id if item.id !== 1) +'" '+("disabled=true" if item.id == 1)+'">'},
+            { html: item.id},
+            { html: item.name },
+            { html: '<a href="/admin/model/edit?' +item.id +'" data-id=' + item.id +'>'+ item.name +' </a>' },
+            { html: (item.create_time | format_time(1))},
+            { html: '<a href="/admin/model/setstatus/?ids=' +item.id +'&status=1-item.status" data-id=' + item.id +' class="active ajax-get" data-toggle="class">
+                    <i class="fa '+('fa-check text-success text-active"' if item.status else 'fa-times text-danger text') + '"></i> </a>' },
+
+            { classes: 'text-center',
+                html: dropdowns.menu([ {
+                text: '删除',
+                icon: 'icon-trash-alt',
+                url: '/admin/model/del/?ids=' + item.id,
+                classes: 'confirm ajax-get'
+            }])}
+        ]}), rowItems) %}
+    {% endfor %}
+
+
+    {% if pagerData %}
+        {% set pager = (pagerData | safe) %}
+    {% endif %}
+    {% set content = cards.grid(theader, rowItems, pager) %}
+
+    {{ pages.content(toolbar, content) }}
+
+{% endblock %}

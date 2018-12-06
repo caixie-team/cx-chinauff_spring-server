@@ -1,0 +1,64 @@
+{% extends "../../_layouts/_main.html" %}
+
+{% block content %}
+
+    <div class="card">
+        <div class="nav-tabs-responsive">
+            <ul class="nav nav-tabs nav-tabs-bottom flex-nowrap mb-0">
+                <li class="nav-item ">
+                    <a class="nav-link" href="/admin/order/receiving"> 收款单 </a></li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/admin/order/invoice">发货单</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin/order/refund">退款单</a>
+            </ul>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped b-t b-light" id="export-form">
+                <thead>
+
+                <tr>
+
+                    <th>发货单号</th>
+                    <th>订单号</th>
+                    <th>物流单号</th>
+                    <th>物流公司</th>
+                    <th>收货人</th>
+                    <th>收货人电话</th>
+                    <th>创建时间</th>
+                    <th style="width:130px;">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for v in list %}
+                    <tr>
+                        <td>{{ v.invoice_no }}</td>
+                        <td> {{ v.order_no }}</td>
+
+                        <td>{{ v.express_no }}</td>
+                        <td>{{ v.express_company_id }}</td>
+                        <td>
+                            {{ v.accept_name }}
+                        </td>
+                        <td>
+                            {{ v.mobile }}
+                        </td>
+                        <td> {{ v.create_time|dateformat('Y-m-d H:i:s') }}</td>
+                        <td><a href="#" class="btn btn-default btn-xs"> 查看</a></td>
+                    </tr>
+                {% endfor %}
+
+
+                </tbody>
+            </table>
+        </div>
+        {% if pagerData %}
+            <div class="card-footer">
+                <div class="pull-right">
+                    {{ pagerData | safe }}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

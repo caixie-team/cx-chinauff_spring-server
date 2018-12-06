@@ -1,0 +1,120 @@
+{% extends "../../_layouts/layout_default.html" %}
+
+{% block navbar %}
+    <!-- Main navbar -->
+    <div class="navbar navbar-expand-md navbar-dark">
+        <div class="navbar-brand">
+            <a href="index.html" class="d-inline-block">
+                <img src="{{ GLOBAL_ASSETS }}/images/logo_light.svg" alt="">
+            </a>
+        </div>
+    </div>
+    <!-- /main navbar -->
+
+{% endblock %}
+
+{% block content %}
+    <!-- Content area -->
+    <div class="content d-flex justify-content-center align-items-center">
+        {% if HOOK@signinView%}
+            {{ HOOK@signinView|safe}}
+        {% else %}
+            <!-- Login form -->
+            <form class="login-form" action="#" method="post">
+                <div class="card mb-0 wmin-400">
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <i class="icon-reading icon-2x text-slate-300 border-slate-300 border-3 rounded-round p-3 mb-3 mt-1"></i>
+                            <h5 class="mb-0">{{ meta_title }}</h5>
+                            <span class="d-block text-muted">在下方输入账户信息</span>
+                        </div>
+
+                        <div class="form-group form-group-feedback form-group-feedback-left">
+                            <input type="text" class="form-control" placeholder="用户名" id="user_name" name="user_name">
+                            <div class="form-control-feedback">
+                                <i class="icon-user text-muted"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group form-group-feedback form-group-feedback-left">
+                            <input type="password" class="form-control" placeholder="密码" id="password" name="password">
+                            <div class="form-control-feedback">
+                                <i class="icon-lock2 text-muted"></i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn bg-orange btn-block">
+                                登录
+                                <i class="icon-circle-right2 ml-2"></i>
+                            </button>
+                        </div>
+                        {#<div class="text-center">#}
+                            {#<a href="login_password_recover.html">忘记密码?</a>#}
+                        {#</div>#}
+                    </div>
+                </div>
+            </form>
+            <!-- /login form -->
+        {% endif %}
+    </div>
+    <!-- /content area -->
+{% endblock %}
+
+{% block footer %}
+    {% include "../components/app_footer.html" %}
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript">
+      $('#validate-submit').click(function () {
+        var self = this;
+        $(self).addClass('disabled').attr('autocomplete', 'off').prop('disabled', true);
+        $.ajax({
+          url: '/admin/login',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            username: $('#username').val(),
+            password: $('#password').val(),
+            captcha: $('#captcha').val(),
+          },
+          success: function (data) {
+            if (data.errno === 0) {
+              if (data.data.url) {
+                Notify.success(data.data.name + ' （即将自动跳转)')
+
+              } else {
+                Notify.success(data.data.name)
+
+              }
+              setTimeout(function () {
+                $(self).removeClass('disabled').prop('disabled', false);
+                if (data.data.url) {
+                  location.href = data.data.url;
+                } else if ($(this).hasClass('no-refresh')) {
+                  Notify.close()
+                } else {
+                  location.reload();
+                }
+              }, 1500);
+            } else {
+              Notify.error(data.errmsg)
+
+              setTimeout(function () {
+
+                $(self).removeClass('disabled').prop('disabled', false);
+                if (data.data) {
+                  location.href = data.data;
+                } else {
+                  // toastr.clear()
+                  Notify.close()
+                }
+              }, 1500);
+            }
+          }
+        });
+        return false;
+      })
+    </script>
+{% endblock %}

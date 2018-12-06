@@ -1,0 +1,88 @@
+{% extends "../../_layouts/_main.html" %}
+{% import "../../_components/_pages.html" as pages %}
+{% import "../../_components/_cards.html" as cards %}
+{% import "../../_components/_dropdowns.html" as dropdowns %}
+
+{% block content %}
+
+        {% set tabs = [{
+            url: '/admin/approval/index',
+            active: (controller.get('model')|default('active', true)),
+            text: '全部 ' + count
+        }] %}
+
+        {% for m in model %}
+            {% set tabs = (tabs.push({
+                url: '/admin/approval/index/?model=' + m.id,
+                active: (controller.get('model')==m.id),
+                text: m.title + (' ' + m.count if m.count > 0)
+            }), tabs) %}
+
+        {% endfor %}
+        {% set theader =  [
+            { html: '<input type="checkbox">'},
+            { html: '排序', width: '8%'},
+            { html: '插件名称'},
+            { html: '插件目录'},
+            { html: '版本号'},
+            { html: '安装时间'},
+            { html: '更新时间'},
+            { html: '状态'},
+            { width: '10%', classes: 'text-center', html: '操作'}
+        ] %}
+        {% set actions = {
+            primary: [{
+                url: '/'+ ctx.module +'/'+ ctx.controller +'/adopta',
+                text: '通过审核',
+                attribute: 'target-form=ids',
+                class: 'ajax-post'
+            }, {
+                url: '/'+ ctx.module +'/'+ ctx.controller +'/refuse',
+                text: '拒绝审核',
+                attribute: 'target-form=ids'
+            }]
+        } %}
+    {% set theader =  [
+        { html: '<input type="checkbox">'},
+        { html: '用户', width: '8%'},
+        { html: '标题'},
+        { html: '发布时间'},
+        { width: '10%', classes: 'text-center', html: '操作'}
+    ] %}
+        {#{{ pages.actionToolbar(actions) }}#}
+
+    {% set rowItems = [] %}
+    {% for item in list.data %}
+        {% set rowItems = (rowItems.push({cells: [
+            { html: '<input class="ids" type="checkbox" name="ids" value="'+ item.id +'">'},
+            { html: '<a href="/admin/user/showuser/id/'+ item.uid +'" data-toggle="modal" data-target="#modal_remote">'+ (item.uid|get_nickname) +'</a>' },
+            { html: '<a href="/admin/approval/details/id/'+ item.id +'" data-toggle="modal" data-target="#modal_remote">'+ item.title +'</a>' },
+            { html: (item.time | moment('YYYY-MM-DD HH:mm:ss'))},
+
+            { classes: 'text-center',
+                html: dropdowns.menu([{
+                url: '/admin/approval/detail/id/' + item.id,
+                icon: 'icon-eye',
+                toggle: true,
+                text: '通过'
+            }, {
+                url: '/admin/approval/adopta/ids?' + item.id,
+                icon: 'icon-check ',
+                classes: 'ajax-get',
+                text: '通过审核'
+            }, {
+                url: '/admin/approval/refuse/ids?' + item.id,
+                text: '拒绝审核',
+                icon: 'icon-trash-alt',
+                classes: 'ajax-get'
+            }])}
+        ]}), rowItems) %}
+    {% endfor %}
+
+    {% if pagerData %}
+        {% set pager = (pagerData | safe) %}
+    {% endif %}
+    {% set content = cards.toolbarGrid(actions, theader, rowItems, pager) %}
+
+    {{ pages.tabContent(tabs, content) }}
+{% endblock %}
