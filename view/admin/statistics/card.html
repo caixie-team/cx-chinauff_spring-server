@@ -7,7 +7,7 @@
 {% block content %}
     {% set toolbar = {
         primary: [{
-            text: '查询',
+            text: '添加',
             url: '/admin/action/add',
             icon: 'icon-add'
         }],
@@ -29,21 +29,30 @@
             attribute: 'target-form="items"',
             classes: 'ajax-post confirm',
             icon: 'icon-trash-alt'
-        }],
-        custom: [{
-            text: '添加',
-            url: '/admin/action/add',
-            icon: 'icon-add'
         }]} %}
 
     {% set rowItems = [] %}
     {% for item in list %}
         {% set rowItems = (rowItems.push({cells: [
-            { html: loop.index},
-            { html: item.date},
-            { html: item.title},
-            { html: item.pv},
-            { html: item.uv}
+            { html: item.id},
+            { html: item.name},
+            { html: '<a data-id="'+ item.id + '" href="/admin/action/edit?id='+ item.id +'" class="">' + item.title +'</a>'},
+            { html: item.type|get_action_type},
+            { html: item.remark},
+            { html: '<a href="/admin/action/setstatus/ids/'+ item.id +'/status?1-item.status" class="active ajax-get" data-toggle="class">
+                        <i class="fa '+( "fa-check text-success text-active" if item.status else "fa-times text-danger text") +'"></i></a>', classes: 'text-center'},
+
+            { classes: 'text-center',
+                html: dropdowns.menu([{
+                url: '/admin/action/edit?id='+ item.id,
+                icon: 'icon-pencil7',
+                text: '修改'
+            }, {
+                url: '/admin/action/setstatus?ids='+ item.id +'&status=-1',
+                icon: 'icon-trash-alt',
+                classes: 'ajax-get',
+                text: '删除'
+            }])}
         ]}), rowItems) %}
     {% endfor %}
 
@@ -52,21 +61,23 @@
             html: '序号'
         },
         {
-            html: '时间'
+            html: '领取时间'
         },
         {
-            html: '页面类别'
+            html: '充值卡类别'
         },
         {
-            html: 'PV'
+            html: '收件人'
         },
         {
-            html: 'UV'
+            html: '手机号码'
+        },
+        {
+            html: '收件地址'
         }
     ] %}
 
     {% set pager = (pagerData | safe) %}
-    {{ pagerData }}
     {% set content = cards.grid(theader, rowItems, pager) %}
 
     {{ pages.content(toolbar, content) }}

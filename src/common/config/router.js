@@ -1,4 +1,5 @@
 module.exports = [
+
   // [/\/admin\/experiment\/(.*)/i, 'admin/article/:1', 'get,post'],
   // ['/apidoc', 'apidoc/index', 'get'],
   ['', 'home/index/index', 'get'],
@@ -16,8 +17,11 @@ module.exports = [
   ['/admin/login', 'admin/user/login', 'get, post'],
   // [/\/addons\/(\w+)?/, 'addons/:1', 'get, post']
   [/\/m\/(\w+)?/, 'module/:1', 'get, post'],
+  [/\/api\/(\w+)(?:\/(\w+))?$/, '/api/:1/:2', 'get, post'],
   // [/\/addons\/(\w+)?/, 'addons/:1', 'get, post'],
-  [/\/api\/(\w+)(?:\/(\d+))?/, 'api/:1?id=:2', 'rest'],
+  // [/\/api\/wechat\/(\w+)?/, 'api/wechat/?action=:1', 'rest'],
+  // [/\/api\/analytics\/(\w+)?/, 'api/analytics/?action=:1', 'rest'],
+  // [/\/api\/(\w+)(?:\/(\d+))?/, 'api/:1?id=:2', 'rest'],
   // [/^(?!\/admin\/|\/home\/|\/center\/|\/api\/|\/uxxx\/):id/i, '/home/route/index/:1/', 'get'],
   ['/:category', 'route/index', 'get']
 ];

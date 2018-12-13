@@ -1,5 +1,5 @@
 module.exports = class extends think.common.Admin {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx); // 调用父级的 constructor 方法，并把 ctx 传递进去
     // 其他额外的操作
     this.tactive = 'order';
@@ -22,12 +22,32 @@ module.exports = class extends think.common.Admin {
   }
 
   /**
+   * 发卡数据
+   * @returns {*}
+   */
+  cardAction () {
+    return this.display()
+  }
+
+  /**
    * 流量数据
    * @returns {*}
    */
-  trafficAction () {
+  async trafficAction () {
+    console.log('traffic action ....')
+    const analyticsModel = this.model('analytics')
+    const data = await analyticsModel.getAllPageView(this.get('page') || 1, 20)
+    // console.log(data)
+    const html = this.pagination(data);
+    // console.log('---page ....')
+    // console.log(html)
+    // console.log('x-x-x-x-x-x--------------')
+    this.assign('pagerData', html); // 分页展示使用
+    // console.log(data.data)
+    this.assign('list', data.data); // 分页展示使用
     return this.display()
   }
+
   /**
    * 兑换
    * @returns {*}
@@ -43,17 +63,19 @@ module.exports = class extends think.common.Admin {
   allocationAction () {
     return this.display()
   }
+
   /**
    * index action
    * @return {Promise} []
    */
-  indexAction() {
+  indexAction () {
     // auto render template file index_index.html
 
     return this.display();
   }
+
   // 订单列表
-  async listAction() {
+  async listAction () {
     const status = this.get('status');
     const map = {};
     if (!think.isEmpty(status)) {
@@ -95,7 +117,7 @@ module.exports = class extends think.common.Admin {
   /**
    * 审核订单
    */
-  async auditAction() {
+  async auditAction () {
     if (this.isPost) {
       const id = this.post('id');
       const admin_remark = this.post('admin_remark');
@@ -116,7 +138,7 @@ module.exports = class extends think.common.Admin {
   /**
    * 删除订单
    */
-  async delAction() {
+  async delAction () {
     const id = this.get('id');
     // 作废的订单才能删除
     const res = await this.model('order').where({id: id, status: 6}).delete();
@@ -126,10 +148,11 @@ module.exports = class extends think.common.Admin {
       return this.fail('删除失败！');
     }
   }
+
   /**
    * 作废订单
    */
-  async voidAction() {
+  async voidAction () {
     if (this.isPost) {
       const id = this.post('id');
       const admin_remark = this.post('admin_remark');
@@ -149,10 +172,11 @@ module.exports = class extends think.common.Admin {
       return this.display();
     }
   }
+
   /**
    * 完成订单
    */
-  async finishAction() {
+  async finishAction () {
     if (this.isPost) {
       const id = this.post('id');
       const admin_remark = this.post('admin_remark');
@@ -173,7 +197,7 @@ module.exports = class extends think.common.Admin {
   /**
    * 备注订单
    */
-  async remarkAction() {
+  async remarkAction () {
     if (this.isPost) {
       const id = this.post('id');
       const admin_remark = this.post('admin_remark');
@@ -190,11 +214,12 @@ module.exports = class extends think.common.Admin {
       return this.display();
     }
   }
+
   /**
    * 查看订单
    * @returns {*}
    */
-  async seeAction() {
+  async seeAction () {
     const id = this.get('id');
     // console.log(id);
     this.meta_title = '查看订单';
@@ -246,10 +271,11 @@ module.exports = class extends think.common.Admin {
     this.assign('county', county);
     return this.display();
   }
+
   /**
    * 编辑订单
    */
-  async editAction() {
+  async editAction () {
     if (this.isPost) {
       const data = this.post();
 
@@ -334,10 +360,11 @@ module.exports = class extends think.common.Admin {
       return this.display();
     }
   }
+
   /**
    * 发货设置
    */
-  async shipAction() {
+  async shipAction () {
     if (this.isPost) {
       const data = this.post();
       data.admin = await get_nickname(this.user.uid);
@@ -400,10 +427,11 @@ module.exports = class extends think.common.Admin {
       return this.display();
     }
   }
+
   /**
    * 查看订单
    */
-  vieworderAction() {
+  vieworderAction () {
     const list = [1, 2, 3];
     this.assign('list', list);
     return this.display();
@@ -413,7 +441,7 @@ module.exports = class extends think.common.Admin {
    * 收款单
    */
 
-  async receivingAction() {
+  async receivingAction () {
     const data = await this.model('doc_receiving').page(this.get('page')).order('create_time DESC').countSelect();
     const html = this.pagination(data);
     this.assign('pagerData', html); // 分页展示使用
@@ -441,7 +469,7 @@ module.exports = class extends think.common.Admin {
   /**
    * 发货单
    */
-  async invoiceAction() {
+  async invoiceAction () {
     const data = await this.model('doc_invoice').page(this.get('page')).order('create_time DESC').countSelect();
     const html = this.pagination(data);
     this.assign('pagerData', html); // 分页展示使用
@@ -458,7 +486,7 @@ module.exports = class extends think.common.Admin {
    * 退款单
    */
 
-  refundAction() {
+  refundAction () {
     this.active = 'admin/order/receiving';
     this.meta_title = '退款单';
     return this.display();

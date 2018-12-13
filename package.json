@@ -39,12 +39,14 @@
     "think-logger3": "^1.1.1",
     "think-model": "^1.2.2",
     "think-model-mysql": "^1.0.6",
+    "think-nuxt": "^1.0.2",
     "think-pagination": "^2.0.0",
     "think-session": "^1.0.3",
     "think-session-file": "^1.0.6",
     "think-view": "^1.0.11",
     "think-view-nunjucks": "^1.0.7",
-    "thinkjs": "^3.2.7"
+    "thinkjs": "^3.2.7",
+    "wechat-jssdk": "^4.0.0-alpha.2"
   },
   "devDependencies": {
     "ava": "^0.25.0",
