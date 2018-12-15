@@ -15,14 +15,12 @@ module.exports = class extends Base {
 
 
     sections.forEach((section, index) => {
-      // console.log(section)
       sectionIds.push(section.id)
 
       if (section.type === 'single') {
         singleSectionIds.push(section.id)
       } else {
         // sectionByType[section.type] = think.extend()
-        // console.log(JSON.stringify(section))
         sectionByType.push([section.type, section])
         // sectionByType.push(section)
       }
