@@ -3,9 +3,12 @@
 const jwt = require('jsonwebtoken')
 const Base = require('./base')
 
+/**
+ * 用户 API
+ * @type {module.exports}
+ */
 module.exports = class extends Base {
   /**
-   * 教师列表
    *
    * @api {get} /api/users/teacher 教师列表请求
    * @apiGroup Users
