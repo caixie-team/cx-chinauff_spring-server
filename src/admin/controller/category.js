@@ -3,7 +3,6 @@ const slugify = require('limax')
 const Base = require('./base')
 
 module.exports = class extends Base {
-
   /**
    * index action
    * @return {Promise} []
