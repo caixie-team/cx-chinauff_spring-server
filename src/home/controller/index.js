@@ -4,7 +4,6 @@ const Base = require('./base.js');
 module.exports = class extends Base {
   async indexAction () {
     this.meta_title = 'homeTitle'
-    // 为首页提供默认分类内容展示
     let defaultCategory = think.config('setup.default_category')
     const categoryId = this.get('category') || defaultCategory
     let id = 0
