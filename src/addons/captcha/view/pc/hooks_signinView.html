@@ -53,10 +53,12 @@
     delimiters: ['${', '}'],
     data: {
       svgCaptcha: ''
+
     },
     methods: {
       getCaptcha () {
         var that = this
+
         axios.get('../addons/captcha/index/captcha')
           .then(function (response) {
             that.svgCaptcha = response.data.data
