@@ -1,6 +1,10 @@
 /* eslint-disable no-useless-constructor */
 const Base = require('./base')
 
+/**
+ *  AI 识别服务
+ * @type {module.exports}
+ */
 module.exports = class extends Base {
   constructor (...args) {
     super(...args)
