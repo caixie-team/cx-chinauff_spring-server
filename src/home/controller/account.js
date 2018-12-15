@@ -8,7 +8,7 @@ module.exports = class extends Base {
    * @returns {Promise<*>}
    */
   async createAction () {
-    this.meta_title = '验证账户';
+    // this.meta_title = '验证账户';
     // 短信注册视图钩子
     await this.hook('smsRegistration');
     // 第三方登录钩子
