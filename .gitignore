@@ -32,7 +32,7 @@ output.tar.gz
 
 runtime/
 
-port
+# port
 
 config.development.js
 adapter.development.js
