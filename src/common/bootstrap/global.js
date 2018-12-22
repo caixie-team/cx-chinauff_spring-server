@@ -16,14 +16,15 @@
  *   let data = await Promise.resolve(111)
  *}
  */
-
+const nanoGenerate = require('nanoid/generate')
+const alphabet = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 /**
  * ip转数字
  * @param ip
  * @returns {number}
  * @private
  */
-global._ip2int = function(ip) {
+global._ip2int = function (ip) {
   let num = 0;
   ip = ip.split('.');
   num = Number(ip[0]) * 256 * 256 * 256 + Number(ip[1]) * 256 * 256 + Number(ip[2]) * 256 + Number(ip[3]);
@@ -36,7 +37,7 @@ global._ip2int = function(ip) {
  * @returns {string|*}
  * @private
  */
-global._int2iP = function(num) {
+global._int2iP = function (num) {
   let str;
   const tt = new Array();
   tt[0] = (num >>> 24) >>> 0;
@@ -53,7 +54,7 @@ global._int2iP = function(num) {
  * @param md5encoded true-密码不加密，默认加密
  * @returns {*}
  */
-global.encryptPassword = function(password, md5encoded) {
+global.encryptPassword = function (password, md5encoded) {
   md5encoded = md5encoded || false;
   password = md5encoded ? password : think.md5(password);
   return think.md5(think.md5('__vrcx') + password + think.md5('Caixie'));
@@ -64,7 +65,7 @@ global.encryptPassword = function(password, md5encoded) {
  * @param arr
  * @returns {Array}
  */
-global.unique = function(arr) {
+global.unique = function (arr) {
   // var result = [], hash = {};
   // for (var i = 0, elem; (elem = arr[i]) != null; i++) {
   //     if (!hash[elem]) {
@@ -81,7 +82,7 @@ global.unique = function(arr) {
  * @param arrayToSearch
  * @returns {boolean}
  */
-global.in_array = function(stringToSearch, arrayToSearch) {
+global.in_array = function (stringToSearch, arrayToSearch) {
   for (let s = 0; s < arrayToSearch.length; s++) {
     const thisEntry = arrayToSearch[s].toString();
     if (thisEntry == stringToSearch) {
@@ -96,7 +97,7 @@ global.in_array = function(stringToSearch, arrayToSearch) {
  * @param d
  * @returns {string}
  */
-global.times = function(d, sec) {
+global.times = function (d, sec) {
   let time;
   const date = new Date(d);
   const y = date.getFullYear();
@@ -133,7 +134,7 @@ function sort_node1(v, w) {
  * global get_children
  * 获取子集分类 （这里是获取所有子集）
  */
-global.get_children = function(nodes, parent, sn = 0) {
+global.get_children = function (nodes, parent, sn = 0) {
   // console.log(11);
   let children = [];
   let last = [];
@@ -247,7 +248,7 @@ global.get_children = function(nodes, parent, sn = 0) {
  * @returns {Array}
  */
 /* global obj_values */
-global.obj_values = function(obj) {
+global.obj_values = function (obj) {
   const objkey = Object.keys(obj);
   const objarr = [];
   objkey.forEach(key => {
@@ -262,7 +263,7 @@ global.obj_values = function(obj) {
  * @returns {boolean}
  */
 /* global isObjectValueEqual */
-global.isObjectValueEqual = function(a, b) {
+global.isObjectValueEqual = function (a, b) {
   // Of course, we can do it use for in
   // Create arrays of property names
   const aProps = Object.getOwnPropertyNames(a);
@@ -294,7 +295,7 @@ global.isObjectValueEqual = function(a, b) {
  * @returns {*|void|string|XML}
  */
 /* global trim */
-global.trim = function(str) {
+global.trim = function (str) {
   return str.replace(/(^\s*)|(\s*$)/g, '');
 };
 /**
@@ -303,7 +304,7 @@ global.trim = function(str) {
  * @returns {*}
  */
 /* global parse_config_attr */
-global.parse_config_attr = function(str, sep = ':') {
+global.parse_config_attr = function (str, sep = ':') {
   let strs;
   if (str.search(/\r\n/ig) > -1) {
     strs = str.split('\r\n');
@@ -323,7 +324,7 @@ global.parse_config_attr = function(str, sep = ':') {
     return obj;
   }
 };
-global.parse_type_attr = function(str) {
+global.parse_type_attr = function (str) {
   let strs;
   if (str.search(/\r\n/ig) > -1) {
     strs = str.split('\r\n');
@@ -362,7 +363,7 @@ global.parse_type_attr = function(str) {
  * @returns {*|void|string|XML}
  */
 /* global ltrim */
-global.ltrim = function(str) {
+global.ltrim = function (str) {
   return str.replace(/(^\s*)/g, '');
 };
 /**
@@ -372,7 +373,7 @@ global.ltrim = function(str) {
  * @returns {*|void|string|XML}
  */
 /* global rtrim */
-global.rtrim = function(str) {
+global.rtrim = function (str) {
   return str.replace(/(\s*$)/g, '');
 };
 /**
@@ -382,7 +383,7 @@ global.rtrim = function(str) {
  * @return array
  */
 /* global arr_to_tree */
-global.arr_to_tree = function(data, pid) {
+global.arr_to_tree = function (data, pid) {
   let result = [], temp;
   const length = data.length;
   for (let i = 0; i < length; i++) {
@@ -406,7 +407,7 @@ global.sanjiao = (arr) => {
   return result;
 };
 /* global arr_to_tree */
-global.sub_cate = function(data, pid) {
+global.sub_cate = function (data, pid) {
   let result = [], temp;
   const length = data.length;
   for (let i = 0; i < length; i++) {
@@ -423,7 +424,7 @@ global.sub_cate = function(data, pid) {
 };
 // 获取属性类型信息
 /* global get_attribute_type */
-global.get_attribute_type = function(type) {
+global.get_attribute_type = function (type) {
   // TODO 可以加入系统配置
   const _type = {
     'num': ['数字', 'int(10) unsigned NOT NULL'],
@@ -457,7 +458,7 @@ global.get_attribute_type = function(type) {
  * @return  '2015-12-17 15:39:44'
  */
 /* global dateformat */
-global.dateformat = function(extra, date) {
+global.dateformat = function (extra, date) {
   const D = new Date(date);
   const time = {
     'Y': D.getFullYear(),
@@ -477,7 +478,7 @@ global.dateformat = function(extra, date) {
   return _date;
 };
 /* global array_search */
-global.array_search = function(arr, str) {
+global.array_search = function (arr, str) {
   // 如果可以的话，调用原生方法
   if (arr && arr.indexOf) {
     return arr.indexOf(str);
@@ -495,7 +496,7 @@ global.array_search = function(arr, str) {
   return false;
 };
 /* global array_diff */
-global.array_diff = function(arr1, arr2) {
+global.array_diff = function (arr1, arr2) {
   // var arr1 = ["i", "b", "c", "d", "e", "f","x",""]; //数组A
   // var arr2 = ["a", "b", "c", "d", "e", "f", "g"];//数组B
   const temp = []; // 临时数组1
@@ -515,7 +516,7 @@ global.array_diff = function(arr1, arr2) {
   return temparray;
 };
 
-global.get_list_field = function(data, grid, controller, module) {
+global.get_list_field = function (data, grid, controller, module) {
   module = module || 'admin';
   // console.log(module);
   const data2 = {};
@@ -595,7 +596,7 @@ global.get_list_field = function(data, grid, controller, module) {
  * @param bool all 是否返回全部类型
  */
 /* global get_action_type */
-global.get_action_type = function(type, all) {
+global.get_action_type = function (type, all) {
   all = all || false;
   const list = {
     1: '系统',
@@ -614,7 +615,7 @@ global.get_action_type = function(type, all) {
  * @param params 数组格式传入参数
  */
 /* global call_user_func */
-global.call_user_func = function(cb, params) {
+global.call_user_func = function (cb, params) {
   const func = eval(cb);
   if (!think.isArray(params)) {
     params = [params];
@@ -628,7 +629,7 @@ global.call_user_func = function(cb, params) {
  * @returns Promise {*}
  */
 /* global get_nickname */
-global.get_nickname = async(uid) => {
+global.get_nickname = async (uid) => {
   // console.log(uid);
   // let data = await think.model('member', think.config("model")).cache(1000).get_nickname(uid);
   const data = await think.model('member').get_nickname(uid);
@@ -641,7 +642,7 @@ global.get_nickname = async(uid) => {
  * @returns Promise {*}
  */
 /* global get_nickname */
-global.get_realname = async(uid) => {
+global.get_realname = async (uid) => {
   // console.log(uid);
   // let data = await think.model('member', think.config("model")).cache(1000).get_nickname(uid);
   const data = await think.model('member').get_realname(uid);
@@ -661,7 +662,7 @@ global.time_format = (time) => {
  * @returns {*}
  */
 /* global str_replace */
-global.str_replace = function(search, replace, subject, count) {
+global.str_replace = function (search, replace, subject, count) {
   let i = 0, j = 0, temp = '', repl = '', sl = 0, fl = 0,
     f = [].concat(search),
     r = [].concat(replace),
@@ -710,7 +711,7 @@ global.get_pdq = (id) => {
  * @return 完整的数据  或者  指定的field字段值
  */
 /* global get_cover */
-global.get_cover = async(cover_id, field) => {
+global.get_cover = async (cover_id, field) => {
   if (think.isEmpty(cover_id)) {
     return false;
   }
@@ -730,7 +731,7 @@ global.get_cover = async(cover_id, field) => {
  * @param w 宽
  * @param h 高
  */
-global.get_pic = async(id, m = null, w = null, h = null) => {
+global.get_pic = async (id, m = null, w = null, h = null) => {
   if (think.isEmpty(id)) {
     return '/static/noimg.jpg';
   }
@@ -778,7 +779,7 @@ global.get_pic = async(id, m = null, w = null, h = null) => {
  * @return 完整的数据或者 指定的field字段值
  */
 /* global get_pics_one */
-global.get_pics_one = async(arr_id, field) => {
+global.get_pics_one = async (arr_id, field) => {
   if (think.isEmpty(arr_id)) {
     return false;
   }
@@ -786,7 +787,7 @@ global.get_pics_one = async(arr_id, field) => {
   return get_cover(arr[0], field);
 };
 // {present_price:100,discount_price:80}
-global.formatprice = function(price) {
+global.formatprice = function (price) {
   const pr = JSON.parse(price);
   let present_price;
   // console.log(pr);
@@ -806,7 +807,7 @@ global.formatprice = function(price) {
   }
 };
 // 获取价格格式化
-global.get_price_format = function(price, type) {
+global.get_price_format = function (price, type) {
   const pr = JSON.parse(price);
 
   if (type == 1) {
@@ -831,7 +832,7 @@ global.get_price_format = function(price, type) {
   return price;
 };
 // 获取价格不格式化
-global.get_price = function(price, type) {
+global.get_price = function (price, type) {
   if (price) {
     price = JSON.parse(price);
     if (type == 1) {
@@ -854,7 +855,7 @@ global.get_price = function(price, type) {
  * @type String
  */
 /* global formatCurrency */
-global.formatCurrency = function(num) {
+global.formatCurrency = function (num) {
   num = num.toString().replace(/\$|\,/g, '');
   if (isNaN(num)) { num = '0' }
   const sign = (num == (num = Math.abs(num)));
@@ -877,7 +878,7 @@ global.formatCurrency = function(num) {
  * @type String
  */
 /* global formatCurrencyTenThou */
-global.formatCurrencyTenThou = function(num) {
+global.formatCurrencyTenThou = function (num) {
   num = num.toString().replace(/\$|\,/g, '');
   if (isNaN(num)) { num = '0' }
   const sign = (num == (num = Math.abs(num)));
@@ -895,16 +896,16 @@ global.formatCurrencyTenThou = function(num) {
  */
 
 /* global getsuk */
-global.getsuk = function(suk, arr) {
+global.getsuk = function (suk, arr) {
   // console.log(suk);
   let suk_;
-  suk.forEach(function(v, k) {
+  suk.forEach(function (v, k) {
     if (v.name == arr[0]) {
       if (v.ch) {
-        v.ch.forEach(function(v_, k_) {
+        v.ch.forEach(function (v_, k_) {
           if (v_.name == arr[1]) {
             if (v_.ch) {
-              v_.ch.forEach(function(v__, k__) {
+              v_.ch.forEach(function (v__, k__) {
                 if (v__.name == arr[2]) {
                   suk_ = think.extend(v__, v_, v);
                 }
@@ -927,7 +928,7 @@ global.getsuk = function(suk, arr) {
  * @param data
  * @returns {{menu: {button: Array}}}
  */
-global.createSelfMenu = function(data) {
+global.createSelfMenu = function (data) {
   const menu = {
     'menu': {
       'button': []
@@ -972,7 +973,7 @@ global.createSelfMenu = function(data) {
  * 数据构建
  */
 
-global.buildselfmenu = function(data) {
+global.buildselfmenu = function (data) {
   const menu = {
     'button': []
   };
@@ -1015,7 +1016,7 @@ global.buildselfmenu = function(data) {
  * @ return {bool}
  */
 /** global checkMobile */
-global.checkMobile = function(agent) {
+global.checkMobile = function (agent) {
   let flag = false;
   agent = agent.toLowerCase();
   const keywords = ['android', 'iphone', 'ipod', 'ipad', 'windows phone', 'mqqbrowser'];
@@ -1128,7 +1129,7 @@ global.img_text_view = (str, w, h) => {
  * @param field 字段名,如果为空则返回整个记录集
  * @returns {*}
  */
-global.get_file = async(file_id, field, key = false) => {
+global.get_file = async (file_id, field, key = false) => {
   if (think.isEmpty(file_id)) {
     return false;
   }
@@ -1148,7 +1149,7 @@ global.get_file = async(file_id, field, key = false) => {
  * @param cid
  * @returns {*}
  */
-global.get_cate = async(cid) => {
+global.get_cate = async (cid) => {
   const column = await think.model('category').get_all_category();
   for (const v of column) {
     if (v.id == cid) {
@@ -1178,7 +1179,7 @@ global.sort_url = (id, val, arr, http) => {
 /*
  *比较数组是否完全相同
  */
-global.a2a = function(a1, a2) {
+global.a2a = function (a1, a2) {
   if (!(think.isArray(a1) && think.isArray(a2))) {
     return false;
   }
@@ -1208,7 +1209,7 @@ global.a2a = function(a1, a2) {
   return true;
 };
 // 生成6位的随机数
-global.MathRand = function() {
+global.MathRand = function () {
   let Num = '';
   for (let i = 0; i < 6; i++) {
     Num += Math.floor(Math.random() * 10);
@@ -1217,7 +1218,7 @@ global.MathRand = function() {
 };
 
 // 更新缓存
-global.updateCache = async(type) => {
+global.updateCache = async (type) => {
   switch (type) {
     case 'category':
       // 更新栏目缓存
@@ -1246,7 +1247,7 @@ global.updateCache = async(type) => {
  * @param type
  * @returns {Promise<void>}
  */
-global.update_cache = async(type) => {
+global.update_cache = async (type) => {
   switch (type) {
     case 'category':
       // 更新栏目缓存
@@ -1278,7 +1279,7 @@ global.update_cache = async(type) => {
  * @param type true
  * @returns {bool} 返回flase 或true false:没权限，true:有权限。
  */
-global.priv = async(catid, roleid, action, is_admin = 0, type = true) => {
+global.priv = async (catid, roleid, action, is_admin = 0, type = true) => {
   const priv = await think.model('category_priv').priv(catid, roleid, action, is_admin, type);
   // console.log(priv);
   if (!priv) {
@@ -1288,7 +1289,7 @@ global.priv = async(catid, roleid, action, is_admin = 0, type = true) => {
   }
 };
 
-global.GetDateStr = function(AddDayCount) {
+global.GetDateStr = function (AddDayCount) {
   const dd = new Date();
   dd.setDate(dd.getDate() + AddDayCount);// 获取AddDayCount天后的日期
   const y = dd.getFullYear();
@@ -1297,11 +1298,11 @@ global.GetDateStr = function(AddDayCount) {
   return y + '-' + m + '-' + d;
 };
 // 转意符换成普通字符
-global.escape2Html = function(str) {
-  const arrEntities = {'lt': '<', 'gt': '>', 'nbsp': ' ', 'amp': '&', 'quot': '"'};
-  return str.replace(/&(lt|gt|nbsp|amp|quot);/ig, function(all, t) { return arrEntities[t] });
+global.escape2Html = function (str) {
+  const arrEntities = { 'lt': '<', 'gt': '>', 'nbsp': ' ', 'amp': '&', 'quot': '"' };
+  return str.replace(/&(lt|gt|nbsp|amp|quot);/ig, function (all, t) { return arrEntities[t] });
 };
-global.html_decode = function(str) {
+global.html_decode = function (str) {
   let s = '';
   if (str.length == 0) return '';
   s = str.replace(/&gt;/g, '&');
@@ -1314,7 +1315,7 @@ global.html_decode = function(str) {
   return s;
 };
 
-global.html_encode = function(str) {
+global.html_encode = function (str) {
   let s = '';
   if (str.length === 0) return '';
   s = str.replace(/&/g, '&gt;');
@@ -1344,3 +1345,9 @@ global.check_document_position = (pos = 0, contain = 0) => {
     return false;
   }
 };
+
+global.Generate = {
+  id: () => {
+    return nanoGenerate(alphabet, 21)
+  }
+}
