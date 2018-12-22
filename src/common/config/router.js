@@ -17,6 +17,7 @@ module.exports = [
   ['/admin/login', 'admin/user/login', 'get, post'],
   // [/\/addons\/(\w+)?/, 'addons/:1', 'get, post']
   [/\/m\/(\w+)?/, 'module/:1', 'get, post'],
+  [/\/api\/wechat\/(\w+)?/, 'api/wechat/?action=:1', 'rest'],
   [/\/api\/(\w+)(?:\/(\w+))?$/, '/api/:1/:2', 'get, post'],
   // [/\/addons\/(\w+)?/, 'addons/:1', 'get, post'],
   // [/\/api\/wechat\/(\w+)?/, 'api/wechat/?action=:1', 'rest'],
