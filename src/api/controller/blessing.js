@@ -48,7 +48,7 @@ module.exports = class extends Base {
 		let nDate = new Date()
 		//TODO ............................
 		/****************上线的时候需要把这句话删除*************** */
-		nDate.setDate(nDate.getDate() + 14)
+		//nDate.setDate(nDate.getDate() + 14)
 		console.log(nDate)
 
 		let nowTime = moment(nDate).format('YYYY-MM-DD HH:mm:ss')
@@ -83,7 +83,7 @@ module.exports = class extends Base {
 		let blessing_josn = {
 			name: pools[0].name,
 			blessing_type: pools[0].blessing_type,
-			full:false
+			full: false
 		}
 
 		//判断集到的福字有没有集满
@@ -121,6 +121,90 @@ module.exports = class extends Base {
 		return this.success({
 			blessing: blessing_josn
 		})
+	}
+
+	/**
+	 * 获取集福统计(集满福的人数,我的集满福个数)
+	 */
+	async blessingStatisticsAction() {
+		const data = this.post()
+		if (think.isEmpty(data.openId)) {
+			return this.fail('请求参数错误')
+		}
+		const blessingUserModel = this.model('activity_blessing_user');
+		const sql = `
+		SELECT 
+			SUM(repeat_count) as nums
+		FROM
+			(SELECT 
+				COUNT(DISTINCT openid) AS repeat_count
+			FROM
+				picker_activity_blessing_user
+			GROUP BY openid) AS t
+		`
+		const peopleNumber = await blessingUserModel.query(sql)
+		const myblessingNumber = await blessingUserModel.where({ openid: data.openId }).count('id');
+		return this.success({
+			peopleNumber: peopleNumber[0].nums,	//集满福的总人数
+			myblessingNumber: myblessingNumber	//我的集满福个数
+		})
+	}
+
+
+	/**
+	 * 初始化当天的数据 用于测试
+	 */
+	async initTodayAction() {
+		let blessingArr = [];
+		for (let i = 0; i < 50; i++) {
+			if ((i % 4 + 1) === 1) {
+				blessingArr.push({
+					id: 1,
+					name: '礻',
+					blessing_type: 1,
+					code: Generate.id()
+				})
+			} else if ((i % 4 + 1) === 2) {
+				blessingArr.push({
+					id: 2,
+					name: '一',
+					blessing_type: 2,
+					code: Generate.id()
+				})
+			} else if ((i % 4 + 1) === 3) {
+				blessingArr.push({
+					id: 3,
+					name: '口',
+					blessing_type: 3,
+					code: Generate.id()
+				})
+			} else if ((i % 4 + 1) === 4) {
+				blessingArr.push({
+					id: 4,
+					name: '田',
+					blessing_type: 4,
+					code: Generate.id()
+				})
+			}
+		}
+
+		blessingArr = _.shuffle(blessingArr) //打乱数组顺序
+		blessingArr = _.shuffle(blessingArr) //打乱数组顺序
+
+		const blessingPoolModel = this.model('activity_blessing_pool');
+		for (let i = 0; i < blessingArr.length; i++) {
+			let release_time = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+			const blessingInfo = blessingArr[i]
+			await blessingPoolModel.add({
+				name: blessingInfo.name,
+				blessing_type: blessingInfo.blessing_type,
+				blessing_id: blessingInfo.id,
+				release_time: release_time,
+				last_quantity: 1,
+				code: blessingInfo.code
+			})
+		}
+		return this.success()
 	}
 
 	async initAction() {
