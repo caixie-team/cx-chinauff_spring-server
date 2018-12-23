@@ -21,18 +21,22 @@ module.exports = class extends Base {
       this.appSecret = this.setup.AI_HW_APP_SECRET
     }
   }
-
+  async indexAction () {
+    if (this.isGet) {
+      return this.success('AI echo ...')
+    }
+  }
   /**
    * 验证图片
    * @returns {Promise<*>}
    */
-  async postAction () {
+  async imageAction () {
     const data = this.post()
     if (data.file) {
       switch (this.aiServer) {
         case 'baidu': {
           const aiService = think.service('ai', 'common', this.aiServer, {
-            app_id: '15069191',
+            app_id: this.appId,
             key: this.appKey,
             secret: this.appSecret
           });

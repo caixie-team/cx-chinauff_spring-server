@@ -11528,6 +11528,15 @@ think-watcher@^3.0.0:
     debug "^2.6.1"
     think-helper "^1.0.0"
 
+think-websocket@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/think-websocket/-/think-websocket-1.0.6.tgz#eff044a4ceb0b8977848935e64cf74b769bb3252"
+  integrity sha1-7/BEpM6wuJd4SJNeZM90t2m7MlI=
+  dependencies:
+    debug "^2.6.1"
+    depd "~1.1.1"
+    think-helper "^1.0.0"
+
 thinkjs@^3.2.7:
   version "3.2.8"
   resolved "https://registry.yarnpkg.com/thinkjs/-/thinkjs-3.2.8.tgz#2a8268b43d2e5a7a1c1eca0bc48fb665e6be97d4"
