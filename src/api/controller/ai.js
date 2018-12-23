@@ -32,7 +32,7 @@ module.exports = class extends Base {
       switch (this.aiServer) {
         case 'baidu': {
           const aiService = think.service('ai', 'common', this.aiServer, {
-            app_id: '15069191',
+            app_id: this.appId,
             key: this.appKey,
             secret: this.appSecret
           });
