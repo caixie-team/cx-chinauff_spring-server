@@ -21,12 +21,16 @@ module.exports = class extends Base {
       this.appSecret = this.setup.AI_HW_APP_SECRET
     }
   }
-
+  async indexAction () {
+    if (this.isGet) {
+      return this.success('AI echo ...')
+    }
+  }
   /**
    * 验证图片
    * @returns {Promise<*>}
    */
-  async postAction () {
+  async imageAction () {
     const data = this.post()
     if (data.file) {
       switch (this.aiServer) {
