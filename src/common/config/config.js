@@ -1,4 +1,6 @@
 const fs = require('fs')
+const isDev = think.env === 'development';
+
 let PORT = null
 const portFile = think.ROOT_PATH + '/PORT'
 if (think.isFile(portFile)) {
@@ -11,5 +13,6 @@ module.exports = {
   host: '0.0.0.0',
   port: PORT || 8360,
   document_model_type: {2: '主题', 1: '目录', 3: '段落'}, // 文档模型配置 (文档模型核心配置，请勿更改)
-  user_administrator: [1] // 数组格式，可以配置多个[1,2,3]
+  user_administrator: [1], // 数组格式，可以配置多个[1,2,3],
+  proxyChinauff: !isDev ? 'https://weixin.chinauff.com/lnj-weixin/console/' : 'http://demo.micvs.com/lnj-weixin/console/'
 }
