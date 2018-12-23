@@ -47,6 +47,7 @@
     "think-session-file": "^1.0.6",
     "think-view": "^1.0.11",
     "think-view-nunjucks": "^1.0.7",
+    "think-websocket": "^1.0.6",
     "thinkjs": "^3.2.7",
     "wechat-jssdk": "^4.0.0-alpha.2"
   },

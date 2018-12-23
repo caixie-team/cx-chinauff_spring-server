@@ -7673,6 +7673,11 @@ nan@^2.9.2, nan@~2.10.0:
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
   integrity sha512-bAdJv7fBLhWC+/Bls0Oza+mvTaNQtP+1RyhhhvD95pgUJz6XM5IzgmxOkItJ9tkoCiplvAnXI1tNmmUD/eScyA==
 
+nanoid@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-2.0.0.tgz#e1ab4a4b024a38d15531ba34a712a201540de639"
+  integrity sha512-SG2qscLE3iM4C0CNzGrsAojJHSVHMS1J8NnvJ31P1lH8P0hGHOiafmniNJz6w6q7vuoDlV7RdySlJgtqkFEVtQ==
+
 nanomatch@^1.2.9:
   version "1.2.13"
   resolved "https://registry.yarnpkg.com/nanomatch/-/nanomatch-1.2.13.tgz#b87a8aa4fc0de8fe6be88895b38983ff265bd119"
@@ -11521,6 +11526,15 @@ think-watcher@^3.0.0:
   integrity sha1-QJcPXrbW7i5LWmDpx1CB/zEto5k=
   dependencies:
     debug "^2.6.1"
+    think-helper "^1.0.0"
+
+think-websocket@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/think-websocket/-/think-websocket-1.0.6.tgz#eff044a4ceb0b8977848935e64cf74b769bb3252"
+  integrity sha1-7/BEpM6wuJd4SJNeZM90t2m7MlI=
+  dependencies:
+    debug "^2.6.1"
+    depd "~1.1.1"
     think-helper "^1.0.0"
 
 thinkjs@^3.2.7:
