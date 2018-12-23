@@ -23,12 +23,17 @@ module.exports = class extends Base {
 		const nowDate = moment(new Date()).format('YYYY-MM-DD')
 		console.log(nowDate)
 
+		//检测是否有助力
+		const helpModel = this.model('activity_help')
+		const helpInfo = await helpModel.where({ be_openid: data.openId, status: 1 }).limit(1).select();
+		return this.success(helpInfo)
+
 		//是否到达参与限制
-		// const blessingTimesModel = this.model('activity_blessing_times');
-		// const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
-		// if (times >= 3) {
-		// 	return this.fail(3, '今日可参与次数已用完')
-		// }
+		const blessingTimesModel = this.model('activity_blessing_times');
+		const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
+		if (times >= 3) {
+			return this.fail(3, '今日可参与次数已用完')
+		}
 
 		//判断openid是否存在
 		const chinauffAccountModel = this.model('chinauff_account')
