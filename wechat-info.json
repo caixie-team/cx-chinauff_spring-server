@@ -3,25 +3,9 @@
     "store": "FileStore_/Users/basil/development/chinauff-server/wechat-info.json"
   },
   "globalToken": {
-    "count": 1,
-    "modifyDate": "2018-12-22T01:35:35.439Z",
-    "accessToken": "16_JTmBFTr6QUen_qwHTaCCqIdGI9FG7PSNcdFsN404XN0SjBJbQqQ1-WCA16IYDRvFjYaSmErxBU_4ga0AytD3cALm86yzR-yL_ISi8--53fzM1vkyXPG5DwDLzQzMQlP0SlRNujXJOVuwAxybHBNhAGASMY",
-    "jsapi_ticket": "kgt8ON7yVITDhtdwci0qeUlpJEh44vkFFMX3kHTtJVla-ESMRqLBsupyot7W3GWVB-hjcvod9m68dMp8UL1lqw"
+    "count": 0
   },
-  "urls": {
-    "http://wx.caixie.top/spring/?openId=oQJYBwwTnIfJIZSMYv_sSBqg2YBA": {
-      "jsapi_ticket": "kgt8ON7yVITDhtdwci0qeUlpJEh44vkFFMX3kHTtJVla-ESMRqLBsupyot7W3GWVB-hjcvod9m68dMp8UL1lqw",
-      "nonceStr": "p9qw4w835c",
-      "timestamp": "1545442535",
-      "url": "http://wx.caixie.top/spring/?openId=oQJYBwwTnIfJIZSMYv_sSBqg2YBA",
-      "signature": "66ce6ddb87d221a2652717572745b4d5329f82d5",
-      "accessToken": "16_JTmBFTr6QUen_qwHTaCCqIdGI9FG7PSNcdFsN404XN0SjBJbQqQ1-WCA16IYDRvFjYaSmErxBU_4ga0AytD3cALm86yzR-yL_ISi8--53fzM1vkyXPG5DwDLzQzMQlP0SlRNujXJOVuwAxybHBNhAGASMY",
-      "signatureName": "http://wx.caixie.top/spring/?openId=oQJYBwwTnIfJIZSMYv_sSBqg2YBA",
-      "createDate": "2018-12-22T01:35:35.440Z",
-      "modifyDate": "2018-12-22T01:35:35.440Z",
-      "updated": true
-    }
-  },
+  "urls": {},
   "oauth": {},
   "card": {},
   "mp": {}
