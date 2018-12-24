@@ -383,6 +383,28 @@ module.exports = class extends Base {
 		return this.success(blessingUserInfo);
 	}
 
+	/**
+	 * 获取领取的福字记录(统计获取到的各个字的记录)
+	 */
+	async recordsAction(){
+		const data = this.post()
+		//openId
+		if (think.isEmpty(data.openId)) {
+			return this.fail('请求参数错误')
+		}
+		const recordModel = this.model('activity_blessing_record')
+		let sql = `
+		SELECT 
+			blessing_type, COUNT(blessing_type) as num
+		FROM
+			spring.picker_activity_blessing_record
+		WHERE
+			openid = '${data.openId}'
+				AND status = 1
+		GROUP BY blessing_type ORDER BY blessing_type ASC;`
+		const records = await recordModel.query(sql);
+		return this.success(records);
+	}
 	/*******************福字数据测试接口****************** */
 
 	/**
