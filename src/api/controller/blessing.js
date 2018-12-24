@@ -339,6 +339,9 @@ module.exports = class extends Base {
 		if (think.isEmpty(blessingUserInfo)) {
 			return this.fail('集福数据不存在')
 		}
+		if (blessingUserInfo.status === 3) {
+			return this.fail('已兑换')
+		}
 
 		//预约兑换数据
 		const reserveModel = this.model('activity_reserve')
