@@ -232,6 +232,20 @@ module.exports = class extends Base {
 	}
 
 	/**
+	 * 我集到的福
+	 */
+	async myAction() {
+		const data = this.post();
+		//openId
+		if (think.isEmpty(data.openId)) {
+			return this.fail('请求参数错误')
+		}
+		const blessingUserModel = this.model('activity_blessing_user')
+		const list = await blessingUserModel.field('id,openid,blessing_code,status,exchange_time').where({ openid: data.openId }).select();
+		return this.success(list);
+	}
+
+	/**
 	 * 预约兑换
 	 */
 	async reserveAction() {
@@ -290,6 +304,81 @@ module.exports = class extends Base {
 		return this.success();
 	}
 
+	/**
+	 * 获取单个预约兑换记录
+	 */
+	async getOneReserveAction() {
+		const data = this.post()
+		//openId
+		if (think.isEmpty(data.openId)) {
+			return this.fail('请求参数错误')
+		}
+		//判断福码非空
+		if (think.isEmpty(data.blessing_code)) {
+			return this.fail('请求参数错误')
+		}
+		const reserveModel = this.model('activity_reserve')
+		const reserveInfo = await reserveModel.where({ openid: data.openId, blessing_code: data.blessing_code }).find();
+		return this.success(reserveInfo);
+	}
+
+	/**
+	 * 兑换核销
+	 */
+	async consumeAction() {
+		const data = this.post()
+
+		//判断福码非空
+		if (think.isEmpty(data.blessing_code)) {
+			return this.fail('请求参数错误')
+		}
+
+		//校验福码合法性
+		const blessingUserModel = this.model('activity_blessing_user')
+		const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code }).find();
+		if (think.isEmpty(blessingUserInfo)) {
+			return this.fail('集福数据不存在')
+		}
+
+		//预约兑换数据
+		const reserveModel = this.model('activity_reserve')
+		const reserveInfo = await reserveModel.where({ blessing_code: data.blessing_code }).find();
+		if (think.isEmpty(reserveInfo)) {
+			return this.fail('请您先预约兑换')
+		}
+
+		//更新福码为已兑换状态
+		await blessingUserModel.where({ blessing_code: data.blessing_code }).update({
+			status: 3, //已兑换
+			exchange_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')  //兑换时间
+		});
+
+		//兑换数据记录
+		const exchangeModel = this.model('activity_exchange')
+		await exchangeModel.add({
+			shop: reserveInfo.shop,
+			openid: reserveInfo.openid,
+			blessing_code: reserveInfo.blessing_code,
+			create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+		});
+
+		return this.success();
+	}
+
+	/**
+	 * 获取单个集福信息
+	 */
+	async getOneAction(){
+		const data = this.post()
+
+		//判断福码非空
+		if (think.isEmpty(data.blessing_code)) {
+			return this.fail('请求参数错误')
+		}
+		const blessingUserModel = this.model('activity_blessing_user')
+		const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code }).find();
+		return this.success(blessingUserInfo);
+	}
 
 	/*******************福字数据测试接口****************** */
 
