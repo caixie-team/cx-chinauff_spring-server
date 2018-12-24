@@ -30,11 +30,10 @@ module.exports = class extends Base {
 		}
 
 		const nowDate = moment(new Date()).format('YYYY-MM-DD')
-		console.log(nowDate)
-
 		//检测是否有助力
 		const helpModel = this.model('activity_help')
-		const helpInfo = await helpModel.where({ be_openid: data.openId, status: 1 }).limit(1).select();
+		const helpInfo = await helpModel.where({ be_openid: data.openId, status: 1 }).limit(1).find();
+
 		if (think.isEmpty(helpInfo)) { //没有助力
 			//是否到达参与限制
 			const blessingTimesModel = this.model('activity_blessing_times');
@@ -56,13 +55,7 @@ module.exports = class extends Base {
 
 		//查询福池是否有奖
 		const blessingPoolModel = this.model('activity_blessing_pool');
-		let nDate = new Date()
-		//TODO ............................
-		/****************上线的时候需要把这句话删除*************** */
-		//nDate.setDate(nDate.getDate() + 14)
-		console.log(nDate)
-
-		let nowTime = moment(nDate).format('YYYY-MM-DD HH:mm:ss')
+		let nowTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
 		const pools = await blessingPoolModel.where({ release_time: { '<=': nowTime }, last_quantity: { '>': 0 } }).limit(1).select();
 		console.log(pools)
 		if (think.isEmpty(pools)) { //没有字奖品
@@ -102,7 +95,6 @@ module.exports = class extends Base {
 			openid: data.openId,
 			status: 1
 		}).group('blessing_type').order('blessing_type').select();
-		console.log(records)
 
 		if (!think.isEmpty(records) && records.length === 4) {//集满福
 			//生成福码
@@ -116,9 +108,9 @@ module.exports = class extends Base {
 				tian_code: records[3].code,
 				status: 1,//福码状态(1:待预约 2:待兑换 3:已兑换)
 				exchange_time: null,
-				create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+				create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+				icon_num: parseInt(Math.random() * 11, 10) + 1 				//1~11的随机数
 			})
-
 			for (let item of records) {
 				//修改福字记录状态为已合成
 				await blessingRecordModel.where({
@@ -241,7 +233,7 @@ module.exports = class extends Base {
 			return this.fail('请求参数错误')
 		}
 		const blessingUserModel = this.model('activity_blessing_user')
-		const list = await blessingUserModel.field('id,openid,blessing_code,status,exchange_time').where({ openid: data.openId }).select();
+		const list = await blessingUserModel.field('id,openid,blessing_code,status,exchange_time,icon_num').where({ openid: data.openId }).select();
 		return this.success(list);
 	}
 
@@ -371,9 +363,8 @@ module.exports = class extends Base {
 	/**
 	 * 获取单个集福信息
 	 */
-	async getOneAction(){
+	async getOneAction() {
 		const data = this.post()
-
 		//判断福码非空
 		if (think.isEmpty(data.blessing_code)) {
 			return this.fail('请求参数错误')
@@ -386,7 +377,7 @@ module.exports = class extends Base {
 	/**
 	 * 获取领取的福字记录(统计获取到的各个字的记录)
 	 */
-	async recordsAction(){
+	async recordsAction() {
 		const data = this.post()
 		//openId
 		if (think.isEmpty(data.openId)) {
@@ -405,6 +396,28 @@ module.exports = class extends Base {
 		const records = await recordModel.query(sql);
 		return this.success(records);
 	}
+
+	/**
+	 * 获取今日参与次数
+	 */
+	async timesAction() {
+		const data = this.post()
+		//openId
+		if (think.isEmpty(data.openId)) {
+			return this.fail('请求参数错误')
+		}
+		const helpModel = this.model('activity_help')
+		//status 助力使用状态(1 未使用 2已使用)
+		const helpNum = await helpModel.where({ be_openid: data.openId, status: 1 }).count('id');
+
+		const nowDate = moment(new Date()).format('YYYY-MM-DD')
+		//获取今日已参与次数
+		const blessingTimesModel = this.model('activity_blessing_times');
+		const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
+		return this.success({
+			num: helpNum + (3 - times)
+		})
+	}
 	/*******************福字数据测试接口****************** */
 
 	/**
@@ -412,7 +425,7 @@ module.exports = class extends Base {
 	 */
 	async initTodayAction() {
 		let blessingArr = [];
-		for (let i = 0; i < 50; i++) {
+		for (let i = 0; i < 100; i++) {
 			if ((i % 4 + 1) === 1) {
 				blessingArr.push({
 					id: 1,
