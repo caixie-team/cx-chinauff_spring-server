@@ -73,7 +73,7 @@
       "description": "CMS application",
       "author": "baisheng <baisheng@gmail.com>",
       "babel": false,
-      "defaultModule": "home"
+      "defaultModule": "admin"
     },
     "projectName": "cms",
     "template": "/Users/basil/.nvm/versions/node/v8.9.0/lib/node_modules/think-cli/default_template",

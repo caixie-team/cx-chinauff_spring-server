@@ -8,7 +8,7 @@ const pathToRegexp = require('path-to-regexp');
  * default options
  */
 const defaultOptions = {
-  defaultModule: 'home', // default module name, is enable in multi module mode
+  defaultModule: 'admin', // default module name, is enable in multi module mode
   defaultController: 'index', // default controller name
   defaultAction: 'index', // default action name
   prefix: [], // url prefix
