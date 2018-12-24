@@ -2,7 +2,7 @@ const Base = require('./base')
 const moment = require('moment');
 const _ = require('lodash');
 /**
- * 用户 API
+ * 集福 API
  * @type {module.exports}
  */
 module.exports = class extends Base {
