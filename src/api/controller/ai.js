@@ -10,7 +10,6 @@ module.exports = class extends Base {
     super(...args)
     this.setup = think.config('setup')
     this.aiServer = this.setup.AI_SERVER
-    console.log(this.aiServer)
     if (this.setup.AI_SERVER === 'baidu') {
       this.appId = this.setup.AI_BAIDU_APP_ID
       this.appKey = this.setup.AI_BAIDU_APP_KEY

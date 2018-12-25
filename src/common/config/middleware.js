@@ -65,7 +65,7 @@ module.exports = [
     options: {
       // 是否对首页进行优化，默认值为 true（开启后如果访问地址是首页，那么不会进行自定义路由匹配）
       optimizeHomepageRouter: false,
-      defaultModule: 'home',
+      defaultModule: 'admin',
       defaultController: 'index',
       defaultAction: 'index',
       prefix: [],

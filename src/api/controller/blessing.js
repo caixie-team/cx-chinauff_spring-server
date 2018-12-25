@@ -313,32 +313,72 @@ module.exports = class extends Base {
 		return this.success(reserveInfo);
 	}
 
-	/**
-	 * 兑换核销
-	 */
+  /**
+	 * 核销
+	 *
+   * @api {post} /api/consume 核销接口
+	 * @apiGroup blessing
+   * @apiDescription 核销接口
+   * @apiName Consume
+	 * @apiParam {String} blessing_code 福码
+	 * @apiParamExample {String} 测试福码: blessing_code
+	 *  mPhkHZgWef4a5Bjsxestt
+   * @apiSuccess {json} result
+   * @apiSuccessExample {json} 核销兑换成功:
+   * {
+   *    "errno": 0,
+   *    "errmsg": "",
+   *    "data": "兑换成功"
+   *}
+   * @apiError {json}   1000 请求参数错误
+   * @apiErrorExample {json} Error-1000:
+   * {
+   * "errno": 1000,
+   * "errmsg": "请求参数错误"
+   * }
+   * @apiError {json}   1001 兑换码无效
+   * @apiErrorExample {json} Error-10001:
+   * {
+   * "errno": 1001,
+   * "errmsg": "兑换码无效"
+   * }
+   * @apiError {json}   1002 已被兑换
+   * @apiErrorExample {json} Error-1002:
+   * {
+   * "errno": 1002,
+   * "errmsg": "已被兑换"
+   * }
+   * @apiError {json}   1003 未预约
+   * @apiErrorExample {json} Error-1003:
+   * {
+   * "errno": 1003,
+   * "errmsg": "未预约"
+   * }
+   * @apiSampleRequest http://spring.chinauff.com/api/consume
+   * @apiVersion 1.0.0
+   */
 	async consumeAction() {
 		const data = this.post()
-
 		//判断福码非空
 		if (think.isEmpty(data.blessing_code)) {
-			return this.fail('请求参数错误')
+			return this.fail(1000, '请求参数错误')
 		}
 
 		//校验福码合法性
 		const blessingUserModel = this.model('activity_blessing_user')
 		const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code }).find();
 		if (think.isEmpty(blessingUserInfo)) {
-			return this.fail('集福数据不存在')
+			return this.fail(1001, '兑换码无效')
 		}
 		if (blessingUserInfo.status === 3) {
-			return this.fail('已兑换')
+			return this.fail(1002, '已被兑换')
 		}
 
 		//预约兑换数据
 		const reserveModel = this.model('activity_reserve')
 		const reserveInfo = await reserveModel.where({ blessing_code: data.blessing_code }).find();
 		if (think.isEmpty(reserveInfo)) {
-			return this.fail('请您先预约兑换')
+			return this.fail(1003, '未预约')
 		}
 
 		//更新福码为已兑换状态
@@ -356,7 +396,7 @@ module.exports = class extends Base {
 			create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
 		});
 
-		return this.success();
+		return this.success('兑换成功');
 	}
 
 	/**
