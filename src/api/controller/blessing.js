@@ -300,63 +300,70 @@ module.exports = class extends Base {
 	 */
 	async getOneReserveAction() {
 		const data = this.post()
-		//openId
-		if (think.isEmpty(data.openId)) {
-			return this.fail('请求参数错误')
-		}
 		//判断福码非空
 		if (think.isEmpty(data.blessing_code)) {
 			return this.fail('请求参数错误')
 		}
-		const reserveModel = this.model('activity_reserve')
-		const reserveInfo = await reserveModel.where({ openid: data.openId, blessing_code: data.blessing_code }).find();
-		return this.success(reserveInfo);
+		const reserveModel = this.model('activity_reserve');
+		let sql = `
+			SELECT 
+				s.shop_name,
+				s.shop_code,
+				r.blessing_code,
+				r.reserve_date
+			FROM
+				picker_activity_reserve r
+					LEFT JOIN
+				picker_chinauff_shop s ON r.shop_id = s.shop_code
+				where r.blessing_code='${data.blessing_code}';`;
+		const list = await reserveModel.query(sql);
+		return this.success(list.length>0?list[0]:{});
 	}
 
-  /**
-	 * 核销
-	 *
-   * @api {post} /api/consume 核销接口
-	 * @apiGroup blessing
-   * @apiDescription 核销接口
-   * @apiName Consume
-	 * @apiParam {String} blessing_code 福码
-	 * @apiParamExample {String} 测试福码: blessing_code
-	 *  mPhkHZgWef4a5Bjsxestt
-   * @apiSuccess {json} result
-   * @apiSuccessExample {json} 核销兑换成功:
-   * {
-   *    "errno": 0,
-   *    "errmsg": "",
-   *    "data": "兑换成功"
-   *}
-   * @apiError {json}   1000 请求参数错误
-   * @apiErrorExample {json} Error-1000:
-   * {
-   * "errno": 1000,
-   * "errmsg": "请求参数错误"
-   * }
-   * @apiError {json}   1001 兑换码无效
-   * @apiErrorExample {json} Error-10001:
-   * {
-   * "errno": 1001,
-   * "errmsg": "兑换码无效"
-   * }
-   * @apiError {json}   1002 已被兑换
-   * @apiErrorExample {json} Error-1002:
-   * {
-   * "errno": 1002,
-   * "errmsg": "已被兑换"
-   * }
-   * @apiError {json}   1003 未预约
-   * @apiErrorExample {json} Error-1003:
-   * {
-   * "errno": 1003,
-   * "errmsg": "未预约"
-   * }
-   * @apiSampleRequest http://spring.chinauff.com/api/consume
-   * @apiVersion 1.0.0
-   */
+	/**
+	   * 核销
+	   *
+	 * @api {post} /api/consume 核销接口
+	   * @apiGroup blessing
+	 * @apiDescription 核销接口
+	 * @apiName Consume
+	   * @apiParam {String} blessing_code 福码
+	   * @apiParamExample {String} 测试福码: blessing_code
+	   *  mPhkHZgWef4a5Bjsxestt
+	 * @apiSuccess {json} result
+	 * @apiSuccessExample {json} 核销兑换成功:
+	 * {
+	 *    "errno": 0,
+	 *    "errmsg": "",
+	 *    "data": "兑换成功"
+	 *}
+	 * @apiError {json}   1000 请求参数错误
+	 * @apiErrorExample {json} Error-1000:
+	 * {
+	 * "errno": 1000,
+	 * "errmsg": "请求参数错误"
+	 * }
+	 * @apiError {json}   1001 兑换码无效
+	 * @apiErrorExample {json} Error-10001:
+	 * {
+	 * "errno": 1001,
+	 * "errmsg": "兑换码无效"
+	 * }
+	 * @apiError {json}   1002 已被兑换
+	 * @apiErrorExample {json} Error-1002:
+	 * {
+	 * "errno": 1002,
+	 * "errmsg": "已被兑换"
+	 * }
+	 * @apiError {json}   1003 未预约
+	 * @apiErrorExample {json} Error-1003:
+	 * {
+	 * "errno": 1003,
+	 * "errmsg": "未预约"
+	 * }
+	 * @apiSampleRequest http://spring.chinauff.com/api/consume
+	 * @apiVersion 1.0.0
+	 */
 	async consumeAction() {
 		const data = this.post()
 		//判断福码非空
@@ -457,6 +464,10 @@ module.exports = class extends Base {
 			num: helpNum + (3 - times)
 		})
 	}
+
+
+
+
 	/*******************福字数据测试接口****************** */
 
 	/**
