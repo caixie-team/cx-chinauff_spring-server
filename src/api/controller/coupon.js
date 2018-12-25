@@ -51,11 +51,12 @@ module.exports = class extends Base {
             return this.fail('活动账户不存在')
         }
 
+        /***************************************************/
+        //step1 判断该活动账户是否有未领取的优惠券，如果有，则把未领取的优惠券返给他
         const couponUserModel = this.model('activity_coupon_user')
-        //判断该活动账户是否有未领取的优惠券，如果有，则把未领取的优惠券返给他
         let cuSql = `
             SELECT 
-                 cu.openid, c.coupon_name, c.type_code
+                 cu.coupon_code,cu.openid,c.coupon_name,c.type_code
             FROM
                 picker_activity_coupon_user cu
                     LEFT JOIN
@@ -70,20 +71,39 @@ module.exports = class extends Base {
             return this.success(cuData[0]);
         }
 
-        let t = new Date()
+        /***************************************************/
+        //step2 判断当前时间是否在 2019.01.10-2019.01.20周期内
+
+        let now = new Date();
+        now.setDate(now.getDate() + 19)
+        
+        const nowTime = now.getTime()
+        //const nowTime = new Date().getTime(); //当前时间
+        const startTime = new Date('2019-01-10 00:00:00').getTime();  //充值卡发放开始时间
+        const endTime = new Date('2019-01-20 23:59:59').getTime();    //充值卡发放结束时间
+        if (nowTime >= startTime && nowTime <= endTime) {
+            console.log('********在发卡的时间区域内*******')
+            //获取中奖的次数
+            
+
+
+        }
+
+        return this.success();
+
         /***************************************************/
         /*************** todo 上线的时候需要去掉 **************/
         /***************************************************/
+        let t = new Date()
         t.setDate(t.getDate() + 12)
 
         let coupon = null;//优惠券奖品
+        const coupon_code = Generate.id();//优惠券码
 
         const nowDate = moment(t).format('YYYY-MM-DD');
         console.log(nowDate)
         let sql = 'SELECT * FROM picker_activity_coupon WHERE stock_mark = 1 AND last_quantity > 0 ';
 
-        const coupon_code = Generate.id();//优惠券码
-        return this.success(coupon_code)
         if (nowDate >= this.one_start_date && nowDate <= this.one_end_date) {//第一周期
             sql += ` AND start_date = '${this.one_start_date}' AND end_date = '${this.one_end_date}' ORDER BY RAND() LIMIT 1;`;
             console.log('*******第一周期******')
@@ -105,13 +125,18 @@ module.exports = class extends Base {
                 });
                 //优惠券库存-1
                 await this.db.where({
-                    id: couponList[0].id
+                    id: couponList[0].id,
+                    last_quantity: { '>': 0 }
                 }).update({
                     last_quantity: ['exp', 'last_quantity-1']
                 });
 
+                //优惠券奖品信息
                 coupon = {
-
+                    coupon_code: coupon_code,
+                    openid: data.openId,
+                    coupon_name: couponList[0].coupon_name,
+                    type_code: couponList[0].type_code
                 };
             }
         }
