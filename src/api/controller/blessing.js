@@ -310,7 +310,7 @@ module.exports = class extends Base {
    * @apiDescription 查询 Code 接口
    * @apiName getCode
    * @apiParam {String} blessing_code 福码
-   * @apiParamExample {String} blessing_code
+   * @apiParamExample {String} 标例福码: blessing_code
    *  mPhkHZgWef4a5Bjsxestt
    * @apiSuccess {json} result
    * @apiSuccessExample {json} 卡劵状态正常:
@@ -373,7 +373,7 @@ module.exports = class extends Base {
    * @apiGroup Card
    * @apiName Consume
    * @apiParam {String} blessing_code 福码
-   * @apiParamExample {String} 测试福码: blessing_code
+   * @apiParamExample {String} 标例福码: blessing_code
    *  mPhkHZgWef4a5Bjsxestt
    * @apiSuccess {json} result
    * @apiSuccessExample {json} 核销兑换成功:
