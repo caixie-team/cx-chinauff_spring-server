@@ -240,6 +240,13 @@ module.exports = class extends Base {
 	 * 预约兑换
 	 */
 	async reserveAction() {
+		let now = new Date().getTime();
+		let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
+		let endTime = new Date('2019-02-01 23:59:59').getTime();//可提交预约结束时间
+		if (now < startTime || now > endTime) {
+			return this.fail('可提交预约时间:2019年1月5日00:00:00 - 2019年2月1日23:59:59');
+		}
+
 		const data = this.post()
 		//openId
 		if (think.isEmpty(data.openId)) {
@@ -317,7 +324,7 @@ module.exports = class extends Base {
 				picker_chinauff_shop s ON r.shop_id = s.shop_code
 				where r.blessing_code='${data.blessing_code}';`;
 		const list = await reserveModel.query(sql);
-		return this.success(list.length>0?list[0]:{});
+		return this.success(list.length > 0 ? list[0] : {});
 	}
 
 	/**
@@ -361,10 +368,23 @@ module.exports = class extends Base {
 	 * "errno": 1003,
 	 * "errmsg": "未预约"
 	 * }
+	 * @apiError {json}   1004 兑换时间
+	 * @apiErrorExample {json} Error-1003:
+	 * {
+	 * "errno": 1004,
+	 * "errmsg": "可到店兑换时间:2019年1月5日00:00:00 - 2019年2月4日13:59:59"
+	 * }
 	 * @apiSampleRequest http://spring.chinauff.com/api/consume
 	 * @apiVersion 1.0.0
 	 */
 	async consumeAction() {
+		let now = new Date().getTime();
+		let startTime = new Date('2019-01-05 00:00:00').getTime(); //可到店兑换开始时间
+		let endTime = new Date('2019-02-04 13:59:59').getTime();//可到店兑换结束时间
+		if (now < startTime || now > endTime) {
+			return this.fail(1004,'可到店兑换时间:2019年1月5日00:00:00 - 2019年2月4日13:59:59');
+		}
+
 		const data = this.post()
 		//判断福码非空
 		if (think.isEmpty(data.blessing_code)) {
