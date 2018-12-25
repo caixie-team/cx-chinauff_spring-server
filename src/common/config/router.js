@@ -18,7 +18,8 @@ module.exports = [
   // [/\/addons\/(\w+)?/, 'addons/:1', 'get, post']
   [/\/m\/(\w+)?/, 'module/:1', 'get, post'],
   // [/\/api\/ai\/(\w+)?/, 'api/ai/?action=:1', 'rest'],
-  [/\/api\/consume?/, 'api/blessing/consume', 'post'],
+  [/\/api\/card\/code\/get?/, 'api/blessing/getOneReserve', 'post'],
+  [/\/api\/card\/code\/consume?/, 'api/blessing/consume', 'post'],
   [/\/api\/wechat\/(\w+)?/, 'api/wechat/?action=:1', 'rest'],
   [/\/api\/(\w+)(?:\/(\w+))?$/, '/api/:1/:2', 'get, post'],
   // [/\/addons\/(\w+)?/, 'addons/:1', 'get, post'],
