@@ -57,7 +57,6 @@ module.exports = class extends Base {
 		const blessingPoolModel = this.model('activity_blessing_pool');
 		let nowTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
 		const pools = await blessingPoolModel.where({ release_time: { '<=': nowTime }, last_quantity: { '>': 0 } }).limit(1).select();
-		console.log(pools)
 		if (think.isEmpty(pools)) { //没有字奖品
 			return this.success({
 				blessing: {}
