@@ -1,0 +1,12 @@
+{
+  "wechatConfig": {
+    "store": "FileStore_/Users/longjianlin/Documents/19_项目/work/spring.server/wechat-info.json"
+  },
+  "globalToken": {
+    "count": 0
+  },
+  "urls": {},
+  "oauth": {},
+  "card": {},
+  "mp": {}
+}
