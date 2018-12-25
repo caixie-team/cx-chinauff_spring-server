@@ -1,6 +1,6 @@
 {
-  "name": "CMS",
-  "description": "CMS application",
+  "name": "ChinauffSpring",
+  "description": "老娘舅中秋集福活动系统",
   "version": "1.0.0",
   "author": "baisheng@gmail.com <baisheng@gmail.com>",
   "scripts": {
@@ -69,8 +69,8 @@
   "readmeFilename": "README.md",
   "thinkjs": {
     "metadata": {
-      "name": "cms",
-      "description": "CMS application",
+      "name": "chinuaffspring",
+      "description": "老娘舅中秋集福活动系统",
       "author": "baisheng <baisheng@gmail.com>",
       "babel": false,
       "defaultModule": "admin"
@@ -79,5 +79,9 @@
     "template": "/Users/basil/.nvm/versions/node/v8.9.0/lib/node_modules/think-cli/default_template",
     "clone": false,
     "isMultiModule": true
+  },
+  "apidoc": {
+    "title": "老娘舅集福活动系统",
+    "url": "http://spring.chinauff.com"
   }
 }
