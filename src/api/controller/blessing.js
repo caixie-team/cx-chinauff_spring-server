@@ -316,8 +316,11 @@ module.exports = class extends Base {
    * @apiDescription 查询 Code 接口
    * @apiName getCode
    * @apiParam {String} blessing_code 福码
-   * @apiParamExample {String} 标例福码: blessing_code
+   * @apiParamExample {String} 示例福码: blessing_code
    *  mPhkHZgWef4a5Bjsxestt
+   * @apiParam {String} shop_code 店铺编号
+   * @apiParamExample {String} 示例编号: shop_code
+   * 210910010001
    * @apiSuccess {json} result
    * @apiSuccessExample {json} 卡劵状态正常, 可用:
    * {
