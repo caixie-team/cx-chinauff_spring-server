@@ -350,36 +350,17 @@ module.exports = class extends Base {
 			return this.fail('请求参数错误')
 		}
 		const reserveModel = this.model('activity_reserve')
-
-		// let sql = `
-		// 	SELECT
-		// 		s.shop_name,
-		// 		s.shop_code,
-		// 		r.blessing_code,
-		// 		r.reserve_date
-		// 	FROM
-		// 		picker_activity_reserve r
-		// 			LEFT JOIN
-		// 		picker_chinauff_shop s ON r.shop_id = s.shop_code
-		// 		where r.blessing_code='${data.blessing_code}';`;
 		const res = await reserveModel.where({
 			shop_id: data.shop_code,
 			blessing_code: data.blessing_code,
 			// 2 为已取消，只验证已预约的
 			status: 1
 		}).find()
-
 		if (!think.isEmpty(res)) {
 			return this.success()
 		} else {
 			return this.fail(1001)
 		}
-		// return this.success(list.length > 0 ? list[0] : {});
-		// if (list.length > 0) {
-		//   return this.success(list[0])
-		// } else {
-		//   return this.fail(1001, '未预约')
-		// }
 	}
 
 	/**
