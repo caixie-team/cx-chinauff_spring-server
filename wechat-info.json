@@ -1,6 +1,6 @@
 {
   "wechatConfig": {
-    "store": "FileStore_/Users/longjianlin/Documents/19_项目/work/spring.server/wechat-info.json"
+    "store": "FileStore_/Users/basil/development/chinauff-server/wechat-info.json"
   },
   "globalToken": {
     "count": 0
