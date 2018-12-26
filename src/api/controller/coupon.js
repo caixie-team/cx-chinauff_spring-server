@@ -18,7 +18,7 @@ module.exports = class extends Base {
      */
     async hitAction() {
 
-        // await this.validateActivityDate(); //验证活动时间
+        await this.validateActivityDate(); //验证活动时间
 
         const data = this.post()
         if (think.isEmpty(data.openId)) {
@@ -108,15 +108,16 @@ module.exports = class extends Base {
         const cardModel = this.model('activity_card');
         const cardUserModel = this.model('activity_card_user');
 
-        let now = new Date();
-        now.setDate(now.getDate() + 19)
-        const nowTime = now.getTime()
+        // let now = new Date();
+        // now.setDate(now.getDate() + 19)
+        // const nowTime = now.getTime()
 
-        //const nowTime = new Date().getTime(); //当前时间
+        const nowTime = new Date().getTime(); //当前时间
+        
         const startTime = new Date('2019-01-10 00:00:00').getTime();  //充值卡发放开始时间
         const endTime = new Date('2019-01-20 23:59:59').getTime();    //充值卡发放结束时间
         if (nowTime >= startTime && nowTime <= endTime) {
-            console.log('********在发卡的时间区域内*******')
+            console.log('******** 会员充值卡产生时间 *******')
 
             //先判断该用户是否已经领过会员充值卡
             const cardUserData = await cardUserModel.where({
@@ -145,7 +146,7 @@ module.exports = class extends Base {
                 const cuNum = await couponUserModel.count('id');    //发出优惠券数
                 const cardNum = await cardUserModel.count('id');    //发出充值卡数
 
-                if ((cuNum + cardNum + 1) % 25 == 0) {//可发充值卡
+                if ((cuNum + cardNum + 1) % 51 == 0) {//可发充值卡
                     // let randCardSql = 'SELECT * FROM picker_activity_card ORDER BY RAND() LIMIT 1;'; //支持多种会员充值卡
 
                     let randCardSql = 'SELECT * FROM picker_activity_card LIMIT 1;';
@@ -172,6 +173,8 @@ module.exports = class extends Base {
                     });
                 }
             }
+        }else{
+            console.log('******** 不在会员充值卡产生时间 *******')
         }
     }
 
@@ -368,7 +371,7 @@ module.exports = class extends Base {
             receive_status: 2,//领取状态(1未领取 2已领取)
             release_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')  //领取时间
         });
-        
+
         return this.success('领取成功')
     }
 
