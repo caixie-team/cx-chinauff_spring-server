@@ -63,7 +63,7 @@ module.exports = class extends Base {
    * "errno": 1004,
    * "errmsg": "未在可兑换时段"
    * }
-   * @apiError {json}   1005 兑换时间
+   * @apiError {json}   1005 未在可兑换门店
    * @apiErrorExample {json} Error-1005:
    * {
    * "errno": 1005,
