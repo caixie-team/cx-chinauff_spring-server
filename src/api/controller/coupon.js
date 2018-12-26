@@ -113,7 +113,7 @@ module.exports = class extends Base {
         // const nowTime = now.getTime()
 
         const nowTime = new Date().getTime(); //当前时间
-        
+
         const startTime = new Date('2019-01-10 00:00:00').getTime();  //充值卡发放开始时间
         const endTime = new Date('2019-01-20 23:59:59').getTime();    //充值卡发放结束时间
         if (nowTime >= startTime && nowTime <= endTime) {
@@ -173,7 +173,7 @@ module.exports = class extends Base {
                     });
                 }
             }
-        }else{
+        } else {
             console.log('******** 不在会员充值卡产生时间 *******')
         }
     }
@@ -374,6 +374,101 @@ module.exports = class extends Base {
 
         return this.success('领取成功')
     }
+
+
+    /*******************test****************** */
+
+    async  getResult(arr) {
+        console.log(arr)
+        var leng = 150000;//获取总数
+
+        for (var i = 0; i < arr.length; i++) {
+            var random = parseInt(Math.random() * leng);       //获取 0-总数 之间的一个随随机整数
+            let p = parseInt(arr[i])
+            console.log(`p:  ${p}`)
+
+            if (random < p) {
+                console.log(`--------${i}-------`)
+                return i                                     //如果在当前的概率范围内,得到的就是当前概率
+            } else {
+                leng -= p                               //否则减去当前的概率范围,进入下一轮循环
+                console.log(`leng:  ${leng}`)
+            }
+        }
+    }
+
+    async testAction() {
+        
+        var gifts = [
+            {
+                "name": "鱼肉狮子头套餐免费吃券",
+                "prop": 45000
+            },
+            {
+                "name": "4元代金券（29起用，全天）",
+                "prop": 30000
+            },
+            {
+                "name": "8元代金券（35起用）",
+                "prop": 15000
+            },
+            {
+                "name": "蜜汁鸡翅5折券",
+                "prop": 15000
+            },
+            {
+                "name": "橙汁5折券",
+                "prop": 45000
+            },
+        ]
+        
+        // var gifts = [
+        //     {
+        //         "name": "鱼肉狮子头套餐免费吃券",
+        //         "prop": 0.3
+        //     },
+        //     {
+        //         "name": "4元代金券（29起用，全天）",
+        //         "prop": 0.2
+        //     },
+        //     {
+        //         "name": "8元代金券（35起用）",
+        //         "prop": 0.1
+        //     },
+        //     {
+        //         "name": "蜜汁鸡翅5折券",
+        //         "prop": 0.1
+        //     },
+        //     {
+        //         "name": "橙汁5折券",
+        //         "prop": 0.3
+        //     },
+        //     // {
+        //     //     "name": "红豆养生汤5折券",
+        //     //     "prop": 0.01
+        //     // },
+        //     // {
+        //     //     "name": "红枣银耳汤5折券",
+        //     //     "prop": 0.01
+        //     // },
+        //     // {
+        //     //     "name": "冰镇黄桃5折券",
+        //     //     "prop": 0.01
+        //     // }
+        // ];
+        var gArr = [];
+        for (var i = 0; i < gifts.length; i++) {
+            gArr.push(gifts[i]['prop'])
+        }
+        const result = await this.getResult(gArr)
+        console.log(result)
+        const data = gifts[result]['name'];
+        console.log(data)
+
+        return this.success(data);
+    }
+
+
 
     /*******************优惠券数据测试接口****************** */
 
