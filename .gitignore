@@ -33,6 +33,6 @@ output.tar.gz
 runtime/
 
 # port
-
+wechat-info.json
 config.development.js
 adapter.development.js
