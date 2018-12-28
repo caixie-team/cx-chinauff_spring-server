@@ -8,26 +8,28 @@ module.exports = class extends think.Model {
    * 加载活动账户信息或创建新活动账户
    * @returns {Promise<void>}
    */
-  async loadOrCreate (openId) {
+  async loadOrCreate (data) {
     const field = [
       'id',
       'openId',
+      'avatar',
       'name',
       'cardNo',
       'createTime',
       'lastLoginTime'
     ]
     let accountInfo = await this.field(field).where({
-      openId: openId
+      openId: data.openId
     }).find()
     if (think.isEmpty(accountInfo)) {
       const insertId = await this.add({
-        openId: openId,
+        openId: data.openId,
+        avatar: data.avatar,
         createTime: new Date().getTime()
       })
       if (insertId) {
         accountInfo = await this.where({
-          openId: openId
+          openId: data.openId
         }).find()
       }
     }

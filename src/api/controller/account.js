@@ -18,7 +18,7 @@ module.exports = class extends Base {
       // IF 用户存在就加载用户信息
       // Else 创建活动账户并加载账户信息
       let accountInfo = await this.model('account')
-        .loadOrCreate(data.openId)
+        .loadOrCreate(data)
       // 验证账户登陆状态信息
       // {
       //   "errcode": 0,
