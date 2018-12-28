@@ -48,7 +48,7 @@ module.exports = class extends Base {
         //step3 走正常的优惠券领取流程
 
         let now = new Date()
-        now.setDate(now.getDate() + 11)         // 用于测试 todo 上线后需要去掉
+        // now.setDate(now.getDate() + 11)         // 用于测试 todo 上线后需要去掉
         const currentDate = moment(now).format('YYYY-MM-DD');
         console.log(`******** 当前日期: ${currentDate} *******`)
 
