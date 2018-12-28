@@ -11,7 +11,6 @@ module.exports = class extends Base {
   async takeAction () {
     if (this.isPost) {
       const data = this.post()
-      console.log(data)
       if (!think._.has(data, 'openId')) {
         return this.fail('openId 参数不存在')
       }
