@@ -11,14 +11,13 @@ module.exports = class extends Base {
   async takeAction () {
     if (this.isPost) {
       const data = this.post()
-      console.log(data)
       if (!think._.has(data, 'openId')) {
         return this.fail('openId 参数不存在')
       }
       // IF 用户存在就加载用户信息
       // Else 创建活动账户并加载账户信息
       let accountInfo = await this.model('account')
-        .loadOrCreate(data.openId)
+        .loadOrCreate(data)
       // 验证账户登陆状态信息
       // {
       //   "errcode": 0,
