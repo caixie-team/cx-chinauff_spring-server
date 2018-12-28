@@ -33,11 +33,12 @@ module.exports = class extends Base {
         if (think.isEmpty(accountInfo.cardNo)) {
           const cardPayload = await this.getCardInfo(userPayload.cardNo)
           if (cardPayload) {
-           accountInfo = await this.model('account').save(data.openId, cardPayload)
+            accountInfo = await this.model('account').save(data.openId, cardPayload)
           }
         }
         accountInfo.status = 1
       }
+      // console.log(accountInfo)
       return this.success(accountInfo)
     }
   }
@@ -50,6 +51,7 @@ module.exports = class extends Base {
   async create (openId) {
     const accountModel = await this.model('account')
   }
+
   // #doc http://doc.micvs.com/index.php?s=/64&page_id=448
   // 卡-基本信息-查询卡信息
   async getCardInfo (cardNo) {
@@ -89,6 +91,7 @@ module.exports = class extends Base {
     // console.error(payload)
     return false
   }
+
   /**
    * 检查用户登录状态
    * @param openId
