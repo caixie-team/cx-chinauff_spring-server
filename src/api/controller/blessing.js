@@ -104,6 +104,7 @@ module.exports = class extends Base {
     if (!think.isEmpty(records) && records.length === 4) {//集满福
       //生成福码
       const blessingUserModel = this.model('activity_blessing_user');
+      const icon_num = parseInt(Math.random() * 11, 10) + 1 ;				//1~11的随机数
       await blessingUserModel.add({
         openid: data.openId,
         blessing_code: Generate.id(),
@@ -114,7 +115,7 @@ module.exports = class extends Base {
         status: 1,//福码状态(1:待预约 2:待兑换 3:已兑换)
         exchange_time: null,
         create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
-        icon_num: parseInt(Math.random() * 11, 10) + 1 				//1~11的随机数
+        icon_num: icon_num
       })
       for (let item of records) {
         //修改福字记录状态为已合成
@@ -124,6 +125,7 @@ module.exports = class extends Base {
           status: 2 //合成福状态(1:未合成 2:已合成)
         })
       }
+      blessing_josn.icon_num = icon_num;
       blessing_josn.full = true;
     }
     return this.success({
