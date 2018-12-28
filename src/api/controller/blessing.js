@@ -199,6 +199,7 @@ module.exports = class extends Base {
     if (think.isEmpty(data.beOpenId)) {
       return this.fail('请求参数错误')
     }
+    const beOpenId = decrypt(data.beOpenId, this.key)
 
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
@@ -207,20 +208,21 @@ module.exports = class extends Base {
       return this.fail('助力活动账户不存在')
     }
 
-    const beHelpChinauffAccount = await chinauffAccountModel.where({ openId: data.beOpenId }).find();
+    // console.log(data.beOpenId)
+    const beHelpChinauffAccount = await chinauffAccountModel.where({ openId: beOpenId }).find();
     if (think.isEmpty(beHelpChinauffAccount)) {
       return this.fail('被助力活动账户不存在')
     }
 
     const helpModel = this.model('activity_help');
     //查询活动周期内是否已经助力过
-    const helpInfo = await helpModel.where({ openid: data.openId, be_openid: data.beOpenId }).find();
+    const helpInfo = await helpModel.where({ openid: data.openId, be_openid: beOpenId }).find();
     if (!think.isEmpty(helpInfo)) {
       return this.fail(1001, '您已助力')
     }
 
     await helpModel.add({
-      be_openid: data.beOpenId,
+      be_openid: beOpenId,
       openid: data.openId,
       status: 1,	//助力使用状态 1未使用 , 2已使用
       create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
@@ -467,8 +469,9 @@ module.exports = class extends Base {
     }
 
     let status = 1; //未助力
-
-    if (data.openId == beOpenId) {
+    console.log(data.openId)
+    console.log(beOpenId)
+    if (data.openId === beOpenId) {
       status = 3;  //同一个人
     } else {
       const helpModel = this.model('activity_help');
