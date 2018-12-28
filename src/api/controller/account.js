@@ -10,45 +10,110 @@ module.exports = class extends Base {
    */
   async takeAction () {
     if (this.isPost) {
-      // console.log(think.config('proxyUrl'))
-      // console.log(apiConfig)
-      // { openId: '' }
       const data = this.post()
       console.log(data)
       if (!think._.has(data, 'openId')) {
-        return this.fail('openId is required!')
+        return this.fail('openId 参数不存在')
       }
-      const accountInfo = await this.model('account')
+      // IF 用户存在就加载用户信息
+      // Else 创建活动账户并加载账户信息
+      let accountInfo = await this.model('account')
         .loadOrCreate(data.openId)
-      // 1 判断是否为新活动账户
-      // const text = await this.fetch('https://github.com/').then(res => res.text());
-      const query = queryString.stringify({
-        // 设备流水
-        deviceSeq: '1516345652000',
-        // 设备时间
-        deviceTime: new Date().getTime(),
-        version: '1.0',
-        token: 'C5AB4E7A104F2492B9241D5E98C9BF0332785730FAC1056BF8A01DD25EF77171',
-        shopNo: '21090001',
-        deviceNo: '21090001',
-        openId: data.openId
-      })
-      const memberIsLogin = (await this.got(
-        'dcApi/member/isLogin',
-        {
-          baseUrl: think.config('proxyChinauff'),
-          query
+      // 验证账户登陆状态信息
+      // {
+      //   "errcode": 0,
+      //   "msg": "用户已登录",
+      //   "userId": 4796590118,
+      //   "cardNo": "210900000004036335"
+      // }
+      const userPayload = await this.checkUserLoginStatus(data.openId)
+      // 已查询用户状态
+      if (userPayload.errcode === 0) { // 如果已登录， 查询用户信息
+        // 用 cardNo 获取用户信息
+        if (think.isEmpty(accountInfo.cardNo)) {
+          const cardPayload = await this.getCardInfo(userPayload.cardNo)
+          if (cardPayload) {
+           accountInfo = await this.model('account').save(data.openId, cardPayload)
+          }
         }
-      )).body
-
-      // const memeberInfo = await this.got('')
-      // 2 新活动账户请求会员信息
+        accountInfo.status = 1
+      }
       return this.success(accountInfo)
     }
   }
 
-  async fetchUserInfo () {
+  /**
+   * 创建活动账户
+   * @param openId
+   * @returns {Promise<void>}
+   */
+  async create (openId) {
+    const accountModel = await this.model('account')
+  }
+  // #doc http://doc.micvs.com/index.php?s=/64&page_id=448
+  // 卡-基本信息-查询卡信息
+  async getCardInfo (cardNo) {
+    const queryConfig = think.config('proxyQueryString')
+    const queryInfo = {
+      token: queryConfig.crmToken,
+      merNo: queryConfig.merNo,
+      shopNo: queryConfig.shopNo,
+      deviceNo: queryConfig.deviceNo,
+      orderNo: Generate.id(),
+      channel: queryConfig.channel,
+      note: queryConfig.note,
+      deviceDate: this.moment().format('YYYY-MM-DD HH:mm:ss'),
+      version: queryConfig.version,
+      transCode: queryConfig.transCode,
+      cardNo
+    }
+    // console.log(queryInfo)
 
+    const query = queryString.stringify(queryInfo)
+    const payload = (await this.got(
+      '/console/api/card/getInfo',
+      {
+        baseUrl: think.config('proxyCrmApi'),
+        query
+      }
+    )).body
+    if (!think.isEmpty(payload)) {
+      const payloadObj = JSON.parse(payload)
+      console.log(payloadObj)
+      if (payloadObj.errcode === 0) {
+        return payloadObj
+      } else {
+        think.logger.error(payloadObj)
+      }
+    }
+    // console.error(payload)
+    return false
+  }
+  /**
+   * 检查用户登录状态
+   * @param openId
+   * @returns {Promise<*>}
+   */
+  async checkUserLoginStatus (openId) {
+    const queryConfig = think.config('proxyQueryString')
+    const queryInfo = {
+      version: queryConfig.version,
+      token: queryConfig.activityToken,
+      deviceSeq: queryConfig.deviceSeq,
+      deviceTime: new Date().getTime(),
+      shopNo: queryConfig.shopNo,
+      deviceNo: queryConfig.deviceNo,
+      openId
+    }
+    const query = queryString.stringify(queryInfo)
+    const userInfo = (await this.got(
+      '/console/dcApi/member/isLogin',
+      {
+        baseUrl: think.config('proxyActivityApi'),
+        query
+      }
+    )).body
+    return JSON.parse(userInfo)
   }
 
   /**
