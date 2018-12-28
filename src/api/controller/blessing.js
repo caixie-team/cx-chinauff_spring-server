@@ -105,9 +105,10 @@ module.exports = class extends Base {
       //生成福码
       const blessingUserModel = this.model('activity_blessing_user');
       const icon_num = parseInt(Math.random() * 11, 10) + 1 ;				//1~11的随机数
+      const blessing_code = Generate.id();
       await blessingUserModel.add({
         openid: data.openId,
-        blessing_code: Generate.id(),
+        blessing_code: blessing_code,
         shi_code: records[0].code,
         yi_code: records[1].code,
         kou_code: records[2].code,
@@ -125,6 +126,7 @@ module.exports = class extends Base {
           status: 2 //合成福状态(1:未合成 2:已合成)
         })
       }
+      blessing_josn.blessing_code = blessing_josn;
       blessing_josn.icon_num = icon_num;
       blessing_josn.full = true;
     }
