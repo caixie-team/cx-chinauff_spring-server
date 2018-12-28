@@ -405,6 +405,8 @@ module.exports = class extends Base {
     if (think.isEmpty(data.openId)) {
       return this.fail('请求参数错误')
     }
+    const helpModel = this.model('activity_help');
+
     let sql = `
         SELECT 
           a.avatar
@@ -413,16 +415,23 @@ module.exports = class extends Base {
                 LEFT JOIN
             picker_chinauff_account a ON h.be_openid = a.openId
         WHERE
-            h.be_openid = '${data.openId}';`
-    const helpModel = this.model('activity_help');
+            h.be_openid = '${data.openId}' limit 5;`
     const avatars = await helpModel.query(sql);
-
+    let arr = [];
+    if (!think.isEmpty(avatars)) {
+      for(let item of avatars){
+        arr.push(item.avatar)
+      }
+    }
+    
+    //统计总助力数
     const total = await helpModel.where({
       be_openid: data.openId
     }).count('id');
+    
     return this.success({
       total: total,
-      avatars: avatars
+      avatars: arr
     });
   }
 
