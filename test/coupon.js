@@ -48,16 +48,16 @@ module.exports = class extends Base {
         //step3 走正常的优惠券领取流程
 
         let now = new Date()
-        now.setDate(now.getDate() + 11)         // 用于测试 todo 上线后需要去掉
+        // now.setDate(now.getDate() + 11)         // 用于测试 todo 上线后需要去掉
         const currentDate = moment(now).format('YYYY-MM-DD');
         console.log(`******** 当前日期: ${currentDate} *******`)
 
-        const cycleData = await this.getCycle(currentDate);
-        if (think.isEmpty(cycleData)) {
+        const dataRes = await this.getCycle(currentDate);
+        if (think.isEmpty(dataRes)) {
             return this.fail(1005, '不在活动期间')
         }
 
-        await this.getCoupon(data.openId, cycleData);
+        await this.getCoupon(data.openId, dataRes.startDate, dataRes.endDate);
     }
 
     /**
@@ -78,7 +78,7 @@ module.exports = class extends Base {
      */
     async unreceived(openId) {
         const couponUserModel = this.model('activity_coupon_user')
-        let sql = `
+        let cuSql = `
             SELECT 
                  cu.coupon_code,cu.openid,c.coupon_name,c.type_code
             FROM
@@ -89,7 +89,7 @@ module.exports = class extends Base {
                 openid = '${openId}'
                     AND receive_status = 1
             LIMIT 1;`;
-        const res = await couponUserModel.query(sql);
+        const res = await couponUserModel.query(cuSql);
         if (!think.isEmpty(res)) { //有未领取的优惠券
             console.log('*******返回未领取的优惠券******')
             return this.success({
@@ -119,13 +119,12 @@ module.exports = class extends Base {
         if (nowTime >= startTime && nowTime <= endTime) {
             console.log('******** 会员充值卡产生时间 *******')
 
-            //先判断该用户是否已经领过会员充值卡 (每个用户仅限收到1张卡)
+            //先判断该用户是否已经领过会员充值卡
             const cardUserData = await cardUserModel.where({
                 openid: openId
             }).find();
 
             if (!think.isEmpty(cardUserData)) {
-                console.log('********该用户中过会员充值卡*******')
                 if (think.isEmpty(cardUserData.receive_time)) {
                     console.log('********将中奖未领取的会员充值卡返给用户*******')
 
@@ -213,204 +212,75 @@ module.exports = class extends Base {
         if (currentDate >= one_start_date && currentDate <= one_end_date) {//第一周期
             data = {
                 startDate: one_start_date,
-                endDate: one_end_date,
-                master_total: 150000,
-                spare_total: 50349,
-                cycle: 1
+                endDate: one_end_date
             }
         } else if (currentDate >= two_start_date && currentDate <= two_end_date) {//第二周期
             data = {
                 startDate: two_start_date,
-                endDate: two_end_date,
-                master_total: 160000,
-                spare_total: 60349,
-                cycle: 2
+                endDate: two_end_date
             }
         } else if (currentDate >= three_start_date && currentDate <= three_end_date) {//第三周期
             data = {
                 startDate: three_start_date,
-                endDate: three_end_date,
-                master_total: 130000,
-                spare_total: 50349,
-                cycle: 3
+                endDate: three_end_date
             }
         } else if (currentDate >= four_start_date && currentDate <= four_end_date) {//第四周期
             data = {
                 startDate: four_start_date,
-                endDate: four_end_date,
-                master_total: 120000,
-                spare_total: 60349,
-                cycle: 4
+                endDate: four_end_date
             }
         } else if (currentDate >= five_start_date && currentDate <= five_end_date) {//第五周期
             data = {
                 startDate: five_start_date,
-                endDate: five_end_date,
-                master_total: 130000,
-                spare_total: 50349,
-                cycle: 5
+                endDate: five_end_date
             }
         } else if (currentDate >= six_start_date && currentDate <= six_end_date) {//第六周期
             data = {
                 startDate: six_start_date,
-                endDate: six_end_date,
-                master_total: 63626,
-                spare_total: 63626,
-                cycle: 6
+                endDate: six_end_date
             }
         }
         return data;
     }
 
     /**
-     * 获取优惠券
+     * 
      * @param {微信openId} openId 
-     * @param {startDate,endDate,master_total,spare_total, cycle} cycleData
      */
-    async getCoupon(openId, cycleData) {
+    async getCoupon(openId, startDate, endDate) {
         let coupon = {};
-        const couponUserModel = this.model('activity_coupon_user')
+        let sql = 'SELECT * FROM picker_activity_coupon WHERE stock_mark = 1 AND last_quantity > 0 ';
+        sql += ` AND start_date >= '2019-01-05' AND end_date <= '${endDate}' ORDER BY RAND() LIMIT 1;`;
 
-        //判断在周期内 , 发券总数是否超过设定限制
-        //周期总数 = 主库存数 + 备用库存数
+        const couponList = await this.db.query(sql); //获取优惠券奖品
+        if (think.isEmpty(couponList)) { //主库存已经没有优惠券奖品
+            console.log(`******* 备用库存 ******`)
+            console.log(`******* startDate:${startDate} - endDate:${endDate} ******`)
 
-        const conponCycleTotal = await couponUserModel.where({
-            cycle: cycleData.cycle
-        }).count('id');
-        if (conponCycleTotal >= (cycleData.master_total + cycleData.spare_total)) {
-            return this.fail(1007, '奖品已被领完');
-        }
-
-        let stockMark = 1; //库存标识 1主库存 2备用库存
-        do {
-            //库存是否还有优惠券奖品
-            const stockCount = await couponUserModel.where({
-                stock_mark: stockMark
-            }).count('id');
-            if (stockMark == 1) { //主库存
-                if (stockCount >= cycleData.master_total) {
-                    console.log(`******* 主库存奖品已经被领完 启用备用库存 ******`)
-                    stockMark = 2;//走备用库存
-                    continue;
-                }
-            } else { //stockMark == 2
-                if (stockCount >= cycleData.spare_total) {
-                    console.log(`******* 备用库存奖品已经被领完 ******`)
-                    return this.fail(1007, '奖品已被领完');
-                }
-            }
-
-            //优惠券奖品列表
-            const coupons = await this.getCoupons(cycleData, stockMark);
-            coupon = await this.lottery(coupons);
-
-            //1.如果周期内，某类型券的发放券数用完，那么该券停止发放；
-            const couponCount = await couponUserModel.where({
-                coupon_id: coupon.id,
-                cycle: cycleData.cycle
-            }).count('id');
-
-            if (coupon.num <= couponCount) { //该优惠券奖品已经用完
-                coupon = {}
-                continue; //继续下一轮抽奖,一直抽到符合条件为止
-            }
-
-            //2.要求整个活动期，同一用户免费券同一类最多2张，其他券同一类最多3张
-            const couponLimitNum = await couponUserModel.where({
-                coupon_id: coupon.id,
-                openid: openId
-            }).count('id');
-
-            if (coupon.type_code == 3409 && couponLimitNum >= 2) { //免费券
-                console.log(`******* 整个活动期，同一用户免费券同一类最多2张 ******`)
-                coupon = {}
-                continue; //继续下一轮抽奖,一直抽到符合条件为止
-            } else if (couponLimitNum >= 3) {
-                console.log(`******* 整个活动期，同一用户其他券同一类最多3张 ******`)
-                coupon = {}
-                continue; //继续下一轮抽奖,一直抽到符合条件为止
-            }
-
-            console.log(`******* 优惠券奖品正常 ******`)
-            break;
-        } while (true)
-
-        await this.hitHandle(openId, coupon, cycleData.cycle, stockMark);
-    }
-
-    /**
-     * 获取优惠券列表
-     * @param {startDate 开始时间,endDate 结束时间,master_total 主库存,spare_total 备用库存, cycle 周期} cycleData
-     * @param {库存标识 1主库存 2备用库存} stockMark
-     */
-    async getCoupons(cycleData, stockMark) {
-        let sql = `
-            SELECT 
-            id,coupon_name,type_code,rate
-            FROM
-                picker_activity_coupon
-            WHERE
-                stock_mark = ${stockMark}
-                    AND start_date >= '${cycleData.startDate}'
-                    AND end_date <= '${cycleData.endDate}';
-        `
-        const list = await this.db.query(sql); //获取优惠券奖品列表
-        if (think.isEmpty(list)) {
-            return null;
-        }
-
-        let coupons = [];
-        for (let item of list) {
-            if (item.rate > 0) { //奖池里只有概率大于0的奖品
-                const num = stockMark == 1 ? parseInt(item.rate * cycleData.master_total) : parseInt(item.rate * cycleData.spare_total);
-                coupons.push({
-                    id: item.id,
-                    coupon_name: item.coupon_name,
-                    type_code: item.type_code,
-                    rate: item.rate,
-                    num: num
-                })
-            }
-        }
-        return coupons;
-    }
-
-    /**
-     * 获取奖品
-     * @param {*} coupons 
-     */
-    async lottery(coupons) {
-        let total = 0;  //奖品总数
-        for (let item of coupons) {
-            total += item.num;
-        }
-
-        for (let i = 0; i < coupons.length; i++) {
-            let random = parseInt(Math.random() * total);       //获取 0-总数 之间的一个随随机整数
-            let num = coupons[i].num;
-            // console.log(`num:  ${num}`)
-
-            if (random < num) {
-                // console.log(`--------${coupons[i]}-------`)
-                return coupons[i]                               //如果在当前的概率范围内,得到的就是当前概率
+            //查询备用库存是否还有优惠券奖品
+            let backupSql = 'SELECT * FROM picker_activity_coupon WHERE stock_mark = 2 AND last_quantity > 0 ';
+            backupSql += ` AND start_date = '${startDate}' AND end_date = '${endDate}' ORDER BY RAND() LIMIT 1;`;
+            const list = await this.db.query(backupSql); //获取备用库存优惠券奖品
+            if (think.isEmpty(list)) { //备用库存已经没有优惠券
+                console.log(`******* 奖品已被领完 ******`)
+                return this.fail(1001, '奖品已被领完');
             } else {
-                total -= num                                    //否则减去当前的概率范围,进入下一轮循环
-                // console.log(`total:  ${total}`)
+                coupon = list[0];
             }
+        } else {
+            console.log(`******* 主库存 ******`)
+            console.log(`******* startDate:${startDate} - endDate:${endDate}******`)
+
+            coupon = couponList[0];//优惠券奖品信息
         }
-
-        console.log(`*******************`)
-        console.log(`抽奖程序出问题`)
+        await this.hitHandle(openId, coupon);
     }
-
     /**
      * 中奖处理
      * @param {微信openId} openId 
-     * @param {优惠券奖品信息} coupon
-     * @param {第几周期 1,2...} cycle 
-     * @param {库存标识 1主库存 2备用库存} stockMark
+     * @param {优惠券奖品信息} coupon 
      */
-    async hitHandle(openId, coupon = {}, cycle, stockMark) {
+    async hitHandle(openId, coupon = {}) {
         const coupon_code = Generate.id();
         const couponUserModel = this.model('activity_coupon_user')
         //将获得的优惠券关联到活动账户下，状态为 未领取
@@ -421,9 +291,14 @@ module.exports = class extends Base {
             status: 1,//使用状态(1未使用 2已使用)
             receive_status: 1,//领取状态(1未领取 2已领取)
             coupon_code: coupon_code,  //券码(仅用于更新用户所拥有的优惠券)
-            cycle: cycle,
-            stock_mark: stockMark,
             create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+        });
+        //优惠券库存-1
+        await this.db.where({
+            id: coupon.id,
+            last_quantity: { '>': 0 }
+        }).update({
+            last_quantity: ['exp', 'last_quantity-1']
         });
 
         return this.success({
@@ -499,6 +374,100 @@ module.exports = class extends Base {
 
         return this.success('领取成功')
     }
+
+
+    /*******************test****************** */
+
+    async  getResult(arr) {
+        console.log(arr)
+        var leng = 150000;//获取总数
+
+        for (var i = 0; i < arr.length; i++) {
+            var random = parseInt(Math.random() * leng);       //获取 0-总数 之间的一个随随机整数
+            let p = parseInt(arr[i])
+            console.log(`p:  ${p}`)
+
+            if (random < p) {
+                console.log(`--------${i}-------`)
+                return i                                     //如果在当前的概率范围内,得到的就是当前概率
+            } else {
+                leng -= p                               //否则减去当前的概率范围,进入下一轮循环
+                console.log(`leng:  ${leng}`)
+            }
+        }
+    }
+
+    async testAction() {
+        
+        var gifts = [
+            {
+                "name": "鱼肉狮子头套餐免费吃券",
+                "prop": 45000
+            },
+            {
+                "name": "4元代金券（29起用，全天）",
+                "prop": 30000
+            },
+            {
+                "name": "8元代金券（35起用）",
+                "prop": 15000
+            },
+            {
+                "name": "蜜汁鸡翅5折券",
+                "prop": 15000
+            },
+            {
+                "name": "橙汁5折券",
+                "prop": 45000
+            },
+        ]
+        
+        // var gifts = [
+        //     {
+        //         "name": "鱼肉狮子头套餐免费吃券",
+        //         "prop": 0.3
+        //     },
+        //     {
+        //         "name": "4元代金券（29起用，全天）",
+        //         "prop": 0.2
+        //     },
+        //     {
+        //         "name": "8元代金券（35起用）",
+        //         "prop": 0.1
+        //     },
+        //     {
+        //         "name": "蜜汁鸡翅5折券",
+        //         "prop": 0.1
+        //     },
+        //     {
+        //         "name": "橙汁5折券",
+        //         "prop": 0.3
+        //     },
+        //     // {
+        //     //     "name": "红豆养生汤5折券",
+        //     //     "prop": 0.01
+        //     // },
+        //     // {
+        //     //     "name": "红枣银耳汤5折券",
+        //     //     "prop": 0.01
+        //     // },
+        //     // {
+        //     //     "name": "冰镇黄桃5折券",
+        //     //     "prop": 0.01
+        //     // }
+        // ];
+        var gArr = [];
+        for (var i = 0; i < gifts.length; i++) {
+            gArr.push(gifts[i]['prop'])
+        }
+        const result = await this.getResult(gArr)
+        console.log(result)
+        const data = gifts[result]['name'];
+        console.log(data)
+
+        return this.success(data);
+    }
+
 
 
     /*******************优惠券数据测试接口****************** */
