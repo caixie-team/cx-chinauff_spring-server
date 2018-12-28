@@ -419,11 +419,11 @@ module.exports = class extends Base {
     const avatars = await helpModel.query(sql);
     let arr = [];
     if (!think.isEmpty(avatars)) {
-      for(let item of avatars){
+      for (let item of avatars) {
         arr.push(item.avatar)
       }
     }
-    
+
     //统计总助力数
     const total = await helpModel.where({
       be_openid: data.openId
@@ -433,6 +433,57 @@ module.exports = class extends Base {
       total: total,
       avatars: arr
     });
+  }
+
+  /**
+   * 好友助力状态
+   */
+  async helpStatusAction() {
+    const data = this.post();
+    //助力者openId
+    if (think.isEmpty(data.openId)) {
+      return this.fail('请求参数错误')
+    }
+    //被助力者openId 是加密的
+    if (think.isEmpty(data.beOpenId)) {
+      return this.fail('请求参数错误')
+    }
+
+    //判断openid是否存在
+    const chinauffAccountModel = this.model('chinauff_account')
+    const helpChinauffAccount = await chinauffAccountModel.where({ openId: data.openId }).find();
+    if (think.isEmpty(helpChinauffAccount)) {
+      return this.fail('助力活动账户不存在')
+    }
+
+    //判断助力者和被助力者是不是同一个人
+    const beOpenId = decrypt(data.beOpenId, this.key);
+    if (think.isEmpty(beOpenId)) {
+      return this.fail('被助力活动账户不存在')
+    }
+    const beHelpChinauffAccount = await chinauffAccountModel.where({ openId: beOpenId }).find();
+    if (think.isEmpty(beHelpChinauffAccount)) {
+      return this.fail('被助力活动账户不存在')
+    }
+
+    let status = 1; //未助力
+
+    if (data.openId == beOpenId) {
+      status = 3;  //同一个人
+    } else {
+      const helpModel = this.model('activity_help');
+      //查询活动周期内是否已经助力过
+      const helpInfo = await helpModel.where({ openid: data.openId, be_openid: beOpenId }).find();
+      if (!think.isEmpty(helpInfo)) {
+        status = 2; //已助力
+      } else {
+        status = 1; //未助力
+      }
+    }
+
+    return this.success({
+      status: status
+    })
   }
 
   /*******************福字数据测试接口****************** */
