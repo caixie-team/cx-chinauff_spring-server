@@ -415,7 +415,7 @@ module.exports = class extends Base {
                 LEFT JOIN
             picker_chinauff_account a ON h.be_openid = a.openId
         WHERE
-            h.be_openid = '${data.openId}' limit 5;`
+            h.be_openid = '${data.openId}' and a.avatar is not NULL limit 5;`
     const avatars = await helpModel.query(sql);
     let arr = [];
     if (!think.isEmpty(avatars)) {
@@ -428,7 +428,7 @@ module.exports = class extends Base {
     const total = await helpModel.where({
       be_openid: data.openId
     }).count('id');
-    
+
     return this.success({
       total: total,
       avatars: arr
