@@ -21,6 +21,10 @@ module.exports = class extends Base {
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误')
     }
+    // 如果是被加密的，进行解密（用于助力时传过来的 beOpenId）
+    if (!think.isEmpty(data.encrypt)) {
+      data.openId = decrypt(data.openId, this.key)
+    }
 
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
@@ -89,7 +93,7 @@ module.exports = class extends Base {
     })
 
     //返回给前端的响应字符串
-    let blessing_josn = {
+    let blessing_json = {
       name: pools[0].name,
       blessing_type: pools[0].blessing_type,
       full: false
@@ -124,11 +128,9 @@ module.exports = class extends Base {
           status: 2 //合成福状态(1:未合成 2:已合成)
         })
       }
-      blessing_josn.full = true;
+      blessing_json.full = true;
     }
-    return this.success({
-      blessing: blessing_josn
-    })
+    return this.success(blessing_json)
   }
 
   /**
@@ -460,7 +462,7 @@ module.exports = class extends Base {
 
     //判断助力者和被助力者是不是同一个人
     const beOpenId = decrypt(data.beOpenId, this.key);
-    if (think.isEmpty(beOpenId)) {
+    if (think.isEmpty(data.beOpenId)) {
       return this.fail('被助力活动账户不存在')
     }
     const beHelpChinauffAccount = await chinauffAccountModel.where({ openId: beOpenId }).find();
