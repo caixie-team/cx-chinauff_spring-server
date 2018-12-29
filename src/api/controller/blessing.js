@@ -25,9 +25,7 @@ module.exports = class extends Base {
     }
     // 如果是被加密的，进行解密（用于助力时传过来的 beOpenId）
     if (!think.isEmpty(data.encrypt)) {
-      console.log('-------解码中。。。。------')
       data.openId = decrypt(data.openId, this.key)
-      console.log(data.openId)
     }
 
     //判断openid是否存在

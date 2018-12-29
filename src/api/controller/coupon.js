@@ -484,9 +484,9 @@ module.exports = class extends Base {
    */
   async receiveCouponAction () {
     const data = this.post()
-    console.log(data)
+    // console.log(data)
     if (think.isEmpty(data.coupon_code)) {
-      return this.fail('请求参数错误')
+      return this.fail(1000, 'code 参数错误')
     }
 
     const couponUserModel = this.model('activity_coupon_user')
@@ -495,9 +495,20 @@ module.exports = class extends Base {
     }).find();
 
     if (think.isEmpty(couponUserData)) {
-      return this.fail('优惠券不存在')
+      return this.fail(1003, '优惠券不存在')
     }
-    const crmSendCouponRes = await this.sendCouponByActivity()
+    // 验证这个码是否发过了
+    if (couponUserData.receive_status === 2) {
+      // return this.fail(1004, '已领取')
+      return this.success({
+        coupon_code: couponUserData.coupon_code,
+        crm_coupon_code: couponUserData.crm_coupon_code,
+        status: couponUserData.status
+      })
+    }
+    console.log(couponUserData.openid)
+    // 发放优惠劵
+    const crmSendCouponRes = await this.sendCouponByActivity(couponUserData.openid)
     if (crmSendCouponRes.errcode === 0) {
       const crm_coupon_code = crmSendCouponRes.data[0]
       await couponUserModel.where({
@@ -505,7 +516,7 @@ module.exports = class extends Base {
       }).update({
         crm_coupon_code,
         receive_status: 2,//领取状态(1未领取 2已领取)
-        release_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')  //领取时间
+        receive_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')  //领取时间
       })
       return this.success({
         coupon_code: data.coupon_code,
@@ -515,27 +526,14 @@ module.exports = class extends Base {
     } else {
       return this.json(crmSendCouponRes)
     }
-    // await couponUserModel.where({
-    //   coupon_code: data.coupon_code
-    // }).update({
-    //   receive_status: 2,//领取状态(1未领取 2已领取)
-    //   release_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')  //领取时间
-    // });
-    // 发劵
   }
 
-  async sendAction () {
-    // console.log('send action ...')
-    const res = await this.sendCouponByActivity()
-    // return this.success(res)
-    return this.json(res)
-  }
   /**
    * 调用 CRM 接口进行发劵操作
    * 只用登录成功的用户可以发劵
    * @returns {Promise<void>}
    */
-  async sendCouponByActivity () {
+  async sendCouponByActivity (openId) {
     // http://demo.micvs.com/crmSession/console/api/
     // coupon/
     // sendCouponByActivity?channel=5&deviceDate=2018-04-16 11:50:00&merNo=2109&shopNo=210999999998&deviceNo=210999999998&version=1.0&token=B0A8DB136921E59A6573A3F732FC754C014361DFC5F5F677894765C28C25A5731DEBCE0DE84B5964&orderNo=Li20180416005&transCode=A016&amount=oQJYBw_H_E3FRVj1jsHSHG__AmKQ&type=2&couponJson=[{couponType:584,couponNum:1},{couponType:581,couponNum:2}]
@@ -550,21 +548,12 @@ module.exports = class extends Base {
       token: queryConfig.token,
       orderNo: Generate.id(),
       transCode: queryConfig.transCode,
+      // amount: openId,
       amount: queryConfig.amount,
       type: queryConfig.type,
       couponJson: JSON.stringify(queryConfig.couponJson)
     }
     const query = queryString.stringify(queryInfo)
-    // console.log(query)
-    // const userInfo = (await this.got(
-    //   '/console/dcApi/member/isLogin',
-    //   {
-    //     baseUrl: think.config('proxyActivityApi'),
-    //     query
-    //   }
-    // )).body
-    // const form = new FormData();
-    // form.append()
     const payload = (await this.got.post(
       '/console/api/coupon/sendCouponByActivity',
       {
@@ -573,15 +562,6 @@ module.exports = class extends Base {
       }
     )).body
     return JSON.parse(payload)
-    // if (!think.isEmpty(payload)) {
-    //   const payloadObj = JSON.parse(payload)
-    //   console.log(payloadObj)
-    //   if (payloadObj.errcode === 0) {
-    //     return payloadObj
-    //   } else {
-    //     think.logger.error(payloadObj)
-    //   }
-    // }
   }
 
   /*******************优惠券数据测试接口****************** */
