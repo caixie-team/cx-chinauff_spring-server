@@ -10,7 +10,9 @@ module.exports = class extends Base {
     super(ctx); // 调用父级的 constructor 方法，并把 ctx 传递进去
     // 其他额外的操作
     this.db = this.model('activity_blessing');
-    this.key = 'bacd$!#@'; //秘钥
+    // this.key = 'bacd$!#@'; //秘钥
+    // this.key = 'chinauffspring2018'; //秘钥 MD5
+    // this.key = '09e96454730650a6'
   }
 
   /**
@@ -23,7 +25,9 @@ module.exports = class extends Base {
     }
     // 如果是被加密的，进行解密（用于助力时传过来的 beOpenId）
     if (!think.isEmpty(data.encrypt)) {
+      console.log('-------解码中。。。。------')
       data.openId = decrypt(data.openId, this.key)
+      console.log(data.openId)
     }
 
     //判断openid是否存在

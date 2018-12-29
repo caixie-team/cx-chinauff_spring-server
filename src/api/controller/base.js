@@ -5,6 +5,8 @@ const BaseRest = require('./rest');
 module.exports = class extends BaseRest {
   constructor (...args) {
     super(...args);
+    // this.key = 'chinauffspring2018'; //秘钥 MD5
+    this.key = '09e96454730650a6'
   }
 
   async __before () {

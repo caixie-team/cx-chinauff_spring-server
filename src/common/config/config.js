@@ -37,5 +37,23 @@ module.exports = {
     // 传入
     cardNo: '',
     openId: ''
+  },
+  proxyQueryStringForCoupon: {
+    version: '1.0',
+    channel: 5,
+    deviceDate:  '2018-04-16 11:50:00',
+    merNo: 2109,
+    deviceNo: '21092552',
+    shopNo: '210910030008',
+    token: '67405076EFC81E6ACA83FB1B7D02898C5CBCC8A464C0EC44C5CA8EEEA62E79FA',
+    deviceSeq: '1516345652000',
+    orderNo: '',
+    transCode: 'A016',
+    amount: 'oQJYBw_H_E3FRVj1jsHSHG__AmKQ',
+    type: 2,
+    couponJson: [{
+      couponType: 1228,
+      couponNum: 1
+    }]
   }
 }
