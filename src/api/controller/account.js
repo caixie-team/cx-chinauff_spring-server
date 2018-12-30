@@ -26,6 +26,7 @@ module.exports = class extends Base {
       //   "cardNo": "210900000004036335"
       // }
       const userPayload = await this.checkUserLoginStatus(data.openId)
+      console.log(userPayload)
       // 已查询用户状态
       if (userPayload.errcode === 0) { // 如果已登录， 查询用户信息
         // 用 cardNo 获取用户信息
