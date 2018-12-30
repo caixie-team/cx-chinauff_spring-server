@@ -126,7 +126,7 @@ module.exports = class extends Base {
           status: 2 //合成福状态(1:未合成 2:已合成)
         })
       }
-      blessing_josn.blessing_code = blessing_josn;
+      blessing_josn.blessing_code = blessing_code;
       blessing_josn.icon_num = icon_num;
       blessing_josn.full = true;
     }
@@ -288,7 +288,7 @@ module.exports = class extends Base {
     }
 
     //判断门店信息非空
-    if (think.isEmpty(data.shop)) {
+    if (think.isEmpty(data.shop_id)) {
       return this.fail('请求参数错误')
     }
 
@@ -299,7 +299,7 @@ module.exports = class extends Base {
     }
 
     await reserveModel.add({
-      shop: data.shop,
+      shop_id: data.shop_id,
       reserve_date: data.reserve_date,
       openid: data.openId,
       blessing_code: data.blessing_code,

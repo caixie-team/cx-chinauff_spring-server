@@ -33,43 +33,26 @@
 
     {% set rowItems = [] %}
     {% for item in list %}
-        {% if item.status != 3 and item.reserve_status != 2 %} 
-            {%
-                set actionHtml = '<a  href="/admin/blessing/cancelReserve?id='+ item.id +'" class="">取消预约</a>'
-            %}
-        {% else %}
-            {%
-                set actionHtml = ''
-            %}
-        {% endif %}
         {% set rowItems = (rowItems.push({cells: [
             { html: loop.index},
             { html: item.create_time},
-            { html: item.reserve_date},
             { html: item.shop_name},
             { html: item.name},
-            { html: item.mobile},
-            { html: item.status_label},
-            { html: item.reserve_status_label},
-            { html: actionHtml,classes: 'text-center'}
+            { html: item.mobile}
         ]}), rowItems) %}
     {% endfor %}
 
     {% set theader =  [
         { html: '序号'},
-        { html: '提交时间'},
-        { html: '预约兑换时间'},
-        { html: '预约兑换门店'},
+        { html: '核销兑换时间'},
+        { html: '核销兑换门店'},
         { html: '用户名'},
-        { html: '手机号码'},
-        { html: '兑换状态'},
-        { html: '预约状态'},
-        { width: '10%', classes: 'text-center', html: '操作'}
+        { html: '手机号码'}
     ] %}
 
     {% set pager = (pagerData | safe) %}
     {% set content = cards.grid(theader, rowItems, pager) %}
 
-    {{ pages.content(null, content) }}
+    {{ pages.content(toolbar, content) }}
 
 {% endblock %}

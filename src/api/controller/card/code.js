@@ -163,7 +163,7 @@ module.exports = class extends Base {
   async consumeAction () {
     // 检查兑换时间 1004
     // return 1004 未在可兑换时段
-    await this._checkTime()
+    // await this._checkTime()
 
     // 检查请求参数
     // return 1000 请求参数错误
@@ -176,7 +176,7 @@ module.exports = class extends Base {
 
     // 预约兑换数据
     // return 1003 未预约
-    const reserveInfo = await this._checkReserve(data.blessing_code)
+    const reserveInfo = await this._checkReserve(data)
 
     //更新福码为已兑换状态
     await this.model('activity_blessing_user').where({blessing_code: data.blessing_code}).update({
@@ -187,7 +187,7 @@ module.exports = class extends Base {
     //兑换数据记录
     const exchangeModel = this.model('activity_exchange')
     await exchangeModel.add({
-      shop: reserveInfo.shop,
+      shop_id: reserveInfo.shop_id,
       openid: reserveInfo.openid,
       blessing_code: reserveInfo.blessing_code,
       create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
@@ -219,12 +219,12 @@ module.exports = class extends Base {
    * @returns {Promise<void>}
    * @private
    */
-  async _checkReserve (blessing_code) {
+  async _checkReserve (data) {
     //预约兑换数据
     const reserveModel = this.model('activity_reserve')
     const reserveInfo = await reserveModel.where({
       shop_id: data.shop_code,
-      blessing_code: blessing_code,
+      blessing_code: data.blessing_code,
       status: 1
     }).find();
     if (think.isEmpty(reserveInfo)) {
