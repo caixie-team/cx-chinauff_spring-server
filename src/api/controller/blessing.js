@@ -539,10 +539,11 @@ module.exports = class extends Base {
 
     blessingArr = _.shuffle(blessingArr) //打乱数组顺序
     blessingArr = _.shuffle(blessingArr) //打乱数组顺序
-
+    let date  = new Date('2018-12-30 00:00:00');
+    date.setDate(date.getDate()+5)
     const blessingPoolModel = this.model('activity_blessing_pool');
     for (let i = 0; i < blessingArr.length; i++) {
-      let release_time = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+      let release_time = moment(date).format('YYYY-MM-DD HH:mm:ss')
       const blessingInfo = blessingArr[i]
       await blessingPoolModel.add({
         name: blessingInfo.name,

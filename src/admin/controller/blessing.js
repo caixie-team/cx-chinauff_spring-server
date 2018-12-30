@@ -112,43 +112,49 @@ module.exports = class extends think.common.Admin {
      */
     async fuziAction() {
         const sql = `
-            SELECT 
-                DATE_FORMAT(bu.create_time, '%Y-%m-%d') as create_time,
-                COUNT(bu.id) AS fuCount,
+                SELECT 
+                DATE_FORMAT(br.create_time, '%Y-%m-%d') AS create_time,
+                COUNT(br.blessing_type = 1 OR NULL) AS shiCount,
+                COUNT(br.blessing_type = 2 OR NULL) AS yiCount,
+                COUNT(br.blessing_type = 3 OR NULL) AS kouCount,
+                COUNT(br.blessing_type = 4 OR NULL) AS tianCount,
                 (SELECT 
-                        COUNT(bp.id)
+                        COUNT(bu.id)
                     FROM
-                        picker_activity_blessing_pool bp
+                        picker_activity_blessing_user bu
                     WHERE
-                        bp.blessing_type = 1
-                            AND DATE_FORMAT(bu.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS shiCount,
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bu.create_time, '%Y-%m-%d')) AS fuCount,
                 (SELECT 
-                        COUNT(bp.id)
+                        COUNT(bp.blessing_type = 1 OR NULL)
                     FROM
                         picker_activity_blessing_pool bp
                     WHERE
-                        bp.blessing_type = 2
-                            AND DATE_FORMAT(bu.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS yiCount,
-                            (SELECT 
-                        COUNT(bp.id)
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS shiNum,
+                (SELECT 
+                        COUNT(bp.blessing_type = 2 OR NULL)
                     FROM
                         picker_activity_blessing_pool bp
                     WHERE
-                        bp.blessing_type = 3
-                            AND DATE_FORMAT(bu.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS kouCount,
-                            (SELECT 
-                        COUNT(bp.id)
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS yiNum,
+                (SELECT 
+                        COUNT(bp.blessing_type = 3 OR NULL)
                     FROM
                         picker_activity_blessing_pool bp
                     WHERE
-                        bp.blessing_type = 4
-                            AND DATE_FORMAT(bu.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS tianCount
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS kouNum,
+                (SELECT 
+                        COUNT(bp.blessing_type = 4 OR NULL)
+                    FROM
+                        picker_activity_blessing_pool bp
+                    WHERE
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS tianNum
             FROM
-                picker_activity_blessing_user bu
-            GROUP BY DATE_FORMAT(bu.create_time, '%Y-%m-%d'); `
+                picker_activity_blessing_record br
+            GROUP BY DATE_FORMAT(br.create_time, '%Y-%m-%d');
+                `
 
-        const blessingUserModel = this.model('activity_blessing_user');
-        const list = await blessingUserModel.query(sql);
+        const blessingRecordModel = this.model('activity_blessing_record');
+        const list = await blessingRecordModel.query(sql);
         if (!think.isEmpty(list)) {
             for (let item of list) {
                 item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日')
@@ -162,6 +168,44 @@ module.exports = class extends think.common.Admin {
      * 发券数据
      */
     async couponAction(){
+        let page = this.get('page')
+        const couponUserModel = this.model('activity_coupon_user');
+        const res = await couponUserModel.alias('cu').field(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') as create_time,c.coupon_name,COUNT(cu.id) AS allNum,COUNT(cu.receive_status = 2 OR NULL) AS receiveNum`)
+        .join({
+            table: 'activity_coupon',
+            join: 'left',
+            as: 'c',
+            on: ['coupon_id', 'id']
+        }).page(page, 20).group(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') , cu.coupon_id`).countSelect();
 
+        if (!think.isEmpty(res.data)) {
+            for (let item of res.data) {
+                item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日')
+            }
+        }
+
+        // let sql =  `
+        //     SELECT 
+        //         DATE_FORMAT(cu.create_time, '%Y-%m-%d') as create_time,
+        //         c.coupon_name,
+        //         COUNT(cu.id) AS allNum,
+        //         COUNT(cu.receive_status = 2 OR NULL) AS receiveNum
+        //     FROM
+        //         picker_activity_coupon_user cu
+        //             LEFT JOIN
+        //         picker_activity_coupon c ON cu.coupon_id = c.id
+        //     GROUP BY DATE_FORMAT(cu.create_time, '%Y-%m-%d') , cu.coupon_id;
+        // `
+        // const list = await couponUserModel.query(sql);
+        // if (!think.isEmpty(list)) {
+        //     for (let item of list) {
+        //         item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日')
+        //     }
+        // }
+
+        const html = this.pagination(res);
+        this.assign('pagerData', html); //分页展示使用
+        this.assign('list', res.data);
+        return this.display()
     }
 }
