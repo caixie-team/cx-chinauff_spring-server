@@ -16,7 +16,6 @@ module.exports = class extends Base {
     if (this.isPost) {
       // 获取用户的坐标
       const data = this.post()
-      console.log(data)
       const lat = data.latitude
       const lon = data.longitude
       const shopModel = this.model('chinauff_shop')
