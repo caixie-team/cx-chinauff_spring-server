@@ -208,4 +208,78 @@ module.exports = class extends think.common.Admin {
         this.assign('list', res.data);
         return this.display()
     }
+
+    /**
+     * 用户信息
+     */
+    async userAction(){
+        let page = this.get('page')
+        const accountModel = this.model('chinauff_account');
+        const res = await accountModel.alias('a').field(`
+        a.name,a.userInfo->>'$.mobile' as mobile,
+        COUNT(bu.id) AS fuCount,
+        (SELECT 
+            COUNT(br.blessing_type = 1 OR NULL)
+        FROM
+            picker_activity_blessing_record br
+        WHERE
+            a.openId = br.openid) AS shiCount,
+        (SELECT 
+                COUNT(br.blessing_type = 2 OR NULL)
+            FROM
+                picker_activity_blessing_record br
+            WHERE
+                a.openId = br.openid) AS yiCount,
+        (SELECT 
+                COUNT(br.blessing_type = 3 OR NULL)
+            FROM
+                picker_activity_blessing_record br
+            WHERE
+                a.openId = br.openid) AS kouCount,
+        (SELECT 
+                COUNT(br.blessing_type = 4 OR NULL)
+            FROM
+                picker_activity_blessing_record br
+            WHERE
+                a.openId = br.openid) AS tianCount,
+        (SELECT 
+                COUNT(cu.id)
+            FROM
+                picker_activity_coupon_user cu
+            WHERE
+                a.openId = cu.openid
+                    AND cu.receive_status = 2) AS couponCount,
+        (SELECT 
+                COUNT(acu.id)
+            FROM
+                picker_activity_card_user acu
+            WHERE
+                a.openId = acu.openid
+                    AND acu.receive_time IS NOT NULL) AS cardCount,
+        (SELECT 
+                COUNT(h.id)
+            FROM
+                picker_activity_help h
+            WHERE
+                a.openId = h.be_openid) AS inviteHelpCount,
+        (SELECT 
+                COUNT(ah.id)
+            FROM
+                picker_activity_help ah
+            WHERE
+                a.openId = ah.openid) AS joinHelpCount 
+            `)
+        .join({
+            table: 'activity_blessing_user',
+            join: 'left',
+            as: 'bu',
+            on: ['openId', 'openid']
+        }).page(page, 10).group(`a.openId`).countSelect();
+        const html = this.pagination(res);
+        console.log('====================')
+        console.log(html)
+        this.assign('pagerData', html); //分页展示使用
+        this.assign('list', res.data);
+        return this.display()
+    }
 }
