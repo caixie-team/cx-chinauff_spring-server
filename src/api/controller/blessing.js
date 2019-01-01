@@ -6,7 +6,7 @@ const _ = require('lodash');
  * @type {module.exports}
  */
 module.exports = class extends Base {
-  constructor(ctx) {
+  constructor (ctx) {
     super(ctx); // 调用父级的 constructor 方法，并把 ctx 传递进去
     // 其他额外的操作
     this.db = this.model('activity_blessing');
@@ -18,7 +18,7 @@ module.exports = class extends Base {
   /**
    * 扫一扫 (福字)
    */
-  async scanAction() {
+  async scanAction () {
     const data = this.post()
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误')
@@ -30,7 +30,7 @@ module.exports = class extends Base {
 
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
-    const chinauffAccount = await chinauffAccountModel.where({ openId: data.openId }).find();
+    const chinauffAccount = await chinauffAccountModel.where({openId: data.openId}).find();
     if (think.isEmpty(chinauffAccount)) {
       return this.fail(1001, '活动账户不存在')
     }
@@ -38,12 +38,12 @@ module.exports = class extends Base {
     const nowDate = moment(new Date()).format('YYYY-MM-DD')
     //检测是否有助力
     const helpModel = this.model('activity_help')
-    const helpInfo = await helpModel.where({ be_openid: data.openId, status: 1 }).limit(1).find();
+    const helpInfo = await helpModel.where({be_openid: data.openId, status: 1}).limit(1).find();
 
     if (think.isEmpty(helpInfo)) { //没有助力
       //是否到达参与限制
       const blessingTimesModel = this.model('activity_blessing_times');
-      const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
+      const times = await blessingTimesModel.where({join_date: nowDate, openid: data.openId}).count('id');
       if (times >= 3) {
         return this.fail(1002, '今日可参与次数已用完')
       } else {
@@ -54,7 +54,7 @@ module.exports = class extends Base {
         });
       }
     } else { //有助力
-      await helpModel.where({ id: helpInfo.id }).update({
+      await helpModel.where({id: helpInfo.id}).update({
         status: 2 	//助力已使用
       })
     }
@@ -63,8 +63,8 @@ module.exports = class extends Base {
     const blessingPoolModel = this.model('activity_blessing_pool');
     let nowTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
     const pools = await blessingPoolModel.where({
-      release_time: { '<=': nowTime },
-      last_quantity: { '>': 0 }
+      release_time: {'<=': nowTime},
+      last_quantity: {'>': 0}
     }).limit(1).select();
 
     if (think.isEmpty(pools)) { //没有字奖品
@@ -74,8 +74,8 @@ module.exports = class extends Base {
     }
     const updateBlessingPool = await blessingPoolModel.where({
       id: pools[0].id,
-      last_quantity: { '>': 0 }
-    }).update({ last_quantity: ['exp', 'last_quantity-1'] })
+      last_quantity: {'>': 0}
+    }).update({last_quantity: ['exp', 'last_quantity-1']})
     if (updateBlessingPool <= 0) { //奖品已被别人领走
       return this.success({
         blessing: {}
@@ -122,6 +122,7 @@ module.exports = class extends Base {
         status: 1,//福码状态(1:待预约 2:待兑换 3:已兑换)
         exchange_time: null,
         create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+        update_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
         icon_num: icon_num
       })
       for (let item of records) {
@@ -142,7 +143,7 @@ module.exports = class extends Base {
   /**
    * 获取集福统计(集满福的人数,我的集满福个数)
    */
-  async blessingStatisticsAction() {
+  async blessingStatisticsAction () {
     const data = this.post()
     if (think.isEmpty(data.openId)) {
       return this.fail('请求参数错误')
@@ -159,7 +160,7 @@ module.exports = class extends Base {
 			GROUP BY openid) AS t
 		`
     const peopleNumber = await blessingUserModel.query(sql)
-    const myblessingNumber = await blessingUserModel.where({ openid: data.openId }).count('id');
+    const myblessingNumber = await blessingUserModel.where({openid: data.openId}).count('id');
     return this.success({
       peopleNumber: peopleNumber[0].nums,	//集满福的总人数
       myblessingNumber: myblessingNumber	//我的集满福个数
@@ -169,7 +170,7 @@ module.exports = class extends Base {
   /**
    * openId 加密
    */
-  async encryptAction() {
+  async encryptAction () {
     const data = this.post();
     if (think.isEmpty(data.openId)) {
       return this.fail('请求参数错误')
@@ -183,7 +184,7 @@ module.exports = class extends Base {
   /**
    * openid 解密
    */
-  async decryptAction() {
+  async decryptAction () {
     const data = this.post();
     if (think.isEmpty(data.openId)) {
       return this.fail('请求参数错误')
@@ -197,7 +198,7 @@ module.exports = class extends Base {
   /**
    * 好友助力
    */
-  async helpAction() {
+  async helpAction () {
     const data = this.post();
     //助力者openId
     if (think.isEmpty(data.openId)) {
@@ -211,19 +212,19 @@ module.exports = class extends Base {
 
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
-    const helpChinauffAccount = await chinauffAccountModel.where({ openId: data.openId }).find();
+    const helpChinauffAccount = await chinauffAccountModel.where({openId: data.openId}).find();
     if (think.isEmpty(helpChinauffAccount)) {
       return this.fail('助力活动账户不存在')
     }
 
-    const beHelpChinauffAccount = await chinauffAccountModel.where({ openId: beOpenId }).find();
+    const beHelpChinauffAccount = await chinauffAccountModel.where({openId: beOpenId}).find();
     if (think.isEmpty(beHelpChinauffAccount)) {
       return this.fail('被助力活动账户不存在')
     }
 
     const helpModel = this.model('activity_help');
     //查询活动周期内是否已经助力过
-    const helpInfo = await helpModel.where({ openid: data.openId, be_openid: beOpenId }).find();
+    const helpInfo = await helpModel.where({openid: data.openId, be_openid: beOpenId}).find();
     if (!think.isEmpty(helpInfo)) {
       return this.fail(1001, '您已助力')
     }
@@ -240,21 +241,23 @@ module.exports = class extends Base {
   /**
    * 我集到的福
    */
-  async myAction() {
+  async myAction () {
     const data = this.post();
     //openId
     if (think.isEmpty(data.openId)) {
       return this.fail('请求参数错误')
     }
     const blessingUserModel = this.model('activity_blessing_user')
-    const list = await blessingUserModel.field('id,openid,blessing_code,status,exchange_time,icon_num').where({ openid: data.openId }).select();
+    const list = await blessingUserModel
+      .field('id,openid,blessing_code,status,exchange_time,icon_num, update_time')
+      .where({openid: data.openId}).order('update_time DESC').select();
     return this.success(list);
   }
 
   /**
    * 预约兑换
    */
-  async reserveAction() {
+  async reserveAction () {
     let now = new Date().getTime();
     let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
     let endTime = new Date('2019-02-01 23:59:59').getTime();//可提交预约结束时间
@@ -269,9 +272,9 @@ module.exports = class extends Base {
     }
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
-    const chinauffAccount = await chinauffAccountModel.where({ openId: data.openId }).find();
+    const chinauffAccount = await chinauffAccountModel.where({openId: data.openId}).find();
     if (think.isEmpty(chinauffAccount)) {
-      return this.fail('活动账户不存在')
+      return this.fail(1001, '活动账户不存在')
     }
 
     //判断福码非空
@@ -280,9 +283,9 @@ module.exports = class extends Base {
     }
     //校验福码合法性
     const blessingUserModel = this.model('activity_blessing_user')
-    const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code }).find();
+    const blessingUserInfo = await blessingUserModel.where({blessing_code: data.blessing_code}).find();
     if (think.isEmpty(blessingUserInfo)) {
-      return this.fail('集福数据不存在')
+      return this.fail(1002, '集福数据不存在')
     }
 
     //判断预约兑换日期非空
@@ -296,31 +299,34 @@ module.exports = class extends Base {
     }
 
     const reserveModel = this.model('activity_reserve')
-    const reserveInfo = await reserveModel.where({ blessing_code: data.blessing_code }).find();
+    const reserveInfo = await reserveModel.where({blessing_code: data.blessing_code}).find();
     if (!think.isEmpty(reserveInfo)) {
-      return this.fail('已预约')
+      return this.fail(1003, '已预约')
     }
 
     await reserveModel.add({
       shop_id: data.shop_id,
-      reserve_date: data.reserve_date,
+      reserve_date: moment(data.reserve_date).format('YYYY-MM-DD HH:mm:ss'),
       openid: data.openId,
       blessing_code: data.blessing_code,
       status: 1, //预约状态
-      create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+      create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
     })
 
     //status 福码状态(1:待预约 2:待兑换 3:已兑换)
-    await blessingUserModel.where({ blessing_code: data.blessing_code }).update({
-      status: 2
+    await blessingUserModel.where({blessing_code: data.blessing_code}).update({
+      status: 2,
+      update_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
     })
-    return this.success();
+    return this.success({
+      reserve_date: data.reserve_date
+    });
   }
 
   /**
    * 获取预约信息
    */
-  async getReserveAction() {
+  async getReserveAction () {
     const data = this.post()
     //判断福码非空
     if (think.isEmpty(data.blessing_code)) {
@@ -346,21 +352,21 @@ module.exports = class extends Base {
   /**
    * 获取单个集福信息
    */
-  async getOneAction() {
+  async getOneAction () {
     const data = this.post()
     //判断福码非空
     if (think.isEmpty(data.blessing_code)) {
       return this.fail('请求参数错误')
     }
     const blessingUserModel = this.model('activity_blessing_user')
-    const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code }).find();
+    const blessingUserInfo = await blessingUserModel.where({blessing_code: data.blessing_code}).find();
     return this.success(blessingUserInfo);
   }
 
   /**
    * 获取领取的福字记录(统计获取到的各个字的记录)
    */
-  async recordsAction() {
+  async recordsAction () {
     const data = this.post()
     //openId
     if (think.isEmpty(data.openId)) {
@@ -383,7 +389,7 @@ module.exports = class extends Base {
   /**
    * 获取今日参与次数
    */
-  async timesAction() {
+  async timesAction () {
     if (this.isPost) {
       const data = this.post()
       //openId
@@ -392,12 +398,12 @@ module.exports = class extends Base {
       }
       const helpModel = this.model('activity_help')
       //status 助力使用状态(1 未使用 2已使用)
-      const helpNum = await helpModel.where({ be_openid: data.openId, status: 1 }).count('id');
+      const helpNum = await helpModel.where({be_openid: data.openId, status: 1}).count('id');
 
       const nowDate = moment(new Date()).format('YYYY-MM-DD')
       //获取今日已参与次数
       const blessingTimesModel = this.model('activity_blessing_times');
-      const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
+      const times = await blessingTimesModel.where({join_date: nowDate, openid: data.openId}).count('id');
 
       return this.success({
         times: helpNum + (3 - times)
@@ -408,7 +414,7 @@ module.exports = class extends Base {
   /**
    * 好友助力统计
    */
-  async helpsAction() {
+  async helpsAction () {
     const data = this.post()
     //被助力的openId
     if (think.isEmpty(data.beOpenId)) {
@@ -449,7 +455,7 @@ module.exports = class extends Base {
   /**
    * 好友助力状态
    */
-  async helpStatusAction() {
+  async helpStatusAction () {
     const data = this.post();
     //助力者openId
     if (think.isEmpty(data.openId)) {
@@ -462,7 +468,7 @@ module.exports = class extends Base {
 
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
-    const helpChinauffAccount = await chinauffAccountModel.where({ openId: data.openId }).find();
+    const helpChinauffAccount = await chinauffAccountModel.where({openId: data.openId}).find();
     if (think.isEmpty(helpChinauffAccount)) {
       return this.fail('助力活动账户不存在')
     }
@@ -472,7 +478,7 @@ module.exports = class extends Base {
     if (think.isEmpty(data.beOpenId)) {
       return this.fail('被助力活动账户不存在')
     }
-    const beHelpChinauffAccount = await chinauffAccountModel.where({ openId: beOpenId }).find();
+    const beHelpChinauffAccount = await chinauffAccountModel.where({openId: beOpenId}).find();
     if (think.isEmpty(beHelpChinauffAccount)) {
       return this.fail('被助力活动账户不存在')
     }
@@ -485,7 +491,7 @@ module.exports = class extends Base {
     } else {
       const helpModel = this.model('activity_help');
       //查询活动周期内是否已经助力过
-      const helpInfo = await helpModel.where({ openid: data.openId, be_openid: beOpenId }).find();
+      const helpInfo = await helpModel.where({openid: data.openId, be_openid: beOpenId}).find();
       if (!think.isEmpty(helpInfo)) {
         status = 2; //已助力
       } else {
@@ -499,9 +505,9 @@ module.exports = class extends Base {
   }
 
   /**
-   * 
+   *
    */
-  async getMyCardAction() {
+  async getMyCardAction () {
     const data = this.post();
     //openId
     if (think.isEmpty(data.openId)) {
@@ -515,6 +521,7 @@ module.exports = class extends Base {
           cu.address,
           cu.recipient_name,
           cu.phone_number,
+          cu.card_code,
           cu.receive_time,
           c.card_name,
           c.card_type
@@ -525,8 +532,28 @@ module.exports = class extends Base {
       WHERE
           cu.openid = '${data.openId}';
       `
-      let rows = await cardUserModel.query(sql);
-      return this.success(rows);
+    let rows = await cardUserModel.query(sql);
+    return this.success(rows);
+  }
+  /**
+   * 验证福码有效性
+   * @returns {Promise<void>}
+   * @private
+   */
+  async checkCodeAction () {
+    const data = this.post()
+    if (think.isEmpty(data.blessing_code)) {
+      return this.fail()
+    }
+    const blessingUserModel = this.model('activity_blessing_user')
+    const blessingUserInfo = await blessingUserModel.where({blessing_code: data.blessing_code}).find();
+    if (think.isEmpty(blessingUserInfo)) {
+      return this.fail(1001, '兑换码无效')
+    }
+    if (blessingUserInfo.status === 3) {
+      return this.fail(1002, '已被兑换')
+    }
+    return this.success()
   }
 
 
@@ -535,7 +562,7 @@ module.exports = class extends Base {
   /**
    * 初始化当天的数据 用于测试
    */
-  async initTodayAction() {
+  async initTodayAction () {
     let blessingArr = [];
     for (let i = 0; i < 100; i++) {
       if ((i % 4 + 1) === 1) {
@@ -589,7 +616,7 @@ module.exports = class extends Base {
     return this.success()
   }
 
-  async initAction() {
+  async initAction () {
 
     if (true) {
       return this.fail('没有需要生成的福字信息')
@@ -597,7 +624,7 @@ module.exports = class extends Base {
 
     //获取需要生成的福字信息
     const blessings = await this.db.where({
-      start_date: '2019-01-05', end_date: '2019-01-09', total: { '>': 0 }
+      start_date: '2019-01-05', end_date: '2019-01-09', total: {'>': 0}
     }).select();
     if (!blessings || blessings.length <= 0) {
       return this.fail('没有需要生成的福字信息')
