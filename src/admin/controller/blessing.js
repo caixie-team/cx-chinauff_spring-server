@@ -1,4 +1,5 @@
 const moment = require('moment');
+const xlsx = require('node-xlsx');
 /**
  * 后台 集福接口
  */
@@ -11,9 +12,26 @@ module.exports = class extends think.common.Admin {
      * 预约管理
      */
     async reserveAction() {
+        const data = this.post()
         let page = this.get('page')
         const reserveModel = this.model('activity_reserve');
-        const res = await reserveModel.alias('r').field(`r.id,r.reserve_date,r.create_time,r.status as 'reserve_status',s.shop_name,s.shop_code,a.name,a.userInfo->>'$.mobile' as mobile,b.status,b.exchange_time`)
+        let where = {}
+        if (!think.isEmpty(data.name)) {
+            where[`a.name`] = data.name;
+        }
+        if (!think.isEmpty(data.mobile)) {
+            where[`a.mobile`] = data.mobile;
+        }
+        if (!think.isEmpty(data.reserve_date)) {
+            where[`r.reserve_date`] = data.reserve_date;
+        }
+        if (!think.isEmpty(data.shop_name)) {
+            where[`s.shop_name`] = data.shop_name;
+        }
+        if (!think.isEmpty(data.status)) {
+            where[`b.status`] = data.status;
+        }
+        const res = await reserveModel.alias('r').field(`r.id,r.reserve_date,r.create_time,r.status as 'reserve_status',s.shop_name,s.shop_code,a.name,a.mobile,b.status,b.exchange_time`)
             .join({
                 table: 'chinauff_shop',
                 join: 'left',
@@ -29,7 +47,7 @@ module.exports = class extends think.common.Admin {
                 join: 'left',
                 as: 'b',
                 on: ['blessing_code', 'blessing_code']
-            }).page(page, 20).countSelect();
+            }).page(page, 20).where(where).countSelect();
 
         if (!think.isEmpty(res.data)) {
             for (let item of res.data) {
@@ -56,7 +74,106 @@ module.exports = class extends think.common.Admin {
         const html = this.pagination(res);
         this.assign('pagerData', html); //分页展示使用
         this.assign('list', res.data);
+        this.assign('data', data);
         return this.display()
+    }
+
+    /**
+     * 导出预约管理信息
+     */
+    async exportReserveAction(){
+        const data = this.post()
+        const reserveModel = this.model('activity_reserve');
+        let where = {}
+        if (!think.isEmpty(data.name)) {
+            where[`a.name`] = data.name;
+        }
+        if (!think.isEmpty(data.mobile)) {
+            where[`a.mobile`] = data.mobile;
+        }
+        if (!think.isEmpty(data.reserve_date)) {
+            where[`r.reserve_date`] = data.reserve_date;
+        }
+        if (!think.isEmpty(data.shop_name)) {
+            where[`s.shop_name`] = data.shop_name;
+        }
+        if (!think.isEmpty(data.status)) {
+            where[`b.status`] = data.status;
+        }
+        const list = await reserveModel.alias('r').field(`r.id,r.reserve_date,r.create_time,r.status as 'reserve_status',s.shop_name,s.shop_code,a.name,a.mobile,b.status,b.exchange_time`)
+            .join({
+                table: 'chinauff_shop',
+                join: 'left',
+                as: 's',
+                on: ['shop_id', 'shop_code']
+            }).join({
+                table: 'chinauff_account',
+                join: 'left',
+                as: 'a',
+                on: ['openid', 'openId']
+            }).join({
+                table: 'activity_blessing_user',
+                join: 'left',
+                as: 'b',
+                on: ['blessing_code', 'blessing_code']
+            }).where(where).select();
+
+        if (!think.isEmpty(list)) {
+            for (let item of list) {
+                item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日 HH:mm:ss')
+                item.reserve_date = moment(new Date(item.reserve_date)).format('YYYY年MM月DD日')
+                switch (item.reserve_status) {
+                    case 1:
+                        item.reserve_status_label = '正常';
+                        break;
+                    case 2:
+                        item.reserve_status_label = '已取消';
+                        break;
+                }
+                switch (item.status) {
+                    case 2:
+                        item.status_label = '未兑换';
+                        break;
+                    case 3:
+                        item.status_label = '已兑换';
+                        break;
+                }
+            }
+        }
+        let datas = [
+            {
+                name: '预约管理',
+                data: [
+                    [
+                        '提交时间',
+                        '预约兑换时间',
+                        '预约兑换门店',
+                        '用户名',
+                        '手机号码',
+                        '兑换状态',
+                        '预约状态'
+                    ]
+                ]
+            }
+        ]
+        if (!think.isEmpty(list)) {
+            for (const item of list) {
+                datas[0].data.push([
+                    item.create_time,
+                    item.reserve_date,
+                    item.shop_name,
+                    item.name,
+                    item.mobile,
+                    item.status_label,
+                    item.reserve_status_label
+                ])
+            }
+        }
+        // 写xlsx
+        let buffer = xlsx.build(datas);
+        this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
+        this.ctx.set("Content-Disposition", "attachment; filename=reserve.xlsx");
+        this.ctx.body = buffer;
     }
 
     /**
@@ -167,16 +284,16 @@ module.exports = class extends think.common.Admin {
     /**
      * 发券数据
      */
-    async couponAction(){
+    async couponAction() {
         let page = this.get('page')
         const couponUserModel = this.model('activity_coupon_user');
         const res = await couponUserModel.alias('cu').field(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') as create_time,c.coupon_name,COUNT(cu.id) AS allNum,COUNT(cu.receive_status = 2 OR NULL) AS receiveNum`)
-        .join({
-            table: 'activity_coupon',
-            join: 'left',
-            as: 'c',
-            on: ['coupon_id', 'id']
-        }).page(page, 20).group(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') , cu.coupon_id`).countSelect();
+            .join({
+                table: 'activity_coupon',
+                join: 'left',
+                as: 'c',
+                on: ['coupon_id', 'id']
+            }).page(page, 20).group(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') , cu.coupon_id`).countSelect();
 
         if (!think.isEmpty(res.data)) {
             for (let item of res.data) {
@@ -192,12 +309,31 @@ module.exports = class extends think.common.Admin {
     /**
      * 用户信息
      */
-    async userAction(){
+    async userAction() {
+        let data = this.post()
         let page = this.get('page')
         const accountModel = this.model('chinauff_account');
-        const total = await accountModel.count('id');
+
+        let where = {}
+        let totalWhere = {}
+        if (!think.isEmpty(data.name)) {
+            where[`a.name`] = data.name;
+            totalWhere[`name`] = data.name;
+        }
+        if (!think.isEmpty(data.mobile)) {
+            where[`a.mobile`] = data.mobile;
+            totalWhere[`mobile`] = data.mobile;
+        }
+        if (!think.isEmpty(data.startTime) && !think.isEmpty(data.endTime)) {
+            let startTime = new Date(`${data.startTime} 00:00:00`).getTime();
+            let endTime = new Date(`${data.endTime} 23:59:59`).getTime();
+
+            where[`a.createTime`] = { '>=': startTime, '<=': endTime }
+            totalWhere[`createTime`] = { '>=': startTime, '<=': endTime }
+        }
+        const total = await accountModel.where(totalWhere).count('id');
         const res = await accountModel.alias('a').field(`
-            a.name,a.userInfo->>'$.mobile' as mobile,
+            a.name,a.mobile,
             (SELECT 
                 COUNT(bu.id)
             FROM
@@ -254,10 +390,134 @@ module.exports = class extends think.common.Admin {
                     picker_activity_help ah
                 WHERE
                     a.openId = ah.openid) AS joinHelpCount 
-                `).page(page, 20).group(`a.openId`).countSelect(total);
+                `).page(page, 20).where(where).countSelect(total);
         const html = this.pagination(res);
         this.assign('pagerData', html); //分页展示使用
         this.assign('list', res.data);
+        this.assign('data', data);
         return this.display()
+    }
+
+    /**
+     * 导出用户信息
+     */
+    async exportUserInfoAction() {
+        let data = this.post()
+        const accountModel = this.model('chinauff_account');
+
+        let where = {}
+        if (!think.isEmpty(data.name)) {
+            where[`a.name`] = data.name;
+        }
+        if (!think.isEmpty(data.mobile)) {
+            where[`a.mobile`] = data.mobile;
+        }
+        if (!think.isEmpty(data.startTime) && !think.isEmpty(data.endTime)) {
+            let startTime = new Date(`${data.startTime} 00:00:00`).getTime();
+            let endTime = new Date(`${data.endTime} 23:59:59`).getTime();
+            where[`a.createTime`] = { '>=': startTime, '<=': endTime }
+        }
+
+        const list = await accountModel.alias('a').field(`
+            a.name,a.mobile,
+            (SELECT 
+                COUNT(bu.id)
+            FROM
+            picker_activity_blessing_user bu
+            WHERE
+                a.openId = bu.openid) AS fuCount,
+            (SELECT 
+                COUNT(br.blessing_type = 1 OR NULL)
+            FROM
+                picker_activity_blessing_record br
+            WHERE
+                a.openId = br.openid) AS shiCount,
+            (SELECT 
+                    COUNT(br.blessing_type = 2 OR NULL)
+                FROM
+                    picker_activity_blessing_record br
+                WHERE
+                    a.openId = br.openid) AS yiCount,
+            (SELECT 
+                    COUNT(br.blessing_type = 3 OR NULL)
+                FROM
+                    picker_activity_blessing_record br
+                WHERE
+                    a.openId = br.openid) AS kouCount,
+            (SELECT 
+                    COUNT(br.blessing_type = 4 OR NULL)
+                FROM
+                    picker_activity_blessing_record br
+                WHERE
+                    a.openId = br.openid) AS tianCount,
+            (SELECT 
+                    COUNT(cu.id)
+                FROM
+                    picker_activity_coupon_user cu
+                WHERE
+                    a.openId = cu.openid
+                        AND cu.receive_status = 2) AS couponCount,
+            (SELECT 
+                    COUNT(acu.id)
+                FROM
+                    picker_activity_card_user acu
+                WHERE
+                    a.openId = acu.openid
+                        AND acu.receive_time IS NOT NULL) AS cardCount,
+            (SELECT 
+                    COUNT(h.id)
+                FROM
+                    picker_activity_help h
+                WHERE
+                    a.openId = h.be_openid) AS inviteHelpCount,
+            (SELECT 
+                    COUNT(ah.id)
+                FROM
+                    picker_activity_help ah
+                WHERE
+                    a.openId = ah.openid) AS joinHelpCount 
+                `).where(where).select();
+        let datas = [
+            {
+                name: '用户信息',
+                data: [
+                    [
+                        '用户名',
+                        '手机号',
+                        '福',
+                        '礻',
+                        '一',
+                        '口',
+                        '田',
+                        '领劵数据',
+                        '领卡数据',
+                        '邀请助力数',
+                        '参与助力数'
+                    ]
+                ]
+            }
+        ]
+        if (!think.isEmpty(list)) {
+            for (const item of list) {
+                datas[0].data.push([
+                    item.name,
+                    item.mobile,
+                    item.fuCount,
+                    item.shiCount,
+                    item.yiCount,
+                    item.kouCount,
+                    item.tianCount,
+                    item.couponCount,
+                    item.cardCount,
+                    item.inviteHelpCount,
+                    item.joinHelpCount
+                ])
+            }
+        }
+        // 写xlsx
+        let buffer = xlsx.build(datas);
+        this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
+        this.ctx.set("Content-Disposition", "attachment; filename=user.xlsx");
+        this.ctx.body = buffer;
     }
 }

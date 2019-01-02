@@ -24,7 +24,7 @@
     "moment": "^2.22.1",
     "moment-timezone": "^0.5.23",
     "nanoid": "^2.0.0",
-    "node-xlsx": "^0.12.0",
+    "node-xlsx": "^0.12.1",
     "pnotify": "^4.0.0-alpha.4",
     "qiniu": "^7.1.7",
     "query-string": "^6.2.0",
