@@ -81,7 +81,7 @@ module.exports = class extends think.common.Admin {
     /**
      * 导出预约管理信息
      */
-    async exportReserveAction(){
+    async exportReserveAction() {
         const data = this.post()
         const reserveModel = this.model('activity_reserve');
         let where = {}
@@ -195,12 +195,26 @@ module.exports = class extends think.common.Admin {
     }
 
     /**
-     * 兑换记录
+     * 兑换数据
      */
     async exchangeAction() {
+        const data = this.post()
+        let where = {}
+        if (!think.isEmpty(data.name)) {
+            where[`a.name`] = data.name;
+        }
+        if (!think.isEmpty(data.mobile)) {
+            where[`a.mobile`] = data.mobile;
+        }
+        // if (!think.isEmpty(data.create_time)) {
+        //     where[`DATE_FORMAT(c.create_time, '%Y-%m-%d')`] = data.create_time;
+        // }
+        if (!think.isEmpty(data.shop_name)) {
+            where[`s.shop_name`] = data.shop_name;
+        }
         let page = this.get('page')
         const exchangeModel = this.model('activity_exchange');
-        const res = await exchangeModel.alias('c').field(`c.id,c.create_time,s.shop_name,s.shop_code,a.name,a.userInfo->>'$.mobile' as mobile`)
+        const res = await exchangeModel.alias('c').field(`c.id,c.create_time,s.shop_name,s.shop_code,a.name,a.mobile`)
             .join({
                 table: 'chinauff_shop',
                 join: 'left',
@@ -211,7 +225,7 @@ module.exports = class extends think.common.Admin {
                 join: 'left',
                 as: 'a',
                 on: ['openid', 'openId']
-            }).page(page, 20).countSelect();
+            }).page(page, 20).where(where).countSelect();
 
         if (!think.isEmpty(res.data)) {
             for (let item of res.data) {
@@ -221,13 +235,84 @@ module.exports = class extends think.common.Admin {
         const html = this.pagination(res);
         this.assign('pagerData', html); //分页展示使用
         this.assign('list', res.data);
+        this.assign('data', data);
         return this.display()
     }
+
+    /**
+     * 兑换数据导出
+     */
+    async exportExchangeAction() {
+        const data = this.post()
+        let where = {}
+        if (!think.isEmpty(data.name)) {
+            where[`a.name`] = data.name;
+        }
+        if (!think.isEmpty(data.mobile)) {
+            where[`a.mobile`] = data.mobile;
+        }
+        // if (!think.isEmpty(data.create_time)) {
+        //     where[`DATE_FORMAT(c.create_time, '%Y-%m-%d')`] = data.create_time;
+        // }
+        if (!think.isEmpty(data.shop_name)) {
+            where[`s.shop_name`] = data.shop_name;
+        }
+        const exchangeModel = this.model('activity_exchange');
+        const list = await exchangeModel.alias('c').field(`c.id,c.create_time,s.shop_name,s.shop_code,a.name,a.mobile`)
+            .join({
+                table: 'chinauff_shop',
+                join: 'left',
+                as: 's',
+                on: ['shop_id', 'shop_code']
+            }).join({
+                table: 'chinauff_account',
+                join: 'left',
+                as: 'a',
+                on: ['openid', 'openId']
+            }).where(where).select();
+
+
+        let datas = [
+            {
+                name: '预约管理',
+                data: [
+                    [
+                        '核销兑换时间',
+                        '核销兑换门店',
+                        '用户名',
+                        '手机号码'
+                    ]
+                ]
+            }
+        ]
+        if (!think.isEmpty(list)) {
+            for (let item of list) {
+                item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日 HH:mm:ss')
+                datas[0].data.push([
+                    item.create_time,
+                    item.shop_name,
+                    item.name,
+                    item.mobile
+                ])
+            }
+        }
+        // 写xlsx
+        let buffer = xlsx.build(datas);
+        this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
+        this.ctx.set("Content-Disposition", "attachment; filename=exchange.xlsx");
+        this.ctx.body = buffer;
+    }
+
 
     /**
      * 福字数据
      */
     async fuziAction() {
+        const data = this.post();
+        let whereSql = ''
+        if (!think.isEmpty(data.create_time)) {
+            whereSql += ` and DATE_FORMAT(br.create_time, '%Y-%m-%d') = '${data.create_time}' `
+        }
         const sql = `
                 SELECT 
                 DATE_FORMAT(br.create_time, '%Y-%m-%d') AS create_time,
@@ -266,7 +351,7 @@ module.exports = class extends think.common.Admin {
                     WHERE
                         DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS tianNum
             FROM
-                picker_activity_blessing_record br
+                picker_activity_blessing_record br where 1=1 ${whereSql}
             GROUP BY DATE_FORMAT(br.create_time, '%Y-%m-%d');
                 `
 
@@ -278,6 +363,7 @@ module.exports = class extends think.common.Admin {
             }
         }
         this.assign('list', list);
+        this.assign('data', data);
         return this.display()
     }
 
