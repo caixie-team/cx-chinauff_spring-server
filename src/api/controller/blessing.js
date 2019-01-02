@@ -499,7 +499,7 @@ module.exports = class extends Base {
   }
 
   /**
-   * 
+   * 我的充值卡
    */
   async getMyCardAction() {
     const data = this.post();
