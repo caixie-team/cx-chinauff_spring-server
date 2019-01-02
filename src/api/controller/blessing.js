@@ -404,7 +404,7 @@ module.exports = class extends Base {
       //获取今日已参与次数
       const blessingTimesModel = this.model('activity_blessing_times');
       const times = await blessingTimesModel.where({join_date: nowDate, openid: data.openId}).count('id');
-
+      console.log(times)
       return this.success({
         times: helpNum + (3 - times)
       })

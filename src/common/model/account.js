@@ -51,6 +51,9 @@ module.exports = class extends think.Model {
     if (think._.has(data, 'userInfo')) {
       saveData.userInfo = JSON.stringify(data.userInfo)
       saveData.name = data.userInfo.name
+      if (think._.has(data.userInfo, 'mobile')) {
+        saveData.mobile = data.userInfo.mobile
+      }
     }
     if (think._.has(data, 'cardInfo')) {
       saveData.cardInfo = JSON.stringify(data.cardInfo)

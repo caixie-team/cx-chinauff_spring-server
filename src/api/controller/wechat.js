@@ -88,6 +88,7 @@ module.exports = class extends Base {
    */
   async getSignature () {
     const queryUrl = this.get('url')
+    console.log(queryUrl)
     if (queryUrl) {
       return await wx.jssdk.getSignature(queryUrl).then(
         data => {
