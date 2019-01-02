@@ -183,26 +183,6 @@ module.exports = class extends think.common.Admin {
                 item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日')
             }
         }
-
-        // let sql =  `
-        //     SELECT 
-        //         DATE_FORMAT(cu.create_time, '%Y-%m-%d') as create_time,
-        //         c.coupon_name,
-        //         COUNT(cu.id) AS allNum,
-        //         COUNT(cu.receive_status = 2 OR NULL) AS receiveNum
-        //     FROM
-        //         picker_activity_coupon_user cu
-        //             LEFT JOIN
-        //         picker_activity_coupon c ON cu.coupon_id = c.id
-        //     GROUP BY DATE_FORMAT(cu.create_time, '%Y-%m-%d') , cu.coupon_id;
-        // `
-        // const list = await couponUserModel.query(sql);
-        // if (!think.isEmpty(list)) {
-        //     for (let item of list) {
-        //         item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日')
-        //     }
-        // }
-
         const html = this.pagination(res);
         this.assign('pagerData', html); //分页展示使用
         this.assign('list', res.data);
@@ -215,69 +195,67 @@ module.exports = class extends think.common.Admin {
     async userAction(){
         let page = this.get('page')
         const accountModel = this.model('chinauff_account');
+        const total = await accountModel.count('id');
         const res = await accountModel.alias('a').field(`
-        a.name,a.userInfo->>'$.mobile' as mobile,
-        COUNT(bu.id) AS fuCount,
-        (SELECT 
-            COUNT(br.blessing_type = 1 OR NULL)
-        FROM
-            picker_activity_blessing_record br
-        WHERE
-            a.openId = br.openid) AS shiCount,
-        (SELECT 
-                COUNT(br.blessing_type = 2 OR NULL)
+            a.name,a.userInfo->>'$.mobile' as mobile,
+            (SELECT 
+                COUNT(bu.id)
+            FROM
+            picker_activity_blessing_user bu
+            WHERE
+                a.openId = bu.openid) AS fuCount,
+            (SELECT 
+                COUNT(br.blessing_type = 1 OR NULL)
             FROM
                 picker_activity_blessing_record br
             WHERE
-                a.openId = br.openid) AS yiCount,
-        (SELECT 
-                COUNT(br.blessing_type = 3 OR NULL)
-            FROM
-                picker_activity_blessing_record br
-            WHERE
-                a.openId = br.openid) AS kouCount,
-        (SELECT 
-                COUNT(br.blessing_type = 4 OR NULL)
-            FROM
-                picker_activity_blessing_record br
-            WHERE
-                a.openId = br.openid) AS tianCount,
-        (SELECT 
-                COUNT(cu.id)
-            FROM
-                picker_activity_coupon_user cu
-            WHERE
-                a.openId = cu.openid
-                    AND cu.receive_status = 2) AS couponCount,
-        (SELECT 
-                COUNT(acu.id)
-            FROM
-                picker_activity_card_user acu
-            WHERE
-                a.openId = acu.openid
-                    AND acu.receive_time IS NOT NULL) AS cardCount,
-        (SELECT 
-                COUNT(h.id)
-            FROM
-                picker_activity_help h
-            WHERE
-                a.openId = h.be_openid) AS inviteHelpCount,
-        (SELECT 
-                COUNT(ah.id)
-            FROM
-                picker_activity_help ah
-            WHERE
-                a.openId = ah.openid) AS joinHelpCount 
-            `)
-        .join({
-            table: 'activity_blessing_user',
-            join: 'left',
-            as: 'bu',
-            on: ['openId', 'openid']
-        }).page(page, 10).group(`a.openId`).countSelect();
+                a.openId = br.openid) AS shiCount,
+            (SELECT 
+                    COUNT(br.blessing_type = 2 OR NULL)
+                FROM
+                    picker_activity_blessing_record br
+                WHERE
+                    a.openId = br.openid) AS yiCount,
+            (SELECT 
+                    COUNT(br.blessing_type = 3 OR NULL)
+                FROM
+                    picker_activity_blessing_record br
+                WHERE
+                    a.openId = br.openid) AS kouCount,
+            (SELECT 
+                    COUNT(br.blessing_type = 4 OR NULL)
+                FROM
+                    picker_activity_blessing_record br
+                WHERE
+                    a.openId = br.openid) AS tianCount,
+            (SELECT 
+                    COUNT(cu.id)
+                FROM
+                    picker_activity_coupon_user cu
+                WHERE
+                    a.openId = cu.openid
+                        AND cu.receive_status = 2) AS couponCount,
+            (SELECT 
+                    COUNT(acu.id)
+                FROM
+                    picker_activity_card_user acu
+                WHERE
+                    a.openId = acu.openid
+                        AND acu.receive_time IS NOT NULL) AS cardCount,
+            (SELECT 
+                    COUNT(h.id)
+                FROM
+                    picker_activity_help h
+                WHERE
+                    a.openId = h.be_openid) AS inviteHelpCount,
+            (SELECT 
+                    COUNT(ah.id)
+                FROM
+                    picker_activity_help ah
+                WHERE
+                    a.openId = ah.openid) AS joinHelpCount 
+                `).page(page, 20).group(`a.openId`).countSelect(total);
         const html = this.pagination(res);
-        console.log('====================')
-        console.log(html)
         this.assign('pagerData', html); //分页展示使用
         this.assign('list', res.data);
         return this.display()
