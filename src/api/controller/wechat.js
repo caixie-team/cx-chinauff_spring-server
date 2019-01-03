@@ -293,7 +293,7 @@ module.exports = class extends Base {
             if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
               return this.success({score: 100})
             } else {
-              return this.success({score: 0})
+              return this.success({score: new Date().getTime()})
             }
             // if (item.score > 0.4 && item.keyword.includes('米')) {
             // 返回置信度
