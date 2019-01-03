@@ -290,17 +290,21 @@ module.exports = class extends Base {
           secret: this.appSecret
         });
         const res = await aiService.image(base64Data)
-        console.log('开启百度云识别。。。。。。。。。')
-        console.log(res)
+        // console.log('开启百度云识别。。。。。。。。。')
+        // console.log(res)
         if (res.result_num > 0) {
           for (let item of res.result) {
-            console.log(item)
-            if (item.score > 0.4 && item.keyword.includes('米')) {
+            if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
+              return this.success({score: 100})
+            } else {
+              return this.success({score: 0})
+            }
+            // if (item.score > 0.4 && item.keyword.includes('米')) {
               // 返回置信度
-              return this.success({score: item.score * 100})
+              // return this.success({score: item.score * 100})
               // console.log(item.score)
               // resolve({score: item.score * 100});
-            }
+            // }
           }
         }
         if (res.error_code) {
