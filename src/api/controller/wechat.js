@@ -290,9 +290,12 @@ module.exports = class extends Base {
           secret: this.appSecret
         });
         const res = await aiService.image(base64Data)
+        console.log('开启百度云识别。。。。。。。。。')
+        console.log(res)
         if (res.result_num > 0) {
           for (let item of res.result) {
-            if (item.score > 0.6 && item.keyword.includes('米')) {
+            console.log(item)
+            if (item.score > 0.4 && item.keyword.includes('米')) {
               // 返回置信度
               return this.success({score: item.score * 100})
               // console.log(item.score)
