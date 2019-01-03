@@ -370,7 +370,7 @@ module.exports = class extends think.common.Admin {
     /**
      * 导出福字数据
      */
-    async exportFuziAction(){
+    async exportFuziAction() {
         const data = this.post();
         let whereSql = ' 1=1 '
         if (!think.isEmpty(data.create_time)) {
@@ -497,14 +497,14 @@ module.exports = class extends think.common.Admin {
         const html = this.pagination(res);
         this.assign('pagerData', html); //分页展示使用
         this.assign('list', res.data);
-        this.assign('coupons',coupons);
-        this.assign('data',data);
+        this.assign('coupons', coupons);
+        this.assign('data', data);
         return this.display()
     }
 
-     /**
-     * 导出发券数据
-     */
+    /**
+    * 导出发券数据
+    */
     async exportCouponAction() {
         const data = this.post()
         const couponUserModel = this.model('activity_coupon_user');
@@ -773,7 +773,7 @@ module.exports = class extends think.common.Admin {
     /**
      * 纳新用户
      */
-    async newsAction(){
+    async newsAction() {
         let data = this.post()
         let page = this.get('page')
         const accountModel = this.model('chinauff_account');
@@ -792,7 +792,7 @@ module.exports = class extends think.common.Admin {
         FROM_UNIXTIME(a.createTime/1000, '%Y-%m-%d') as create_time ,count('id') as allNum
         `).page(page, 20).where(whereSql).group(`FROM_UNIXTIME(a.createTime/1000, '%Y-%m-%d') `).countSelect(total[0].count);
 
-        if(think.isEmpty(res.data)){
+        if (think.isEmpty(res.data)) {
             res.count = 0;
             res.totalPages = 0;
         }
@@ -806,7 +806,7 @@ module.exports = class extends think.common.Admin {
     /**
      * 导出纳新用户
      */
-    async exportNewsAction(){
+    async exportNewsAction() {
         let data = this.post()
         const accountModel = this.model('chinauff_account');
         let whereSql = ' a.isNew = 1 ';//纳新用户
@@ -843,4 +843,105 @@ module.exports = class extends think.common.Admin {
         this.ctx.set("Content-Disposition", "attachment; filename=news.xlsx");
         this.ctx.body = buffer;
     }
+
+    /**
+     * 门店配货
+     */
+    async allocationAction() {
+        let nowDate = null;
+        let data = this.post();
+        if (think.isEmpty(data.reserve_date)) {
+            //默认为距今第三天
+            nowDate = new Date('2019-01-06')
+            nowDate.setDate(nowDate.getDate() + 3);
+            nowDate = moment(nowDate).format('YYYY-MM-DD')
+        } else {
+            nowDate = data.reserve_date;
+        }
+        let where = `r.reserve_date = '${nowDate}' `
+        if (!think.isEmpty(data.shop_code)) {
+            where+=` and r.shop_id= ${data.shop_code}` ;
+        }
+        let sql = `
+            SELECT 
+                r.reserve_date,
+                s.shop_name,
+                shop_code,
+                s.num,
+                COUNT(r.id) AS reserve_count,
+                (SELECT 
+                        COUNT(e.id)
+                    FROM
+                        picker_activity_exchange e
+                    WHERE
+                        r.shop_id = e.shop_id
+                            AND DATE_FORMAT(e.create_time, '%Y-%m-%d') = r.reserve_date) AS exchange_count
+            FROM
+                picker_activity_reserve r
+                    LEFT JOIN
+                picker_chinauff_shop s ON r.shop_id = s.shop_code
+            WHERE ${where}
+            GROUP BY r.shop_id;
+        `
+        const reserveModel = this.model('activity_reserve');
+        let list = await reserveModel.query(sql);
+
+        const shopModel = this.model('chinauff_shop');
+        const shops = await shopModel.select();           
+        this.assign('list', list);
+        this.assign('shops', shops);
+        this.assign('data', data);
+        return this.display();
+    }
+
+     /**
+     * 导出门店配货
+     */
+    async exportAllocationAction() {
+        let nowDate = null;
+        let data = this.post();
+        if (think.isEmpty(data.reserve_date)) {
+            //默认为距今第三天
+            nowDate = new Date('2019-01-06')
+            nowDate.setDate(nowDate.getDate() + 3);
+            nowDate = moment(nowDate).format('YYYY-MM-DD')
+        } else {
+            nowDate = data.reserve_date;
+        }
+        let where = `r.reserve_date = '${nowDate}' `
+        if (!think.isEmpty(data.shop_code)) {
+            where+=` and r.shop_id= ${data.shop_code}` ;
+        }
+        let sql = `
+            SELECT 
+                r.reserve_date,
+                s.shop_name,
+                shop_code,
+                s.num,
+                COUNT(r.id) AS reserve_count,
+                (SELECT 
+                        COUNT(e.id)
+                    FROM
+                        picker_activity_exchange e
+                    WHERE
+                        r.shop_id = e.shop_id
+                            AND DATE_FORMAT(e.create_time, '%Y-%m-%d') = r.reserve_date) AS exchange_count
+            FROM
+                picker_activity_reserve r
+                    LEFT JOIN
+                picker_chinauff_shop s ON r.shop_id = s.shop_code
+            WHERE ${where}
+            GROUP BY r.shop_id;
+        `
+        const reserveModel = this.model('activity_reserve');
+        let list = await reserveModel.query(sql);
+
+        const shopModel = this.model('chinauff_shop');
+        const shops = await shopModel.select();           
+        this.assign('list', list);
+        this.assign('shops', shops);
+        this.assign('data', data);
+        return this.display();
+    }
+
 }

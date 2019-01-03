@@ -306,12 +306,19 @@ module.exports = class extends Base {
 
     await reserveModel.add({
       shop_id: data.shop_id,
-      reserve_date: moment(data.reserve_date).format('YYYY-MM-DD HH:mm:ss'),
+      reserve_date: moment(data.reserve_date).format('YYYY-MM-DD'),
       openid: data.openId,
       blessing_code: data.blessing_code,
       status: 1, //预约状态
       create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
     })
+
+    const shopModel = this.model('chinauff_shop')
+    //门店的库存数量减1
+    await shopModel.where({
+      shop_code: data.shop_id,
+      num: {'>': 0}
+    }).update({num: ['exp', 'num-1']})
 
     //status 福码状态(1:待预约 2:待兑换 3:已兑换)
     await blessingUserModel.where({blessing_code: data.blessing_code}).update({
