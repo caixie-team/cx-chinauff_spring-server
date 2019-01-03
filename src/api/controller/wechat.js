@@ -207,7 +207,7 @@ module.exports = class extends Base {
     return new Buffer(bitmap).toString('base64');
   }
 
-  async getAccessTokenAction() {
+  async getAccessToken() {
     const query = queryString.stringify({
       appid: this.config.appId
     })
@@ -218,8 +218,15 @@ module.exports = class extends Base {
         query
       }
     )).body
-
-    return this.success(payload)
+    const data = JSON.parse(payload)
+    let accessToken = null
+    if (data.errcode == 0) {
+      accessToken = data.data
+      // return data.data
+    }
+    return {
+      accessToken
+    }
   }
   /**
    * 获取临时素材
@@ -238,6 +245,7 @@ module.exports = class extends Base {
     if (think.isEmpty(mediaId)) {
       return this.fail()
     }
+    const { accessToken } = await this.getAccessToken()
     // await this.got('')
     const query = queryString.stringify({
       appid: this.config.appId
@@ -250,7 +258,7 @@ module.exports = class extends Base {
       }
     )).body
     // lnj-weixin/console/activity/weChat/accessToken?appid=wxa8299eb7fc27ef04
-    const accessToken = '17_kA-EV4bfnBNq1dYmc-0Wb4AG2Y9n9ijBGkIgy5C3FP3wuiok5X1gkxGWEQWwk1kNvaJeH3wAGcNnnzfFkQ7cFuo0mqARZiTKymfYl_FXj8kxEZr2HUK3evk97P4Y8SKMlDgWnzJIb_R1sunKCVDgAFAHAI'
+    // const accessToken = '17_kA-EV4bfnBNq1dYmc-0Wb4AG2Y9n9ijBGkIgy5C3FP3wuiok5X1gkxGWEQWwk1kNvaJeH3wAGcNnnzfFkQ7cFuo0mqARZiTKymfYl_FXj8kxEZr2HUK3evk97P4Y8SKMlDgWnzJIb_R1sunKCVDgAFAHAI'
     const uploadPath = think.ROOT_PATH + '/www/static/upload/picture/' + dateformat("Y-m-d", new Date().getTime());
 
     think.mkdir(uploadPath);
@@ -316,11 +324,11 @@ module.exports = class extends Base {
       // const accessToken = await wx.jssdk.getAccessToken()
       const accessToken = '17_C3213veG8uoTitMpYgNm6Lqe9qmGXo97j2dvB_RwNFYbTPnL6m5lndQkdLZlkI-OcS1Zj133GY1gekGd_c60kfNFaHb_4cgYSYNu7P-L_QcywRQYCz6THXrWLQyg7a9EkQeR7ZGXjcYwb9jnTOKhAHABWS'
       // const accessToken = '17_V7GB_65T7xPQ-hcg2yVvvD-PehfDi5guRPl94DHlL43iaJ1seLcM871nWL8K9NVMOGciqVlJ3oD6dxO7Wkz_BJXR7J6xra6qcic7w76VnO7TR5noYhrHj_s-h_MDVCaAGANFM'
-      console.log(accessToken)
+      // console.log(accessToken)
       const url = `https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=${accessToken}`
       const query = queryString.stringify(param)
 
-      const form = new FormData()
+      // const form = new FormData()
       // form.append('type', param.type)
       // form.append('offset', param.offset)
       // form.append('count', param.count)
@@ -397,15 +405,7 @@ module.exports = class extends Base {
 
     }
     file.path = uploadPath + '/' + basename;
-    console.log(file.path)
-    // const global = await wx.store.getGlobalToken()
-    // const accessToken = await wx.jssdk.getAccessToken()
-    // console.log(accessToken)
-    // console.log('--x-x-x-')
-    // const accessToken = '17_XvpZDras2VNEUrk_L5jhzifI2-xHo6OyTj3-w2kD2EzfbAHvn2-b_AroAaTXDF8sixEB5UtLb6gdUtKYy3hTBNRFgahKA8EAA7EjrZGzTOSqQemZIGVqNG2vkP6U5vOyZUNoeUK3zc4QZFRRRLUfAFAWQZ'
-    // const accessToken = '17_EU_2YommrTfT3FG2qtfe9vM76t3Dn_DBC6h1E-NaWANw3OgGWKAEND5gXrHCVMRcqTOlnCxy8QwVn0dmxdKu8ttWk6aIxb9HRYXOqho1yVM5kbLoyBvWeEB6c1BVVDXS7hbQhoUnWjku9wmmGYQgAGAVNF'
-    // const accessToken = '17_l2hQBTzBwlbxd46TuPLdRMZnFbGhuaV-wtAUR9xhAKNzqcIALc0GMMNMeXYewmNAsMUrkFnXChpBgN2ax5eF5H0l0v6SUM3GiRojtaC54DFfTQhCHtTEW9dvZi1OgjyMgRxV1emBZviw3nMmJGLdABAAXC'
-    const accessToken = '17_kA-EV4bfnBNq1dYmc-0Wb4AG2Y9n9ijBGkIgy5C3FP3wuiok5X1gkxGWEQWwk1kNvaJeH3wAGcNnnzfFkQ7cFuo0mqARZiTKymfYl_FXj8kxEZr2HUK3evk97P4Y8SKMlDgWnzJIb_R1sunKCVDgAFAHAI'
+    const { accessToken } = await this.getAccessToken()
 
     const data = await this._promiseRequest({
       imgStram: fs.createReadStream(file.path),
