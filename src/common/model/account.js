@@ -25,7 +25,9 @@ module.exports = class extends think.Model {
       const insertId = await this.add({
         openId: data.openId,
         avatar: data.avatar,
-        createTime: new Date().getTime()
+        updateTime: new Date().getTime(),
+        createTime: new Date().getTime(),
+        lastLoginTime: new Date().getTime()
       })
       if (insertId) {
         accountInfo = await this.where({
