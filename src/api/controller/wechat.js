@@ -61,6 +61,7 @@ module.exports = class extends Base {
 
 
     this.setup = think.config('setup')
+    this.config = think.config('wechat')
     this.aiServer = this.setup.AI_SERVER
     if (this.setup.AI_SERVER === 'baidu') {
       this.appId = this.setup.AI_BAIDU_APP_ID
@@ -105,7 +106,7 @@ module.exports = class extends Base {
    * @returns {Promise<any>}
    */
   async signatureAction () {
-    console.log('签名')
+    // console.log('签名')
     const queryUrl = this.get('url')
     console.log(queryUrl)
     if (queryUrl) {
@@ -206,6 +207,20 @@ module.exports = class extends Base {
     return new Buffer(bitmap).toString('base64');
   }
 
+  async getAccessTokenAction() {
+    const query = queryString.stringify({
+      appid: this.config.appId
+    })
+    const payload = (await this.got(
+      '/console/activity/weChat/accessToken',
+      {
+        baseUrl: think.config('proxyActivityApi'),
+        query
+      }
+    )).body
+
+    return this.success(payload)
+  }
   /**
    * 获取临时素材
    * 详情请见：<http://mp.weixin.qq.com/wiki/11/07b6b76a6b6e8848e855a435d5e34a5f.html>
@@ -223,6 +238,18 @@ module.exports = class extends Base {
     if (think.isEmpty(mediaId)) {
       return this.fail()
     }
+    // await this.got('')
+    const query = queryString.stringify({
+      appid: this.config.appId
+    })
+    const payload = (await this.got(
+      '/console/activity/weChat/accessToken',
+      {
+        baseUrl: think.config('proxyActivityApi'),
+        query
+      }
+    )).body
+    // lnj-weixin/console/activity/weChat/accessToken?appid=wxa8299eb7fc27ef04
     const accessToken = '17_kA-EV4bfnBNq1dYmc-0Wb4AG2Y9n9ijBGkIgy5C3FP3wuiok5X1gkxGWEQWwk1kNvaJeH3wAGcNnnzfFkQ7cFuo0mqARZiTKymfYl_FXj8kxEZr2HUK3evk97P4Y8SKMlDgWnzJIb_R1sunKCVDgAFAHAI'
     const uploadPath = think.ROOT_PATH + '/www/static/upload/picture/' + dateformat("Y-m-d", new Date().getTime());
 

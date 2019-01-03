@@ -16,6 +16,9 @@ module.exports = {
   user_administrator: [1], // 数组格式，可以配置多个[1,2,3],
   // proxyActivityApi: !isDev ? 'http://crm.chinauff.com/lnj-weixin' : 'http://demo.micvs.com/lnj-weixin/console',
   // proxyCrmApi: !isDev ? 'http://crm.chinauff.com/crm' : 'http://demo.i-manji.com/crmSession'
+  wechat: {
+    appId: 'wxa8299eb7fc27ef04'
+  },
   proxyActivityApi: 'http://demo.micvs.com/lnj-weixin',
   proxyCrmApi: 'http://demo.i-manji.com/crmSession',
   proxyQueryString: {
