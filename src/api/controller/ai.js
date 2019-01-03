@@ -42,7 +42,7 @@ module.exports = class extends Base {
           const res = await aiService.image(data.file)
           if (res.result_num > 0) {
             for (let item of res.result) {
-              if (item.score > 0.6 && item.keyword.includes('米')) {
+              if (item.score > 0.4 && item.keyword.includes('米')) {
                 // 返回置信度
                 return this.success({score: item.score * 100})
               }
@@ -63,7 +63,7 @@ module.exports = class extends Base {
           if (res.result) {
             const tags = res.result.tags
             for (let item of tags) {
-              if (item.confidence > 60 && item.tag.includes('米')) {
+              if (item.confidence > 40 && item.tag.includes('米')) {
                 // 返回置信度
                 return this.success({score: item.confidence})
               }
