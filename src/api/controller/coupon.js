@@ -427,6 +427,7 @@ module.exports = class extends Base {
     await couponUserModel.add({
       openid: openId,
       coupon_id: coupon.id,
+      type_code: coupon.type_code,
       receive_time: null,//领取时间
       status: 1,//使用状态(1未使用 2已使用)
       receive_status: 1,//领取状态(1未领取 2已领取)

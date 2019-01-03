@@ -199,19 +199,20 @@ module.exports = class extends think.common.Admin {
      */
     async exchangeAction() {
         const data = this.post()
-        let where = {}
+        let _where = '1=1';
         if (!think.isEmpty(data.name)) {
-            where[`a.name`] = data.name;
+            _where += ` and a.name = '${data.name}' `;
         }
         if (!think.isEmpty(data.mobile)) {
-            where[`a.mobile`] = data.mobile;
+            _where += ` and a.mobile = '${data.mobile}' `;
         }
-        // if (!think.isEmpty(data.create_time)) {
-        //     where[`DATE_FORMAT(c.create_time, '%Y-%m-%d')`] = data.create_time;
-        // }
+        if (!think.isEmpty(data.create_time)) {
+            _where += ` and DATE_FORMAT(c.create_time, '%Y-%m-%d') = '${data.create_time}' `;
+        }
         if (!think.isEmpty(data.shop_name)) {
-            where[`s.shop_name`] = data.shop_name;
+            _where += ` and s.shop_name = '${data.shop_name}' `;
         }
+
         let page = this.get('page')
         const exchangeModel = this.model('activity_exchange');
         const res = await exchangeModel.alias('c').field(`c.id,c.create_time,s.shop_name,s.shop_code,a.name,a.mobile`)
@@ -225,7 +226,7 @@ module.exports = class extends think.common.Admin {
                 join: 'left',
                 as: 'a',
                 on: ['openid', 'openId']
-            }).page(page, 20).where(where).countSelect();
+            }).page(page, 20).where(_where).countSelect();
 
         if (!think.isEmpty(res.data)) {
             for (let item of res.data) {
@@ -244,18 +245,18 @@ module.exports = class extends think.common.Admin {
      */
     async exportExchangeAction() {
         const data = this.post()
-        let where = {}
+        let _where = '1=1';
         if (!think.isEmpty(data.name)) {
-            where[`a.name`] = data.name;
+            _where += ` and a.name = '${data.name}' `;
         }
         if (!think.isEmpty(data.mobile)) {
-            where[`a.mobile`] = data.mobile;
+            _where += ` and a.mobile = '${data.mobile}' `;
         }
-        // if (!think.isEmpty(data.create_time)) {
-        //     where[`DATE_FORMAT(c.create_time, '%Y-%m-%d')`] = data.create_time;
-        // }
+        if (!think.isEmpty(data.create_time)) {
+            _where += ` and DATE_FORMAT(c.create_time, '%Y-%m-%d') = '${data.create_time}' `;
+        }
         if (!think.isEmpty(data.shop_name)) {
-            where[`s.shop_name`] = data.shop_name;
+            _where += ` and s.shop_name = '${data.shop_name}' `;
         }
         const exchangeModel = this.model('activity_exchange');
         const list = await exchangeModel.alias('c').field(`c.id,c.create_time,s.shop_name,s.shop_code,a.name,a.mobile`)
@@ -269,12 +270,11 @@ module.exports = class extends think.common.Admin {
                 join: 'left',
                 as: 'a',
                 on: ['openid', 'openId']
-            }).where(where).select();
-
+            }).where(_where).select();
 
         let datas = [
             {
-                name: '预约管理',
+                name: '兑换数据',
                 data: [
                     [
                         '核销兑换时间',
@@ -309,7 +309,7 @@ module.exports = class extends think.common.Admin {
      */
     async fuziAction() {
         const data = this.post();
-        let whereSql = ''
+        let whereSql = ' 1=1 '
         if (!think.isEmpty(data.create_time)) {
             whereSql += ` and DATE_FORMAT(br.create_time, '%Y-%m-%d') = '${data.create_time}' `
         }
@@ -351,7 +351,7 @@ module.exports = class extends think.common.Admin {
                     WHERE
                         DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS tianNum
             FROM
-                picker_activity_blessing_record br where 1=1 ${whereSql}
+                picker_activity_blessing_record br where ${whereSql}
             GROUP BY DATE_FORMAT(br.create_time, '%Y-%m-%d');
                 `
 
@@ -368,28 +368,191 @@ module.exports = class extends think.common.Admin {
     }
 
     /**
+     * 导出福字数据
+     */
+    async exportFuziAction(){
+        const data = this.post();
+        let whereSql = ' 1=1 '
+        if (!think.isEmpty(data.create_time)) {
+            whereSql += ` and DATE_FORMAT(br.create_time, '%Y-%m-%d') = '${data.create_time}' `
+        }
+        const sql = `
+                SELECT 
+                DATE_FORMAT(br.create_time, '%Y-%m-%d') AS create_time,
+                COUNT(br.blessing_type = 1 OR NULL) AS shiCount,
+                COUNT(br.blessing_type = 2 OR NULL) AS yiCount,
+                COUNT(br.blessing_type = 3 OR NULL) AS kouCount,
+                COUNT(br.blessing_type = 4 OR NULL) AS tianCount,
+                (SELECT 
+                        COUNT(bu.id)
+                    FROM
+                        picker_activity_blessing_user bu
+                    WHERE
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bu.create_time, '%Y-%m-%d')) AS fuCount,
+                (SELECT 
+                        COUNT(bp.blessing_type = 1 OR NULL)
+                    FROM
+                        picker_activity_blessing_pool bp
+                    WHERE
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS shiNum,
+                (SELECT 
+                        COUNT(bp.blessing_type = 2 OR NULL)
+                    FROM
+                        picker_activity_blessing_pool bp
+                    WHERE
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS yiNum,
+                (SELECT 
+                        COUNT(bp.blessing_type = 3 OR NULL)
+                    FROM
+                        picker_activity_blessing_pool bp
+                    WHERE
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS kouNum,
+                (SELECT 
+                        COUNT(bp.blessing_type = 4 OR NULL)
+                    FROM
+                        picker_activity_blessing_pool bp
+                    WHERE
+                        DATE_FORMAT(br.create_time, '%Y-%m-%d') = DATE_FORMAT(bp.release_time, '%Y-%m-%d')) AS tianNum
+            FROM
+                picker_activity_blessing_record br where ${whereSql}
+            GROUP BY DATE_FORMAT(br.create_time, '%Y-%m-%d');
+                `
+
+        const blessingRecordModel = this.model('activity_blessing_record');
+        const list = await blessingRecordModel.query(sql);
+        let datas = [
+            {
+                name: '福字数据',
+                data: [
+                    [
+                        '日期',
+                        '福',
+                        '礻',
+                        '一',
+                        '口',
+                        '田',
+                        '礻',
+                        '一',
+                        '口',
+                        '田',
+                    ]
+                ]
+            }
+        ]
+        if (!think.isEmpty(list)) {
+            for (let item of list) {
+                item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日')
+                datas[0].data.push([
+                    item.create_time,
+                    item.fuCount,
+                    item.shiCount,
+                    item.yiCount,
+                    item.kouCount,
+                    item.tianCount,
+                    item.shiNum,
+                    item.yiNum,
+                    item.kouNum,
+                    item.tianNum
+                ])
+            }
+        }
+        // 写xlsx
+        let buffer = xlsx.build(datas);
+        this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
+        this.ctx.set("Content-Disposition", "attachment; filename=fuzi.xlsx");
+        this.ctx.body = buffer;
+    }
+
+    /**
      * 发券数据
      */
     async couponAction() {
+        const data = this.post()
         let page = this.get('page')
         const couponUserModel = this.model('activity_coupon_user');
+        let whereSql = ' 1=1 '
+        if (!think.isEmpty(data.create_time)) {
+            whereSql += ` and DATE_FORMAT(cu.create_time, '%Y-%m-%d') = '${data.create_time}' `
+        }
+        if (!think.isEmpty(data.type_code)) {
+            whereSql += ` and cu.type_code = '${data.type_code}' `
+        }
+
         const res = await couponUserModel.alias('cu').field(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') as create_time,c.coupon_name,COUNT(cu.id) AS allNum,COUNT(cu.receive_status = 2 OR NULL) AS receiveNum`)
             .join({
                 table: 'activity_coupon',
                 join: 'left',
                 as: 'c',
                 on: ['coupon_id', 'id']
-            }).page(page, 20).group(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') , cu.coupon_id`).countSelect();
+            }).page(page, 20).where(whereSql).group(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') , cu.type_code`).countSelect();
 
         if (!think.isEmpty(res.data)) {
             for (let item of res.data) {
                 item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日')
             }
         }
+
+        const couponModel = this.model('activity_coupon');
+        const coupons = await couponModel.group('type_code').select();
         const html = this.pagination(res);
         this.assign('pagerData', html); //分页展示使用
         this.assign('list', res.data);
+        this.assign('coupons',coupons);
+        this.assign('data',data);
         return this.display()
+    }
+
+     /**
+     * 导出发券数据
+     */
+    async exportCouponAction() {
+        const data = this.post()
+        const couponUserModel = this.model('activity_coupon_user');
+        let whereSql = ' 1=1 '
+        if (!think.isEmpty(data.create_time)) {
+            whereSql += ` and DATE_FORMAT(cu.create_time, '%Y-%m-%d') = '${data.create_time}' `
+        }
+        if (!think.isEmpty(data.type_code)) {
+            whereSql += ` and cu.type_code = '${data.type_code}' `
+        }
+
+        const list = await couponUserModel.alias('cu').field(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') as create_time,c.coupon_name,COUNT(cu.id) AS allNum,COUNT(cu.receive_status = 2 OR NULL) AS receiveNum`)
+            .join({
+                table: 'activity_coupon',
+                join: 'left',
+                as: 'c',
+                on: ['coupon_id', 'id']
+            }).where(whereSql).group(`DATE_FORMAT(cu.create_time, '%Y-%m-%d') , cu.type_code`).select();
+
+        let datas = [
+            {
+                name: '发券数据',
+                data: [
+                    [
+                        '时间',
+                        '优惠券类别',
+                        '发放量',
+                        '领取量'
+                    ]
+                ]
+            }
+        ]
+        if (!think.isEmpty(list)) {
+            for (let item of list) {
+                item.create_time = moment(new Date(item.create_time)).format('YYYY年MM月DD日')
+                datas[0].data.push([
+                    item.create_time,
+                    item.coupon_name,
+                    item.allNum,
+                    item.receiveNum
+                ])
+            }
+        }
+        // 写xlsx
+        let buffer = xlsx.build(datas);
+        this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
+        this.ctx.set("Content-Disposition", "attachment; filename=coupon.xlsx");
+        this.ctx.body = buffer;
     }
 
     /**
@@ -604,6 +767,80 @@ module.exports = class extends think.common.Admin {
         let buffer = xlsx.build(datas);
         this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
         this.ctx.set("Content-Disposition", "attachment; filename=user.xlsx");
+        this.ctx.body = buffer;
+    }
+
+    /**
+     * 纳新用户
+     */
+    async newsAction(){
+        let data = this.post()
+        let page = this.get('page')
+        const accountModel = this.model('chinauff_account');
+        let whereSql = ' a.isNew = 1 ';//纳新用户
+        if (!think.isEmpty(data.create_time)) {
+            whereSql += ` and FROM_UNIXTIME(a.createTime/1000, '%Y-%m-%d') = '${data.create_time}' `
+        }
+
+        let sql = `select count(1) as count from (
+                SELECT  COUNT(a.id) FROM 
+                picker_chinauff_account a 
+                where ${whereSql} GROUP BY FROM_UNIXTIME(a.createTime / 1000, '%Y-%m-%d')) t `;
+        let total = await accountModel.query(sql)
+
+        let res = await accountModel.alias('a').field(`
+        FROM_UNIXTIME(a.createTime/1000, '%Y-%m-%d') as create_time ,count('id') as allNum
+        `).page(page, 20).where(whereSql).group(`FROM_UNIXTIME(a.createTime/1000, '%Y-%m-%d') `).countSelect(total[0].count);
+
+        if(think.isEmpty(res.data)){
+            res.count = 0;
+            res.totalPages = 0;
+        }
+        const html = this.pagination(res);
+        this.assign('pagerData', html); //分页展示使用
+        this.assign('list', res.data);
+        this.assign('data', data);
+        return this.display()
+    }
+
+    /**
+     * 导出纳新用户
+     */
+    async exportNewsAction(){
+        let data = this.post()
+        const accountModel = this.model('chinauff_account');
+        let whereSql = ' a.isNew = 1 ';//纳新用户
+        if (!think.isEmpty(data.create_time)) {
+            whereSql += ` and FROM_UNIXTIME(a.createTime/1000, '%Y-%m-%d') = '${data.create_time}' `
+        }
+
+        let list = await accountModel.alias('a').field(`
+        FROM_UNIXTIME(a.createTime/1000, '%Y-%m-%d') as create_time ,count('id') as allNum
+        `).where(whereSql).group(`FROM_UNIXTIME(a.createTime/1000, '%Y-%m-%d') `).select();
+
+        let datas = [
+            {
+                name: '纳新用户',
+                data: [
+                    [
+                        '时间',
+                        '纳新数'
+                    ]
+                ]
+            }
+        ]
+        if (!think.isEmpty(list)) {
+            for (const item of list) {
+                datas[0].data.push([
+                    item.create_time,
+                    item.allNum
+                ])
+            }
+        }
+        // 写xlsx
+        let buffer = xlsx.build(datas);
+        this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
+        this.ctx.set("Content-Disposition", "attachment; filename=news.xlsx");
         this.ctx.body = buffer;
     }
 }
