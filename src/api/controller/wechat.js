@@ -5,7 +5,20 @@ const {Wechat} = require('wechat-jssdk');
 const DOMAIN = 'http://wx.caixie.top';
 const appId = 'wx40f58df735cd2868'
 const appSecret = '745431b820310fe33756ccb3f992b509'
+const formstream = require('formstream');
+const queryString = require('query-string');
+const FormData = require('form-data');
+const util = require('util');
+const path = require('path');
+const httpx = require('httpx');
+const liburl = require('url');
+const JSONbig = require('json-bigint');
+const fs = require('fs');
+const utils = require('../../lib/jssdk/utils');
 
+const request = require('request');
+// const statAsync = util.promisify(stat);
+const {Base64Encode} = require('base64-stream');
 const wechatConfig = {
   //set your oauth redirect url, defaults to localhost
   wechatRedirectUrl: `${DOMAIN}`,
@@ -27,7 +40,7 @@ const wechatConfig = {
   }
 }
 const wx = new Wechat(wechatConfig);
-
+const rp = require('request-promise');
 module.exports = class extends Base {
   constructor (...args) {
     super(...args)
@@ -38,40 +51,45 @@ module.exports = class extends Base {
     this.saveSessionKey = async (openid, sessionkey) => {
       await think.cache(`session_${openid}`, sessionkey)
     }
+    this.prefix = 'https://api.weixin.qq.com/cgi-bin/';
+    this.mpPrefix = 'https://mp.weixin.qq.com/cgi-bin/';
+    this.fileServerPrefix = 'http://file.api.weixin.qq.com/cgi-bin/';
+    // http://file.api.weixin.qq.com/cgi-bin
+    this.payPrefix = 'https://api.weixin.qq.com/pay/';
+    this.merchantPrefix = 'https://api.weixin.qq.com/merchant/';
+    this.customservicePrefix = 'https://api.weixin.qq.com/customservice/';
+
+
+    this.setup = think.config('setup')
+    this.aiServer = this.setup.AI_SERVER
+    if (this.setup.AI_SERVER === 'baidu') {
+      this.appId = this.setup.AI_BAIDU_APP_ID
+      this.appKey = this.setup.AI_BAIDU_APP_KEY
+      this.appSecret = this.setup.AI_BAIDU_APP_SECRET
+    }
+    if (this.setup.AI_SERVER === 'huawei') {
+      this.appKey = this.setup.AI_HW_APP_KEY
+      this.appSecret = this.setup.AI_HW_APP_SECRET
+    }
   }
 
-  async getAction () {
-    const action = this.get('action')
-    if (!think.isEmpty(action)) {
-      switch (action) {
-        case 'signature': {
-          return await this.getSignature()
-        }
-        case 'implicit': {
-          return await this.getImplicitOAuth()
-        }
-        case 'oauth': {
-          return await this.getOAuth()
-        }
-      }
-    } else {
-      // 静默授权地址
-      const implicitOAuthUrl = wx.oauth.generateOAuthUrl(
-        DOMAIN,
-        'snsapi_base'
-      )
-      return this.success({
-        oauthUrl: wx.oauth.snsUserInfoUrl,
-        implicitOAuth: implicitOAuthUrl
-      })
-    }
+  async indexAction () {
+    // 静默授权地址
+    const implicitOAuthUrl = wx.oauth.generateOAuthUrl(
+      DOMAIN,
+      'snsapi_base'
+    )
+    return this.success({
+      oauthUrl: wx.oauth.snsUserInfoUrl,
+      implicitOAuth: implicitOAuthUrl
+    })
   }
 
   /**
    * 获取用户授权信息
    * @returns {Promise<*>}
    */
-  async oauth () {
+  async oauthAction () {
     const code = this.get('code')
     const key = await this.ctx.session('openid');
     const profile = await wx.oauth.getUserInfo(code, key)
@@ -86,7 +104,8 @@ module.exports = class extends Base {
    *
    * @returns {Promise<any>}
    */
-  async getSignature () {
+  async signatureAction () {
+    console.log('签名')
     const queryUrl = this.get('url')
     console.log(queryUrl)
     if (queryUrl) {
@@ -106,7 +125,7 @@ module.exports = class extends Base {
    * 静默获取用户信息
    * @returns {Promise<void>}
    */
-  async getImplicitOAuth () {
+  async implicitOAuthAction () {
     // const code = this.get('code')
     const redirect = this.get('callback')
     // wx.oauth.getUserBaseInfo(code).then(function (tokenInfo) {
@@ -159,5 +178,282 @@ module.exports = class extends Base {
         // res.redirect(wx.oauth.snsUserInfoUrl);
       });
   }
-}
 
+  async getMedia (accessToken, mediaId) {
+    const url = this.prefix + 'media/get'
+
+    const params = {
+      access_token: accessToken,
+      media_id: mediaId,
+    };
+    return utils
+      .sendRequest({
+        url,
+        qs: params,
+      })
+      .then(data => {
+        return data
+      })
+      .catch(reason => {
+        debug('get ticket failed!');
+        return Promise.reject(reason);
+      });
+  }
+  base64_encode(file) {
+    // read binary data
+    let bitmap = fs.readFileSync(file);
+    // convert binary data to base64 encoded string
+    return new Buffer(bitmap).toString('base64');
+  }
+
+  /**
+   * 获取临时素材
+   * 详情请见：<http://mp.weixin.qq.com/wiki/11/07b6b76a6b6e8848e855a435d5e34a5f.html>
+   * Examples:
+   * ```
+   * api.getMedia('media_id');
+   * ```
+   * - `result`, 调用正常时得到的文件Buffer对象
+   * - `res`, HTTP响应对象
+   * @param {String} mediaId 媒体文件的ID
+   */
+  async oneMediaAction () {
+    const mediaId = this.get('mediaId')
+    const openId = this.get('openId')
+    if (think.isEmpty(mediaId)) {
+      return this.fail()
+    }
+    const accessToken = '17_kA-EV4bfnBNq1dYmc-0Wb4AG2Y9n9ijBGkIgy5C3FP3wuiok5X1gkxGWEQWwk1kNvaJeH3wAGcNnnzfFkQ7cFuo0mqARZiTKymfYl_FXj8kxEZr2HUK3evk97P4Y8SKMlDgWnzJIb_R1sunKCVDgAFAHAI'
+    const uploadPath = think.ROOT_PATH + '/www/static/upload/picture/' + dateformat("Y-m-d", new Date().getTime());
+
+    think.mkdir(uploadPath);
+
+    const riceFile = uploadPath + '/' + openId + '_rice.jpg'
+      // /Users/basil/development/chinauff-server/screenshot/test.jpg
+    return new Promise((resolve, reject) => {
+      var stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token='+accessToken+'&media_id='+mediaId)
+        .pipe(fs.createWriteStream(riceFile));
+      stream.on('finish', () => {
+        if (think.isFile(riceFile)) {
+          const base64 = this.base64_encode(riceFile)
+          resolve(base64)
+        } else {
+          reject('error')
+        }
+      })
+    }).then(
+      async (base64Data) => {
+        const aiService = think.service('ai', 'common', this.aiServer, {
+          app_id: this.appId,
+          key: this.appKey,
+          secret: this.appSecret
+        });
+        const res = await aiService.image(base64Data)
+        if (res.result_num > 0) {
+          for (let item of res.result) {
+            if (item.score > 0.6 && item.keyword.includes('米')) {
+              // 返回置信度
+              return this.success({score: item.score * 100})
+              // console.log(item.score)
+              // resolve({score: item.score * 100});
+            }
+          }
+        }
+        if (res.error_code) {
+          think.logger.error(res)
+        }
+      },
+      ({message}) => this.fail(message)
+    );
+
+  }
+
+  /**
+   * 获取媒体列表
+   * http请求方式: POST
+   * https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=ACCESS_TOKEN
+   * @returns {Promise<void>}
+   */
+  async materialAction () {
+    if (this.isPost) {
+      // {
+      //     "type":TYPE,     // 素材的类型，图片（image）、视频（video）、语音 （voice）、图文（news）
+      //     "offset":OFFSET, // 从全部素材的该偏移位置开始返回，0表示从第一个素材 返回
+      //     "count":COUNT    // 返回素材的数量，取值在1到20之间
+      // }
+      const param = this.post()
+      // console.log(param)
+      const global = await wx.store.getGlobalToken
+      // console.log(global.accessToken)
+      // const accessToken = '17_DSnJkI6eSFuIi_NnKxnnVwteLusD2ScbjqZYhvdWIoWXviHUyHMMkeGO2VD7uyMiF5GjwzaJxaCxbIRwo2XEMD8X1hOXr3yp8FKvt_mX3-Y-q5QMl2LcTFImL24L2rbkNgucrt_6Ll_GtFZIUMLjADAGYX'
+      // const accessToken = await wx.jssdk.getAccessToken()
+      const accessToken = '17_C3213veG8uoTitMpYgNm6Lqe9qmGXo97j2dvB_RwNFYbTPnL6m5lndQkdLZlkI-OcS1Zj133GY1gekGd_c60kfNFaHb_4cgYSYNu7P-L_QcywRQYCz6THXrWLQyg7a9EkQeR7ZGXjcYwb9jnTOKhAHABWS'
+      // const accessToken = '17_V7GB_65T7xPQ-hcg2yVvvD-PehfDi5guRPl94DHlL43iaJ1seLcM871nWL8K9NVMOGciqVlJ3oD6dxO7Wkz_BJXR7J6xra6qcic7w76VnO7TR5noYhrHj_s-h_MDVCaAGANFM'
+      console.log(accessToken)
+      const url = `https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=${accessToken}`
+      const query = queryString.stringify(param)
+
+      const form = new FormData()
+      // form.append('type', param.type)
+      // form.append('offset', param.offset)
+      // form.append('count', param.count)
+      const payload = (await this.got.post(
+        url,
+        {
+          json: true,
+          body: param
+        }
+      )).body
+
+      console.log(payload)
+      return this.success(payload)
+    }
+    // https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=ACCESS_TOKEN
+  }
+
+  async _promiseRequest ({imgStram = null, imgBuffer = null, accessToken}) {
+    const url = `https://api.weixin.qq.com/cgi-bin/media/upload?access_token=${accessToken}&type=image`;
+    return new Promise((resolve, reject) => {
+      const req = request.post(
+        {
+          url,
+          headers: {
+            accept: '*/*',
+          },
+        },
+        (err, res) => {
+          if (err) {
+            reject(err);
+          }
+
+          try {
+            const resData = JSON.parse(res.body); // 里面带有返回的media_id
+
+            resolve(resData);
+          } catch (e) {
+            console.log(e)
+          }
+        },
+      );
+
+      const form = req.form();
+
+      if (imgBuffer) {
+        form.append('media', imgBuffer, {
+          contentType: 'image/jpeg', // 微信识别需要
+          filename: 'code.jpg', // 微信识别需要
+        });
+      } else if (imgStram) {
+        form.append('media', imgStram);
+      }
+
+      form.append('hack', ''); // 微信服务器的bug，需要hack一下才能识别到对象
+    });
+  }
+
+
+  async uploadMediaAction () {
+    const file = think.extend({}, this.file('file'))
+    const filepath = file.path
+    const extname = path.extname(file.name)
+    const basename = path.basename(filepath) + extname;
+    const type = 'image'
+    const uploadPath = think.ROOT_PATH + '/wwww/static/upload/picture/' + dateformat("Y-m-d", new Date().getTime());
+
+    think.mkdir(uploadPath);
+
+    if (think.isFile(filepath)) {
+      fs.renameSync(filepath, uploadPath + '/' + basename);
+
+    } else {
+      console.log("文件不存在！")
+
+    }
+    file.path = uploadPath + '/' + basename;
+    console.log(file.path)
+    // const global = await wx.store.getGlobalToken()
+    // const accessToken = await wx.jssdk.getAccessToken()
+    // console.log(accessToken)
+    // console.log('--x-x-x-')
+    // const accessToken = '17_XvpZDras2VNEUrk_L5jhzifI2-xHo6OyTj3-w2kD2EzfbAHvn2-b_AroAaTXDF8sixEB5UtLb6gdUtKYy3hTBNRFgahKA8EAA7EjrZGzTOSqQemZIGVqNG2vkP6U5vOyZUNoeUK3zc4QZFRRRLUfAFAWQZ'
+    // const accessToken = '17_EU_2YommrTfT3FG2qtfe9vM76t3Dn_DBC6h1E-NaWANw3OgGWKAEND5gXrHCVMRcqTOlnCxy8QwVn0dmxdKu8ttWk6aIxb9HRYXOqho1yVM5kbLoyBvWeEB6c1BVVDXS7hbQhoUnWjku9wmmGYQgAGAVNF'
+    // const accessToken = '17_l2hQBTzBwlbxd46TuPLdRMZnFbGhuaV-wtAUR9xhAKNzqcIALc0GMMNMeXYewmNAsMUrkFnXChpBgN2ax5eF5H0l0v6SUM3GiRojtaC54DFfTQhCHtTEW9dvZi1OgjyMgRxV1emBZviw3nMmJGLdABAAXC'
+    const accessToken = '17_kA-EV4bfnBNq1dYmc-0Wb4AG2Y9n9ijBGkIgy5C3FP3wuiok5X1gkxGWEQWwk1kNvaJeH3wAGcNnnzfFkQ7cFuo0mqARZiTKymfYl_FXj8kxEZr2HUK3evk97P4Y8SKMlDgWnzJIb_R1sunKCVDgAFAHAI'
+
+    const data = await this._promiseRequest({
+      imgStram: fs.createReadStream(file.path),
+      accessToken
+    })
+    return this.json(data)
+  };
+
+  async request (url, opts, retry) {
+    if (typeof retry === 'undefined') {
+      retry = 3;
+    }
+
+    var options = {};
+    Object.assign(options, this.defaults);
+    opts || (opts = {});
+    var keys = Object.keys(opts);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (key !== 'headers') {
+        options[key] = opts[key];
+      } else {
+        if (opts.headers) {
+          options.headers = options.headers || {};
+          Object.assign(options.headers, opts.headers);
+        }
+      }
+    }
+
+    var res = await httpx.request(url, options);
+    if (res.statusCode < 200 || res.statusCode > 204) {
+      var err = new Error(`url: ${url}, status code: ${res.statusCode}`);
+      err.name = 'WeChatAPIError';
+      throw err;
+    }
+
+    var buffer = await httpx.read(res);
+    var contentType = res.headers['content-type'] || '';
+    if (contentType.indexOf('application/json') !== -1) {
+      var data;
+      var origin = buffer.toString();
+      try {
+        data = JSONbig.parse(replaceJSONCtlChars(origin));
+      } catch (ex) {
+        let err = new Error('JSON.parse error. buffer is ' + origin);
+        err.name = 'WeChatAPIError';
+        throw err;
+      }
+
+      if (data && data.errcode) {
+        let err = new Error(data.errmsg);
+        err.name = 'WeChatAPIError';
+        err.code = data.errcode;
+
+        if ((err.code === 40001 || err.code === 42001) && retry > 0 && !this.tokenFromCustom) {
+          // 销毁已过期的token
+          await this.saveToken(null);
+          let token = await this.getAccessToken();
+          let urlobj = liburl.parse(url, true);
+
+          if (urlobj.query && urlobj.query.access_token) {
+            urlobj.query.access_token = token.accessToken;
+            delete urlobj.search;
+          }
+
+          return this.request(liburl.format(urlobj), opts, retry - 1);
+        }
+
+        throw err;
+      }
+
+      return data;
+    }
+
+    return buffer;
+  }
+
+}

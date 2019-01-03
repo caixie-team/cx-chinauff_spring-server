@@ -44,6 +44,10 @@ module.exports = class extends think.Model {
    * @returns {Promise<*>}
    */
   async save (openId, data) {
+    const accountData = await this.where({openId}).find()
+    if (think.isEmpty(accountData)) {
+      return
+    }
     let saveData = {
       updateTime: new Date().getTime(),
       lastLoginTime: new Date().getTime(),
@@ -53,6 +57,16 @@ module.exports = class extends think.Model {
       saveData.name = data.userInfo.name
       if (think._.has(data.userInfo, 'mobile')) {
         saveData.mobile = data.userInfo.mobile
+      }
+      // 根据加入时间判断是否为本系统的纳新用户
+      if (think._.has(data.userInfo, 'joinDate')) {
+        const joinDate = data.userInfo.joinDate
+        if (accountData.isNew === 0 || think.isEmpty(accountData.isNew)) {
+          if (joinDate < accountData.createTime) {
+            saveData.isNew = 1
+          }
+        }
+        // if (accountData.createTime)
       }
     }
     if (think._.has(data, 'cardInfo')) {
@@ -69,6 +83,7 @@ module.exports = class extends think.Model {
       'openId',
       'name',
       'cardNo',
+      'isNew',
       'createTime',
       'lastLoginTime'
     ]

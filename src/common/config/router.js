@@ -20,7 +20,7 @@ module.exports = [
   // [/\/api\/ai\/(\w+)?/, 'api/ai/?action=:1', 'rest'],
   // [/\/api\/card\/code\/get?/, 'api/blessing/getOneReserve', 'post'],
   // [/\/api\/card\/code\/consume?/, 'api/blessing/consume', 'post'],
-  [/\/api\/wechat\/(\w+)?/, 'api/wechat/?action=:1', 'rest'],
+  // [/\/api\/wechat\/(\w+)?/, 'api/wechat/?action=:1', 'rest'],
   [/\/api\/(\w+)(?:\/(\w+))?$/, '/api/:1/:2', 'get, post'],
   // [/\/addons\/(\w+)?/, 'addons/:1', 'get, post'],
   // [/\/api\/wechat\/(\w+)?/, 'api/wechat/?action=:1', 'rest'],
