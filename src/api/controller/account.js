@@ -35,8 +35,16 @@ module.exports = class extends Base {
           if (cardPayload) {
             accountInfo = await this.model('account').save(data.openId, cardPayload)
           }
+        } else {
+          accountInfo = await this.model('account').save(data.openId, {
+            lastLoginTime: new Date().getTime()
+          })
         }
         accountInfo.status = 1
+      } else { // 更新最后登录时间
+        accountInfo = await this.model('account').save(data.openId, {
+          lastLoginTime: new Date().getTime()
+        })
       }
       // console.log(accountInfo)
       return this.success(accountInfo)
