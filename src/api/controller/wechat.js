@@ -200,14 +200,15 @@ module.exports = class extends Base {
         return Promise.reject(reason);
       });
   }
-  base64_encode(file) {
+
+  base64_encode (file) {
     // read binary data
     let bitmap = fs.readFileSync(file);
     // convert binary data to base64 encoded string
     return new Buffer(bitmap).toString('base64');
   }
 
-  async getAccessToken() {
+  async getAccessToken () {
     const query = queryString.stringify({
       appid: this.config.appId
     })
@@ -228,6 +229,7 @@ module.exports = class extends Base {
       accessToken
     }
   }
+
   /**
    * 获取临时素材
    * 详情请见：<http://mp.weixin.qq.com/wiki/11/07b6b76a6b6e8848e855a435d5e34a5f.html>
@@ -244,14 +246,8 @@ module.exports = class extends Base {
     if (!think._.has(data, 'mediaId') || !think._.has(data, 'openId')) {
       return this.fail()
     }
-    const { mediaId, openId } = data
-    // const mediaId = this.get('mediaId')
-    // const openId = this.get('openId')
-    // if (think.isEmpty(mediaId)) {
-    //   return this.fail()
-    // }
-    // console.log('检测图片。。。')
-    const { accessToken } = await this.getAccessToken()
+    const {mediaId, openId} = data
+    const {accessToken} = await this.getAccessToken()
     // await this.got('')
     const query = queryString.stringify({
       appid: this.config.appId
@@ -270,9 +266,9 @@ module.exports = class extends Base {
     think.mkdir(uploadPath);
 
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
-      // /Users/basil/development/chinauff-server/screenshot/test.jpg
+    // /Users/basil/development/chinauff-server/screenshot/test.jpg
     return new Promise((resolve, reject) => {
-      var stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token='+accessToken+'&media_id='+mediaId)
+      var stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token=' + accessToken + '&media_id=' + mediaId)
         .pipe(fs.createWriteStream(riceFile));
       stream.on('finish', () => {
         if (think.isFile(riceFile)) {
@@ -290,8 +286,8 @@ module.exports = class extends Base {
           secret: this.appSecret
         });
         const res = await aiService.image(base64Data)
-        console.log('开启百度云识别。。。。。。。。。')
-        console.log(res)
+        // console.log('开启百度云识别。。。。。。。。。')
+        // console.log(res)
         if (res.result_num > 0) {
           for (let item of res.result) {
             if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
@@ -300,18 +296,22 @@ module.exports = class extends Base {
               return this.success({score: 0})
             }
             // if (item.score > 0.4 && item.keyword.includes('米')) {
-              // 返回置信度
-              // return this.success({score: item.score * 100})
-              // console.log(item.score)
-              // resolve({score: item.score * 100});
+            // 返回置信度
+            // return this.success({score: item.score * 100})
+            // console.log(item.score)
+            // resolve({score: item.score * 100});
             // }
           }
         }
         if (res.error_code) {
           think.logger.error(res)
+          return this.success({score: new Date().getTime()})
         }
       },
-      ({message}) => this.fail(message)
+      ({message}) => {
+        console.log(message)
+        this.fail(message)
+      }
     );
 
   }
@@ -418,7 +418,7 @@ module.exports = class extends Base {
 
     }
     file.path = uploadPath + '/' + basename;
-    const { accessToken } = await this.getAccessToken()
+    const {accessToken} = await this.getAccessToken()
 
     const data = await this._promiseRequest({
       imgStram: fs.createReadStream(file.path),
