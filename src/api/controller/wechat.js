@@ -240,11 +240,17 @@ module.exports = class extends Base {
    * @param {String} mediaId 媒体文件的ID
    */
   async oneMediaAction () {
-    const mediaId = this.get('mediaId')
-    const openId = this.get('openId')
-    if (think.isEmpty(mediaId)) {
+    const data = this.post()
+    if (!think._.has(data, 'mediaId') || !think._.has(data, 'openId')) {
       return this.fail()
     }
+    const { mediaId, openId } = data
+    // const mediaId = this.get('mediaId')
+    // const openId = this.get('openId')
+    // if (think.isEmpty(mediaId)) {
+    //   return this.fail()
+    // }
+    // console.log('检测图片。。。')
     const { accessToken } = await this.getAccessToken()
     // await this.got('')
     const query = queryString.stringify({
