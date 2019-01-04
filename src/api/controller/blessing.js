@@ -270,7 +270,7 @@ module.exports = class extends Base {
     const data = this.post()
     //openId
     if (think.isEmpty(data.openId)) {
-      return this.fail('请求参数错误')
+      return this.fail(1000, '请求参数错误, 没有openId')
     }
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
@@ -281,7 +281,7 @@ module.exports = class extends Base {
 
     //判断福码非空
     if (think.isEmpty(data.blessing_code)) {
-      return this.fail('请求参数错误')
+      return this.fail(1002, '请求参数错误, 没有福码')
     }
     //校验福码合法性
     const blessingUserModel = this.model('activity_blessing_user')

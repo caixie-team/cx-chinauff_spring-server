@@ -268,7 +268,7 @@ module.exports = class extends Base {
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
     // /Users/basil/development/chinauff-server/screenshot/test.jpg
     return new Promise((resolve, reject) => {
-      var stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token=' + accessToken + '&media_id=' + mediaId)
+      const stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token=' + accessToken + '&media_id=' + mediaId)
         .pipe(fs.createWriteStream(riceFile));
       stream.on('finish', () => {
         if (think.isFile(riceFile)) {
@@ -278,6 +278,8 @@ module.exports = class extends Base {
           reject('error')
         }
       })
+      console.log('错误。。。')
+      reject('error')
     }).then(
       async (base64Data) => {
         const aiService = think.service('ai', 'common', this.aiServer, {
