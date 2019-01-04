@@ -541,7 +541,11 @@ module.exports = class extends Base {
    */
   async sendCouponAction () {
     console.log('....helo .....')
-    const openId = 'oQJYBwwTnIfJIZSMYv_sSBqg2YBA'
+    // const openId = 'oQJYBwwTnIfJIZSMYv_sSBqg2YBA'
+    // ME
+    // const openId = 'oQJYBwwTnIfJIZSMYv_sSBqg2YBA'
+    // TEST
+    const openId = 'oQJYBw1y5E3NlaSrdQFtYv36F9ew'
     const data = this.post()
     // http://demo.micvs.com/crmSession/console/api/
     // coupon/
