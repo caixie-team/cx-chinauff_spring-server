@@ -191,7 +191,7 @@ module.exports = class extends Base {
    */
   async getCycle (currentDate) {
     //第一阶段
-    const one_start_date = '2019-01-05';
+    const one_start_date = '2019-01-04';
     const one_end_date = '2019-01-09';
 
     //第二阶段
