@@ -258,17 +258,21 @@ module.exports = class extends Base {
    * 预约兑换
    */
   async reserveAction () {
+    console.log('reserver ......')
     let now = new Date().getTime();
-    let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
+    // let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
+    // TODO 上线前测试时间
+    let startTime = new Date('2019-01-04 00:00:00').getTime(); //可提交预约开始时间
     let endTime = new Date('2019-02-01 23:59:59').getTime();//可提交预约结束时间
     if (now < startTime || now > endTime) {
       return this.fail('可提交预约时间:2019年1月5日00:00:00 - 2019年2月1日23:59:59');
     }
 
     const data = this.post()
+    console.log(data)
     //openId
     if (think.isEmpty(data.openId)) {
-      return this.fail('请求参数错误')
+      return this.fail(1000, '请求参数错误, 没有openId')
     }
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
@@ -279,7 +283,7 @@ module.exports = class extends Base {
 
     //判断福码非空
     if (think.isEmpty(data.blessing_code)) {
-      return this.fail('请求参数错误')
+      return this.fail(1002, '请求参数错误, 没有福码')
     }
     //校验福码合法性
     const blessingUserModel = this.model('activity_blessing_user')
