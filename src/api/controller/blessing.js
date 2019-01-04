@@ -258,6 +258,7 @@ module.exports = class extends Base {
    * 预约兑换
    */
   async reserveAction () {
+    console.log('reserver ......')
     let now = new Date().getTime();
     // let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
     // TODO 上线前测试时间
@@ -268,6 +269,7 @@ module.exports = class extends Base {
     }
 
     const data = this.post()
+    console.log(data)
     //openId
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误, 没有openId')
