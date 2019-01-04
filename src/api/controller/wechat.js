@@ -278,8 +278,6 @@ module.exports = class extends Base {
           reject('error')
         }
       })
-      console.log('错误。。。')
-      reject('error')
     }).then(
       async (base64Data) => {
         const aiService = think.service('ai', 'common', this.aiServer, {
