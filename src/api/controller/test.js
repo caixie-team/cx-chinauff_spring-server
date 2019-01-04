@@ -514,7 +514,7 @@ module.exports = class extends Base {
     }
     // console.log(couponUserData.openid)
     // 发放优惠劵
-    const crmSendCouponRes = await this.sendCouponByActivity(couponUserData.openid, couponUserData.type_code)
+    const crmSendCouponRes = await this.sendCouponByActivity(couponUserData.openid)
     if (crmSendCouponRes.errcode === 0) {
       const crm_coupon_code = crmSendCouponRes.data[0]
       await couponUserModel.where({
@@ -539,13 +539,16 @@ module.exports = class extends Base {
    * 只用登录成功的用户可以发劵
    * @returns {Promise<void>}
    */
-  async sendCouponByActivity (openId, code) {
+  async sendCouponAction () {
+    console.log('....helo .....')
+    const openId = 'oQJYBwwTnIfJIZSMYv_sSBqg2YBA'
+    const data = this.post()
     // http://demo.micvs.com/crmSession/console/api/
     // coupon/
     // sendCouponByActivity?channel=5&deviceDate=2018-04-16 11:50:00&merNo=2109&shopNo=210999999998&deviceNo=210999999998&version=1.0&token=B0A8DB136921E59A6573A3F732FC754C014361DFC5F5F677894765C28C25A5731DEBCE0DE84B5964&orderNo=Li20180416005&transCode=A016&amount=oQJYBw_H_E3FRVj1jsHSHG__AmKQ&type=2&couponJson=[{couponType:584,couponNum:1},{couponType:581,couponNum:2}]
     const queryConfig = think.config('proxyQueryStringForCoupon')
     const couponJson = [{
-      couponType: code,
+      couponType: data.code,
       couponNum: 1
     }]
     const queryInfo = {
@@ -561,13 +564,12 @@ module.exports = class extends Base {
       // amount: queryConfig.amount,
       amount: openId,
       type: queryConfig.type,
-      // TODO 处理卡劵
-      // couponJson: JSON.stringify(queryConfig.couponJson)
-      couponJson: JSON.stringify(couponJson)
+      // couponJson: JSON.stringify(couponJson)
+      couponJson: JSON.stringify(queryConfig.couponJson)
     }
     const query = queryString.stringify(queryInfo)
 
-    // console.log(query)
+    console.log(query)
     const payload = (await this.got.post(
       '/console/api/coupon/sendCouponByActivity',
       {
@@ -575,8 +577,8 @@ module.exports = class extends Base {
         query
       }
     )).body
-    // console.log(payload)
-    return JSON.parse(payload)
+    console.log(payload)
+    this.success(JSON.parse(payload))
   }
 
   /*******************优惠券数据测试接口****************** */

@@ -19,14 +19,17 @@ module.exports = {
   wechat: {
     appId: 'wxa8299eb7fc27ef04'
   },
+  // 活动 API
   proxyActivityApi: 'http://demo.micvs.com/lnj-weixin',
+  // proxyActivityApi: 'http://crm.chinauff.com',
+  // CRM API
   proxyCrmApi: 'http://demo.i-manji.com/crmSession',
+  // proxyCrmApi: 'http://crm.chinauff.com',
   proxyQueryString: {
     version: '1.0',
     activityToken: 'C5AB4E7A104F2492B9241D5E98C9BF0332785730FAC1056BF8A01DD25EF77171',
     crmToken: '67405076EFC81E6ACA83FB1B7D02898C5CBCC8A464C0EC44C5CA8EEEA62E79FA',
     deviceSeq: '1516345652000',
-    // new Date().getTime()
     deviceTime: '',
     merNo: 2109,
     shopNo: '210910030008',
