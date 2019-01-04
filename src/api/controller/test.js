@@ -540,7 +540,11 @@ module.exports = class extends Base {
    * @returns {Promise<void>}
    */
   async sendCouponAction () {
-    console.log('....helo .....')
+    return this.success({
+      msg: '生产环境',
+      data: '停止测试'
+    })
+    // 正式环境要换 openId 不同系统不一样的 openId
     // const openId = 'oQJYBwwTnIfJIZSMYv_sSBqg2YBA'
     // ME
     // const openId = 'oQJYBwwTnIfJIZSMYv_sSBqg2YBA'
@@ -573,11 +577,15 @@ module.exports = class extends Base {
     }
     const query = queryString.stringify(queryInfo)
 
+    // proxyActivityApi: 'http://crm.chinauff.com',
+    // http://crm.chinauff.com/crm/console/api/coupon/sendCouponByActivity
+    const proxy = 'http://crm.chinauff.com/crm'
     console.log(query)
     const payload = (await this.got.post(
       '/console/api/coupon/sendCouponByActivity',
       {
-        baseUrl: think.config('proxyCrmApi'),
+        baseUrl: proxy,
+        // baseUrl: 'http://crm.chinauff.com',
         query
       }
     )).body
