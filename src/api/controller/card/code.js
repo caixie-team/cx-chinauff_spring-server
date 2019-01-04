@@ -227,7 +227,6 @@ module.exports = class extends Base {
     const reserveInfo = await reserveModel.where({
       shop_id: data.shop_code,
       blessing_code: data.blessing_code,
-      status: 1
     }).find();
     if (think.isEmpty(reserveInfo)) {
       return this.fail(1003, '未预约')
