@@ -560,6 +560,8 @@ module.exports = class extends Base {
       couponJson: JSON.stringify(queryConfig.couponJson)
     }
     const query = queryString.stringify(queryInfo)
+
+    console.log(query)
     const payload = (await this.got.post(
       '/console/api/coupon/sendCouponByActivity',
       {
@@ -567,6 +569,7 @@ module.exports = class extends Base {
         query
       }
     )).body
+    console.log(payload)
     return JSON.parse(payload)
   }
 
