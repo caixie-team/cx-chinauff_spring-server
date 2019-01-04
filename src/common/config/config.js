@@ -52,7 +52,8 @@ module.exports = {
     deviceSeq: '1516345652000',
     orderNo: '',
     transCode: 'A016',
-    amount: 'oQJYBw_H_E3FRVj1jsHSHG__AmKQ',
+    // amount: 'oQJYBw_H_E3FRVj1jsHSHG__AmKQ',
+    amount: '',
     type: 2,
     couponJson: [{
       couponType: 1228,

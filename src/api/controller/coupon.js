@@ -554,8 +554,8 @@ module.exports = class extends Base {
       token: queryConfig.token,
       orderNo: Generate.id(),
       transCode: queryConfig.transCode,
-      // amount: openId,
-      amount: queryConfig.amount,
+      // amount: queryConfig.amount,
+      amount: openId,
       type: queryConfig.type,
       couponJson: JSON.stringify(queryConfig.couponJson)
     }
