@@ -259,7 +259,9 @@ module.exports = class extends Base {
    */
   async reserveAction () {
     let now = new Date().getTime();
-    let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
+    // let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
+    // TODO 上线前测试时间
+    let startTime = new Date('2019-01-04 00:00:00').getTime(); //可提交预约开始时间
     let endTime = new Date('2019-02-01 23:59:59').getTime();//可提交预约结束时间
     if (now < startTime || now > endTime) {
       return this.fail('可提交预约时间:2019年1月5日00:00:00 - 2019年2月1日23:59:59');

@@ -258,7 +258,10 @@ module.exports = class extends Base {
 
   async _checkTime () {
     let now = new Date().getTime();
-    let startTime = new Date('2019-01-05 00:00:00').getTime(); //可到店兑换开始时间
+    // let startTime = new Date('2019-01-05 00:00:00').getTime(); //可到店兑换开始时间
+    // let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
+    // TODO 上线前测试时间
+    let startTime = new Date('2019-01-04 00:00:00').getTime(); //可提交预约开始时间
     let endTime = new Date('2019-02-04 13:59:59').getTime();//可到店兑换结束时间
     if (now < startTime || now > endTime) {
       return this.fail(1004, '未在可兑换时间段');
