@@ -21,8 +21,8 @@ module.exports = class extends Base {
    * 抽奖
    */
   async hitAction () {
-
-    await this.validateActivityDate(); //验证活动时间
+    // 测试时关闭了 todo 上线后需要去掉
+    // await this.validateActivityDate(); //验证活动时间
 
     const data = this.post()
     if (think.isEmpty(data.openId)) {
@@ -114,8 +114,14 @@ module.exports = class extends Base {
     const cardUserModel = this.model('activity_card_user');
 
     const nowTime = new Date().getTime(); //当前时间
-    const startTime = new Date('2019-01-10 00:00:00').getTime();  //充值卡发放开始时间
-    const endTime = new Date('2019-01-20 23:59:59').getTime();    //充值卡发放结束时间
+
+    //////////////用于测试 上线需要去掉
+    const startTime = new Date('2018-12-30 00:00:00').getTime();  //充值卡发放开始时间
+    const endTime = new Date('2019-01-04 23:59:59').getTime();    //充值卡发放结束时间
+
+
+    // const startTime = new Date('2019-01-10 00:00:00').getTime();  //充值卡发放开始时间
+    // const endTime = new Date('2019-01-20 23:59:59').getTime();    //充值卡发放结束时间
     if (nowTime >= startTime && nowTime <= endTime) {
       console.log('******** 会员充值卡产生时间 *******')
 
@@ -257,6 +263,14 @@ module.exports = class extends Base {
         master_total: 63626,
         spare_total: 63626,
         cycle: 6
+      }
+    } else {
+      data = {
+        startDate: '2018-12-30',
+        endDate: '2019-01-04',
+        master_total: 1000,
+        spare_total: 1000,
+        cycle: 7
       }
     }
     return data;
@@ -500,7 +514,7 @@ module.exports = class extends Base {
     }
     // console.log(couponUserData.openid)
     // 发放优惠劵
-    const crmSendCouponRes = await this.sendCouponByActivity(couponUserData.openid, couponUserData.type_code)
+    const crmSendCouponRes = await this.sendCouponByActivity(couponUserData.openid)
     if (crmSendCouponRes.errcode === 0) {
       const crm_coupon_code = crmSendCouponRes.data[0]
       await couponUserModel.where({
@@ -525,13 +539,20 @@ module.exports = class extends Base {
    * 只用登录成功的用户可以发劵
    * @returns {Promise<void>}
    */
-  async sendCouponByActivity (openId, code) {
+  async sendCouponAction () {
+    console.log('....helo .....')
+    // const openId = 'oQJYBwwTnIfJIZSMYv_sSBqg2YBA'
+    // ME
+    // const openId = 'oQJYBwwTnIfJIZSMYv_sSBqg2YBA'
+    // TEST
+    const openId = 'oQJYBw1y5E3NlaSrdQFtYv36F9ew'
+    const data = this.post()
     // http://demo.micvs.com/crmSession/console/api/
     // coupon/
     // sendCouponByActivity?channel=5&deviceDate=2018-04-16 11:50:00&merNo=2109&shopNo=210999999998&deviceNo=210999999998&version=1.0&token=B0A8DB136921E59A6573A3F732FC754C014361DFC5F5F677894765C28C25A5731DEBCE0DE84B5964&orderNo=Li20180416005&transCode=A016&amount=oQJYBw_H_E3FRVj1jsHSHG__AmKQ&type=2&couponJson=[{couponType:584,couponNum:1},{couponType:581,couponNum:2}]
     const queryConfig = think.config('proxyQueryStringForCoupon')
     const couponJson = [{
-      couponType: code,
+      couponType: data.code,
       couponNum: 1
     }]
     const queryInfo = {
@@ -547,13 +568,12 @@ module.exports = class extends Base {
       // amount: queryConfig.amount,
       amount: openId,
       type: queryConfig.type,
-      // TODO 处理卡劵
-      // couponJson: JSON.stringify(queryConfig.couponJson)
-      couponJson: JSON.stringify(couponJson)
+      // couponJson: JSON.stringify(couponJson)
+      couponJson: JSON.stringify(queryConfig.couponJson)
     }
     const query = queryString.stringify(queryInfo)
 
-    // console.log(query)
+    console.log(query)
     const payload = (await this.got.post(
       '/console/api/coupon/sendCouponByActivity',
       {
@@ -561,8 +581,8 @@ module.exports = class extends Base {
         query
       }
     )).body
-    // console.log(payload)
-    return JSON.parse(payload)
+    console.log(payload)
+    this.success(JSON.parse(payload))
   }
 
   /*******************优惠券数据测试接口****************** */
