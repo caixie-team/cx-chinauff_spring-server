@@ -70,7 +70,7 @@ module.exports = class extends Base {
    */
   async validateActivityDate () {
     const currentDate = moment(new Date()).format('YYYY-MM-DD');
-    if (currentDate < '2019-01-04') {
+    if (currentDate < '2019-01-05') {
       return this.fail(1002, '活动未开始');
     } else if (currentDate > '2019-02-04') {
       return this.fail(1003, '活动已结束');
@@ -191,7 +191,7 @@ module.exports = class extends Base {
    */
   async getCycle (currentDate) {
     //第一阶段
-    const one_start_date = '2019-01-04';
+    const one_start_date = '2019-01-05';
     const one_end_date = '2019-01-09';
 
     //第二阶段
