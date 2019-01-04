@@ -852,7 +852,7 @@ module.exports = class extends think.common.Admin {
         let data = this.post();
         if (think.isEmpty(data.reserve_date)) {
             //默认为距今第三天
-            nowDate = new Date('2019-01-06')
+            nowDate = new Date()
             nowDate.setDate(nowDate.getDate() + 3);
             nowDate = moment(nowDate).format('YYYY-MM-DD')
         } else {
@@ -902,7 +902,7 @@ module.exports = class extends think.common.Admin {
         let data = this.post();
         if (think.isEmpty(data.reserve_date)) {
             //默认为距今第三天
-            nowDate = new Date('2019-01-06')
+            nowDate = new Date()
             nowDate.setDate(nowDate.getDate() + 3);
             nowDate = moment(nowDate).format('YYYY-MM-DD')
         } else {
@@ -935,13 +935,36 @@ module.exports = class extends think.common.Admin {
         `
         const reserveModel = this.model('activity_reserve');
         let list = await reserveModel.query(sql);
-
-        const shopModel = this.model('chinauff_shop');
-        const shops = await shopModel.select();           
-        this.assign('list', list);
-        this.assign('shops', shops);
-        this.assign('data', data);
-        return this.display();
+        let datas = [
+            {
+                name: '门店配货',
+                data: [
+                    [
+                        '日期',
+                        '门店名称',
+                        '预约数',
+                        '兑换数',
+                        '库存'
+                    ]
+                ]
+            }
+        ]
+        if (!think.isEmpty(list)) {
+            for (const item of list) {
+                datas[0].data.push([
+                    item.reserve_date,
+                    item.shop_name,
+                    item.reserve_count,
+                    item.exchange_count,
+                    item.num
+                ])
+            }
+        }
+        // 写xlsx
+        let buffer = xlsx.build(datas);
+        this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
+        this.ctx.set("Content-Disposition", "attachment; filename=allocation.xlsx");
+        this.ctx.body = buffer;
     }
 
 }
