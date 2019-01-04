@@ -79,6 +79,7 @@ module.exports = class extends Base {
     // 检查请求参数
     // return 1000 请求参数错误
     const data = await this._checkParams()
+    console.log(data)
     // const data = this.post()
     //判断福码非空
     // if (think.isEmpty(data.blessing_code) || think.isEmpty(data.shop_code)) {
@@ -92,7 +93,7 @@ module.exports = class extends Base {
 
     // 预约兑换数据
     // return 1003 未预约
-    const reserveInfo = await this._checkReserve(data.blessing_code)
+    const reserveInfo = await this._checkReserve(data)
 
     // const reserveModel = this.model('activity_reserve')
     // const res = await reserveModel.where({
@@ -203,6 +204,7 @@ module.exports = class extends Base {
    */
   async _checkParams () {
     const data = this.post()
+    console.log(data)
     if (think.isEmpty(data.blessing_code) || think.isEmpty(data.shop_code)) {
       return this.fail(1000, '请求参数错误')
       // return this.fail('请求参数错误')
