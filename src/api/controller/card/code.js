@@ -105,7 +105,7 @@ module.exports = class extends Base {
     if (!think.isEmpty(reserveInfo)) {
       return this.success()
     } else {
-      return this.fail(1005, '未在可兑换门店')
+      return this.fail(1003, '未预约')
     }
   }
 
@@ -204,7 +204,6 @@ module.exports = class extends Base {
    */
   async _checkParams () {
     const data = this.post()
-    console.log(data)
     if (think.isEmpty(data.blessing_code) || think.isEmpty(data.shop_code)) {
       return this.fail(1000, '请求参数错误')
       // return this.fail('请求参数错误')
@@ -225,12 +224,16 @@ module.exports = class extends Base {
     //预约兑换数据
     const reserveModel = this.model('activity_reserve')
     const reserveInfo = await reserveModel.where({
-      shop_id: data.shop_code,
       blessing_code: data.blessing_code,
+      status: 1
     }).find();
     if (think.isEmpty(reserveInfo)) {
       return this.fail(1003, '未预约')
     }
+    if (reserveInfo.shop_id !== data.shop_code) {
+      return this.fail(1005, '未在可兑换门店')
+    }
+
     return reserveInfo
   }
 
