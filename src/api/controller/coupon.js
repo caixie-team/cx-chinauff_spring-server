@@ -21,8 +21,8 @@ module.exports = class extends Base {
    * 抽奖
    */
   async hitAction () {
-    // 测试时关闭了 todo 上线后需要去掉
-    // await this.validateActivityDate(); //验证活动时间
+
+    await this.validateActivityDate(); //验证活动时间
 
     const data = this.post()
     if (think.isEmpty(data.openId)) {
@@ -114,14 +114,8 @@ module.exports = class extends Base {
     const cardUserModel = this.model('activity_card_user');
 
     const nowTime = new Date().getTime(); //当前时间
-
-    //////////////用于测试 上线需要去掉
-    const startTime = new Date('2018-12-30 00:00:00').getTime();  //充值卡发放开始时间
-    const endTime = new Date('2019-01-04 23:59:59').getTime();    //充值卡发放结束时间
-
-
-    // const startTime = new Date('2019-01-10 00:00:00').getTime();  //充值卡发放开始时间
-    // const endTime = new Date('2019-01-20 23:59:59').getTime();    //充值卡发放结束时间
+    const startTime = new Date('2019-01-10 00:00:00').getTime();  //充值卡发放开始时间
+    const endTime = new Date('2019-01-20 23:59:59').getTime();    //充值卡发放结束时间
     if (nowTime >= startTime && nowTime <= endTime) {
       console.log('******** 会员充值卡产生时间 *******')
 
@@ -263,14 +257,6 @@ module.exports = class extends Base {
         master_total: 63626,
         spare_total: 63626,
         cycle: 6
-      }
-    } else {
-      data = {
-        startDate: '2018-12-30',
-        endDate: '2019-01-04',
-        master_total: 1000,
-        spare_total: 1000,
-        cycle: 7
       }
     }
     return data;
