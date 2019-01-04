@@ -571,6 +571,9 @@ module.exports = class extends Base {
    * 初始化当天的数据 用于测试
    */
   async initTodayAction () {
+    if (true) {
+      return this.fail('没有需要生成的福字信息')
+    }
     let blessingArr = [];
     for (let i = 0; i < 100; i++) {
       if ((i % 4 + 1) === 1) {
@@ -632,7 +635,7 @@ module.exports = class extends Base {
 
     //获取需要生成的福字信息
     const blessings = await this.db.where({
-      start_date: '2019-01-05', end_date: '2019-01-09', total: {'>': 0}
+      start_date: '2019-02-02', end_date: '2019-02-04', total: {'>': 0}
     }).select();
     if (!blessings || blessings.length <= 0) {
       return this.fail('没有需要生成的福字信息')
@@ -654,9 +657,11 @@ module.exports = class extends Base {
     }
 
     blessingArr = _.shuffle(blessingArr) //打乱数组顺序
+    blessingArr = _.shuffle(blessingArr) //打乱数组顺序
+    blessingArr = _.shuffle(blessingArr) //打乱数组顺序
 
-    let startTime = new Date('2019-01-05 00:00:00').getTime()
-    let endTime = new Date('2019-01-09 23:59:59').getTime()
+    let startTime = new Date('2019-02-02 00:00:00').getTime()
+    let endTime = new Date('2019-02-04 23:59:59').getTime()
     let time = endTime - startTime;
     let n = time;
     let m = bLength;
@@ -682,7 +687,7 @@ module.exports = class extends Base {
     }
 
     const blessingPoolModel = this.model('activity_blessing_pool');
-    let t = new Date('2019-01-05 00:00:00').getTime()
+    let t = new Date('2019-02-02 00:00:00').getTime()
     for (let i = 0; i < arr.length; i++) {
       t = t + arr[i];
       let tempTime = new Date()
