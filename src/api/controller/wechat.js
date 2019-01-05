@@ -108,7 +108,7 @@ module.exports = class extends Base {
   async signatureAction () {
     // console.log('签名')
     const queryUrl = this.get('url')
-    console.log(queryUrl)
+    // console.log(queryUrl)
     if (queryUrl) {
       return await wx.jssdk.getSignature(queryUrl).then(
         data => {
@@ -169,7 +169,7 @@ module.exports = class extends Base {
     wx.oauth
       .getUserInfo(null, key)
       .then(function (userProfile) {
-        console.log(userProfile);
+        // console.log(userProfile);
         // res.render('oauth', {
         //   wechatInfo: JSON.stringify(userProfile),
         // });
@@ -212,9 +212,9 @@ module.exports = class extends Base {
     const query = queryString.stringify({
       appid: 'wxa8299eb7fc27ef04'
     })
-    console.log('REQUEST ACCESS TOKEN...')
-    console.log('REQUEST PARMS...')
-    console.log(query)
+    // console.log('REQUEST ACCESS TOKEN...')
+    // console.log('REQUEST PARMS...')
+    // console.log(query)
     const payload = await this.got(
       '/console/activity/weChat/accessToken',
       {
@@ -228,8 +228,8 @@ module.exports = class extends Base {
       accessToken = data.data
       // return data.data
     }
-    console.log('GET ACCESS TOKEN SUCCESS')
-    console.log(accessToken)
+    // console.log('GET ACCESS TOKEN SUCCESS')
+    // console.log(accessToken)
     return {
       accessToken
     }
@@ -275,26 +275,26 @@ module.exports = class extends Base {
     think.mkdir(uploadPath);
 
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
-    console.log('微信的token')
-    console.log(accessToken)
-    console.log('媒体id')
-    console.log(mediaId)
+    // console.log('微信的token')
+    // console.log(accessToken)
+    // console.log('媒体id')
+    // console.log(mediaId)
 
     // /Users/basil/development/chinauff-server/screenshot/test.jpg
     return new Promise((resolve, reject) => {
       const stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token=' + accessToken + '&media_id=' + mediaId)
         .pipe(fs.createWriteStream(riceFile));
-      console.log(stream)
+      // console.log(stream)
       stream.on('finish', () => {
         if (think.isFile(riceFile)) {
           const base64 = this.base64_encode(riceFile)
           resolve(base64)
         } else {
-          console.log('扫-扫。。。。 errror')
+          // console.log('扫-扫。。。。 errror')
           reject('error')
         }
       })
-      console.log('errorr.....')
+      // console.log('errorr.....')
       reject('error')
     }).then(
       async (base64Data) => {
@@ -304,8 +304,8 @@ module.exports = class extends Base {
           secret: this.appSecret
         });
         const res = await aiService.image(base64Data)
-        console.log('开启百度云识别。。。。。。。。。')
-        console.log(res)
+        // console.log('开启百度云识别。。。。。。。。。')
+        // console.log(res)
         if (res.result_num > 0) {
           for (let item of res.result) {
             if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
@@ -328,7 +328,7 @@ module.exports = class extends Base {
         }
       },
       ({message}) => {
-        console.log(message)
+        // console.log(message)
         // this.fail(message)
         // 接口出现问题直接成功返回
         return this.success({score: 100})
