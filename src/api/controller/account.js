@@ -34,11 +34,11 @@ module.exports = class extends Base {
         console.log('REQUEST CARD INFO')
         if (think.isEmpty(accountInfo.cardNo)) {
           const cardPayload = await this.getCardInfo(userPayload.cardNo)
+          console.log('REQUEST CARD INFO DATA')
           console.log(cardPayload)
           if (cardPayload) {
             accountInfo = await this.model('account').save(data.openId, cardPayload)
           }
-          console.log('REQUEST CARD INFO SUCCESS')
           console.log(accountInfo)
         } else {
           console.log('UPDATE ACCOUNT LGOIN TIME  SUCCESS')
@@ -95,7 +95,7 @@ module.exports = class extends Base {
       }
     )
     console.log('REQUEST GETINFO CARD INFO ')
-    console.log(payload)
+    console.log(payload.body)
     if (!think.isEmpty(payload.body)) {
       const payloadObj = JSON.parse(payload.body)
       if (payloadObj.errcode === 0) {
