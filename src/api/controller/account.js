@@ -68,8 +68,8 @@ module.exports = class extends Base {
     const queryInfo = {
       token: queryConfig.crmToken,
       merNo: queryConfig.merNo,
-      shop_no: queryConfig.shopNo,
-      device_no: queryConfig.deviceNo,
+      shopNo: queryConfig.shopNo,
+      deviceNo: queryConfig.deviceNo,
       // orderNo: Generate.id(),
       channel: queryConfig.channel,
       // note: queryConfig.note,
@@ -116,10 +116,10 @@ module.exports = class extends Base {
       token: queryConfig.activityToken,
       // deviceSeq: queryConfig.deviceSeq,
       // deviceTime: new Date().getTime(),
-      // shopNo: queryConfig.shopNo,
-      // deviceNo: queryConfig.deviceNo,
-      shop_no: queryConfig.shopNo,
-      device_no: queryConfig.deviceNo,
+      shopNo: queryConfig.shopNo,
+      deviceNo: queryConfig.deviceNo,
+      // shop_no: queryConfig.shopNo,
+      // device_no: queryConfig.deviceNo,
       openId
     }
     console.log('REQUEST CHECK LOGIN PARAMS ...')
