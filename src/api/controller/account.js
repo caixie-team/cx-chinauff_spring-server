@@ -87,16 +87,16 @@ module.exports = class extends Base {
     // console.log(queryInfo)
 
     const query = queryString.stringify(queryInfo)
-    const payload = (await this.got(
+    const payload = await this.got(
       '/console/api/card/getInfo',
       {
         baseUrl: think.config('proxyCrmApi'),
         query
       }
-    )).body
+    )
 
-    if (!think.isEmpty(payload)) {
-      const payloadObj = JSON.parse(payload)
+    if (!think.isEmpty(payload.body)) {
+      const payloadObj = JSON.parse(payload.body)
       if (payloadObj.errcode === 0) {
         return payloadObj
       } else {
