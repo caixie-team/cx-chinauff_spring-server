@@ -68,14 +68,14 @@ module.exports = class extends Base {
     const queryInfo = {
       token: queryConfig.crmToken,
       merNo: queryConfig.merNo,
-      shopNo: queryConfig.shopNo,
-      deviceNo: queryConfig.deviceNo,
-      orderNo: Generate.id(),
+      shop_no: queryConfig.shopNo,
+      device_no: queryConfig.deviceNo,
+      // orderNo: Generate.id(),
       channel: queryConfig.channel,
-      note: queryConfig.note,
-      deviceDate: this.moment().format('YYYY-MM-DD HH:mm:ss'),
+      // note: queryConfig.note,
+      // deviceDate: this.moment().format('YYYY-MM-DD HH:mm:ss'),
       version: queryConfig.version,
-      transCode: queryConfig.transCode,
+      // transCode: queryConfig.transCode,
       cardNo
     }
     // console.log(queryInfo)
@@ -109,12 +109,15 @@ module.exports = class extends Base {
   async checkUserLoginStatus (openId) {
     const queryConfig = think.config('proxyQueryString')
     const queryInfo = {
+      merNo: queryConfig.merNo,
       version: queryConfig.version,
       token: queryConfig.activityToken,
-      deviceSeq: queryConfig.deviceSeq,
-      deviceTime: new Date().getTime(),
-      shopNo: queryConfig.shopNo,
-      deviceNo: queryConfig.deviceNo,
+      // deviceSeq: queryConfig.deviceSeq,
+      // deviceTime: new Date().getTime(),
+      // shopNo: queryConfig.shopNo,
+      // deviceNo: queryConfig.deviceNo,
+      shop_no: queryConfig.shopNo,
+      device_no: queryConfig.deviceNo,
       openId
     }
     console.log('PARAMS ...')

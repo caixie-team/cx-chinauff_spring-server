@@ -18,7 +18,7 @@ module.exports = {
   // proxyCrmApi: !isDev ? 'http://crm.chinauff.com/crm' : 'http://demo.i-manji.com/crmSession'
   wechat: {
     // appId: isDev ? 'wxa8299eb7fc27ef04' : 'wxb44ce8b8c5cfdc0a'
-    appId: isDev ? 'wxa8299eb7fc27ef04' : 'wxa8299eb7fc27ef04'
+    appId: isDev ? 'wxa8299eb7fc27ef04' : 'wxb44ce8b8c5cfdc0a'
   },
   // 公网地址：https://weixin.chinauff.com
   // 内网地址：http://192.168.0.136
@@ -35,13 +35,13 @@ module.exports = {
   // proxyCrmApi: 'http://crm.chinauff.com/crm',
   proxyQueryString: {
     version: '1.0',
-    activityToken: isDev ? 'C5AB4E7A104F2492B9241D5E98C9BF0332785730FAC1056BF8A01DD25EF77171' : 'B0A8DB136921E59A6573A3F732FC754C014361DFC5F5F677894765C28C25A5731DEBCE0DE84B5964',
+    activityToken: isDev ? 'C5AB4E7A104F2492B9241D5E98C9BF0332785730FAC1056BF8A01DD25EF77171' : 'C5AB4E7A104F2492B9241D5E98C9BF0332785730FAC1056BF8A01DD25EF77171',
     // activityToken: 'C5AB4E7A104F2492B9241D5E98C9BF0332785730FAC1056BF8A01DD25EF77171',
     // crmToken: '67405076EFC81E6ACA83FB1B7D02898C5CBCC8A464C0EC44C5CA8EEEA62E79FA',
     crmToken: isDev ? '67405076EFC81E6ACA83FB1B7D02898C5CBCC8A464C0EC44C5CA8EEEA62E79FA' : 'B0A8DB136921E59A6573A3F732FC754C014361DFC5F5F677894765C28C25A5731DEBCE0DE84B5964',
     deviceSeq: '1516345652000',
     deviceTime: '',
-    merNo: 2109,
+    merNo: isDev ? 2109 : 2109,
     // shopNo: '210910030008',
     shopNo: isDev ? '210910030008' : '210999999998',
     deviceNo: isDev ? '21092552' : '210999999998',
