@@ -210,7 +210,7 @@ module.exports = class extends Base {
 
   async getAccessToken () {
     const query = queryString.stringify({
-      appid: this.config.appId
+      appid: 'wxa8299eb7fc27ef04'
     })
     console.log('REQUEST ACCESS TOKEN...')
     console.log('REQUEST PARMS...')
