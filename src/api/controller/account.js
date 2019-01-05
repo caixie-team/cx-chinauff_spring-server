@@ -117,6 +117,8 @@ module.exports = class extends Base {
       deviceNo: queryConfig.deviceNo,
       openId
     }
+    console.log('PARAMS ...')
+    console.log(queryInfo)
     const query = queryString.stringify(queryInfo)
     const userInfo = (await this.got(
       '/console/dcApi/member/isLogin',
