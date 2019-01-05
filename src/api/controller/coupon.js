@@ -495,7 +495,8 @@ module.exports = class extends Base {
       return this.success({
         coupon_code: couponUserData.coupon_code,
         crm_coupon_code: couponUserData.crm_coupon_code,
-        status: couponUserData.status
+        status: couponUserData.status,
+        receive_status: couponUserData.receive_status
       })
     }
     // console.log(couponUserData.openid)
