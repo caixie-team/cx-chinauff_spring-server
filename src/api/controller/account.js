@@ -131,14 +131,19 @@ module.exports = class extends Base {
     console.log('REQUEST CHECK LOGIN PARAMS ...')
     console.log(queryInfo)
     const query = queryString.stringify(queryInfo)
-    const userInfo = (await this.got(
-      '/console/dcApi/member/isLogin',
+    // const userInfo = (await this.got(
+    //   '/console/dcApi/member/isLogin',
+    //   {
+    //     baseUrl: 'http://crm.chinauff.com/lnj-weixin',
+    //     query
+    //   }
+    // )).body
+    const userInfo = await this.got('/console/dcApi/member/isLogin',
       {
         baseUrl: 'http://crm.chinauff.com/lnj-weixin',
         // baseUrl: think.config('proxyActivityApi'),
         query
-      }
-    )).body
+      })
     console.log('REQUEST CHECK LOGIN STATUS ...')
     // console.log('CHECK LOGIN STATUS ...')
     console.log(userInfo)
