@@ -256,7 +256,7 @@ module.exports = class extends Base {
     const {mediaId, openId} = data
     // console.log(openId)
     const {accessToken} = await this.getAccessToken()
-    console.log(accessToken)
+    // console.log(accessToken)
     // await this.got('')
     // const query = queryString.stringify({
     //   appid: this.config.appId
@@ -275,6 +275,11 @@ module.exports = class extends Base {
     think.mkdir(uploadPath);
 
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
+    console.log('微信的token')
+    console.log(accessToken)
+    console.log('媒体id')
+    console.log(mediaId)
+
     // /Users/basil/development/chinauff-server/screenshot/test.jpg
     return new Promise((resolve, reject) => {
       const stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token=' + accessToken + '&media_id=' + mediaId)
