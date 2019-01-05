@@ -18,7 +18,7 @@ module.exports = {
   // proxyCrmApi: !isDev ? 'http://crm.chinauff.com/crm' : 'http://demo.i-manji.com/crmSession'
   wechat: {
     // appId: isDev ? 'wxa8299eb7fc27ef04' : 'wxb44ce8b8c5cfdc0a'
-    appId: isDev ? 'wxa8299eb7fc27ef04' : 'wxb44ce8b8c5cfdc0a'
+    appId: isDev ? 'wxa8299eb7fc27ef04' : 'wxa8299eb7fc27ef04'
   },
   // 公网地址：https://weixin.chinauff.com
   // 内网地址：http://192.168.0.136
