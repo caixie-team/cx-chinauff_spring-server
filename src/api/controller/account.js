@@ -94,7 +94,8 @@ module.exports = class extends Base {
         query
       }
     )
-
+    console.log('REQUEST GETINFO CARD INFO ')
+    console.log(payload)
     if (!think.isEmpty(payload.body)) {
       const payloadObj = JSON.parse(payload.body)
       if (payloadObj.errcode === 0) {
