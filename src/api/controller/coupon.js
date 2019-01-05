@@ -513,7 +513,7 @@ module.exports = class extends Base {
       return this.success({
         coupon_code: data.coupon_code,
         crm_coupon_code,
-        status: 2
+        receive_status: 2
       })
     } else {
       return this.json(crmSendCouponRes)
