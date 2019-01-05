@@ -26,7 +26,7 @@ module.exports = {
   // shopno=210999999998
   // deviceno=210999999998
   // channel=18
-  // token=B0A8DB136921E59A6573A3F732FC754C014361DFC5F5F677894765C28C25A5731DEBCE0DE84B5964
+  // token=B0A8DB136921E59A6573A3F732FC754C0143proxyQueryString61DFC5F5F677894765C28C25A5731DEBCE0DE84B5964
   // 活动 API
   // proxyActivityApi: isDev ? 'http://demo.micvs.com/lnj-weixin' : 'http://crm.chinauff.com/lnj-weixin',
   proxyActivityApi: 'http://crm.chinauff.com/lnj-weixin',
@@ -54,7 +54,7 @@ module.exports = {
     // deviceNo: '21092552',
     // Generate.id()
     orderNo: '',
-    channel: 2,
+    channel: 18,
     note: 'chinauff_spring',
     deviceDate: '2018-09-03 10:03:49',
     transCode: 'C034',
