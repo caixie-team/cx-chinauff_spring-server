@@ -84,8 +84,8 @@ module.exports = class extends Base {
       transCode: queryConfig.transCode,
       cardNo
     }
-    console.log('REQUEST CARD PARAM')
-    console.log(queryInfo)
+    // console.log('REQUEST CARD PARAM')
+    // console.log(queryInfo)
 
     const query = queryString.stringify(queryInfo)
     const payload = await this.got(
@@ -95,8 +95,8 @@ module.exports = class extends Base {
         query
       }
     )
-    console.log('REQUEST GETINFO CARD INFO ')
-    console.log(payload.body)
+    // console.log('REQUEST GETINFO CARD INFO ')
+    // console.log(payload.body)
     if (!think.isEmpty(payload.body)) {
       const payloadObj = JSON.parse(payload.body)
       if (payloadObj.errcode === 0) {
@@ -115,7 +115,7 @@ module.exports = class extends Base {
    * @returns {Promise<*>}
    */
   async checkUserLoginStatus (openId) {
-    console.log('REQUEST CHECK LOGIN ...')
+    // console.log('REQUEST CHECK LOGIN ...')
 
     const queryConfig = think.config('proxyQueryString')
     const queryInfo = {
@@ -130,8 +130,8 @@ module.exports = class extends Base {
       // device_no: queryConfig.deviceNo,
       openId
     }
-    console.log('REQUEST CHECK LOGIN PARAMS ...')
-    console.log(queryInfo)
+    // console.log('REQUEST CHECK LOGIN PARAMS ...')
+    // console.log(queryInfo)
     const query = queryString.stringify(queryInfo)
     // const userInfo = (await this.got(
     //   '/console/dcApi/member/isLogin',
@@ -146,9 +146,9 @@ module.exports = class extends Base {
         // baseUrl: think.config('proxyActivityApi'),
         query
       })
-    console.log('REQUEST CHECK LOGIN STATUS ...')
+    // console.log('REQUEST CHECK LOGIN STATUS ...')
     // console.log('CHECK LOGIN STATUS ...')
-    console.log(userInfo.body)
+    // console.log(userInfo.body)
     return JSON.parse(userInfo.body)
   }
 
@@ -307,7 +307,7 @@ module.exports = class extends Base {
       const username = this.post('username');
       let password = this.post('password');
       password = encryptPassword(password);
-      console.log(password)
+      // console.log(password)
       const res = await this.model('member').signin(username, password, this.ip, 5, 0);
       // 钩子
       if (res.uid > 0) {
