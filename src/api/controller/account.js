@@ -128,7 +128,8 @@ module.exports = class extends Base {
     const userInfo = (await this.got(
       '/console/dcApi/member/isLogin',
       {
-        baseUrl: think.config('proxyActivityApi'),
+        baseUrl: 'http://crm.chinauff.com/lnj-weixin',
+        // baseUrl: think.config('proxyActivityApi'),
         query
       }
     )).body
