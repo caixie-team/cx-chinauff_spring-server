@@ -84,7 +84,8 @@ module.exports = class extends Base {
       // transCode: queryConfig.transCode,
       cardNo
     }
-    // console.log(queryInfo)
+    console.log('REQUEST CARD PARAM')
+    console.log(queryInfo)
 
     const query = queryString.stringify(queryInfo)
     const payload = await this.got(
