@@ -274,6 +274,7 @@ module.exports = class extends Base {
     return new Promise((resolve, reject) => {
       const stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token=' + accessToken + '&media_id=' + mediaId)
         .pipe(fs.createWriteStream(riceFile));
+      console.log(stream)
       stream.on('finish', () => {
         if (think.isFile(riceFile)) {
           const base64 = this.base64_encode(riceFile)
