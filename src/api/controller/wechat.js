@@ -292,8 +292,7 @@ module.exports = class extends Base {
           secret: this.appSecret
         });
         const res = await aiService.image(base64Data)
-        // console.log('开启百度云识别。。。。。。。。。')
-        // console.log(res)
+        console.log('开启百度云识别。。。。。。。。。')
         console.log(res)
         if (res.result_num > 0) {
           for (let item of res.result) {
