@@ -212,19 +212,24 @@ module.exports = class extends Base {
     const query = queryString.stringify({
       appid: this.config.appId
     })
-    const payload = (await this.got(
+    console.log('REQUEST ACCESS TOKEN...')
+    console.log('REQUEST PARMS...')
+    console.log(query)
+    const payload = await this.got(
       '/console/activity/weChat/accessToken',
       {
         baseUrl: think.config('proxyActivityApi'),
         query
       }
-    )).body
-    const data = JSON.parse(payload)
+    )
+    const data = JSON.parse(payload.body)
     let accessToken = null
     if (data.errcode == 0) {
       accessToken = data.data
       // return data.data
     }
+    console.log('GET ACCESS TOKEN SUCCESS')
+    console.log(accessToken)
     return {
       accessToken
     }
@@ -253,16 +258,16 @@ module.exports = class extends Base {
     const {accessToken} = await this.getAccessToken()
     console.log(accessToken)
     // await this.got('')
-    const query = queryString.stringify({
-      appid: this.config.appId
-    })
-    const payload = (await this.got(
-      '/console/activity/weChat/accessToken',
-      {
-        baseUrl: think.config('proxyActivityApi'),
-        query
-      }
-    )).body
+    // const query = queryString.stringify({
+    //   appid: this.config.appId
+    // })
+    // const payload = (await this.got(
+    //   '/console/activity/weChat/accessToken',
+    //   {
+    //     baseUrl: think.config('proxyActivityApi'),
+    //     query
+    //   }
+    // )).body
     // lnj-weixin/console/activity/weChat/accessToken?appid=wxa8299eb7fc27ef04
     // const accessToken = '17_kA-EV4bfnBNq1dYmc-0Wb4AG2Y9n9ijBGkIgy5C3FP3wuiok5X1gkxGWEQWwk1kNvaJeH3wAGcNnnzfFkQ7cFuo0mqARZiTKymfYl_FXj8kxEZr2HUK3evk97P4Y8SKMlDgWnzJIb_R1sunKCVDgAFAHAI'
     const uploadPath = think.ROOT_PATH + '/www/static/upload/picture/' + dateformat("Y-m-d", new Date().getTime());
