@@ -76,12 +76,12 @@ module.exports = class extends Base {
       merNo: queryConfig.merNo,
       shopNo: queryConfig.shopNo,
       deviceNo: queryConfig.deviceNo,
-      // orderNo: Generate.id(),
+      orderNo: Generate.id(),
       channel: queryConfig.channel,
-      // note: queryConfig.note,
-      // deviceDate: this.moment().format('YYYY-MM-DD HH:mm:ss'),
+      note: queryConfig.note,
+      deviceDate: this.moment().format('YYYY-MM-DD HH:mm:ss'),
       version: queryConfig.version,
-      // transCode: queryConfig.transCode,
+      transCode: queryConfig.transCode,
       cardNo
     }
     console.log('REQUEST CARD PARAM')

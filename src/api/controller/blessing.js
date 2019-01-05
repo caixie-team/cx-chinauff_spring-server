@@ -23,7 +23,7 @@ module.exports = class extends Base {
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误')
     }
-    // 如果是被加密的，进行解密（用于助力时传过来的 beOpenId）
+    // 如果是被加密的，进行解密（用于助力时传过来的 beOpenIdproxyCrmApi）
     if (!think.isEmpty(data.encrypt)) {
       data.openId = decrypt(data.openId, this.key)
     }
