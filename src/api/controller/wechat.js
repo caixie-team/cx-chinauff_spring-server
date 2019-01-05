@@ -243,11 +243,15 @@ module.exports = class extends Base {
    */
   async oneMediaAction () {
     const data = this.post()
+    console.log('扫-扫。。。。')
+    console.log(data)
     if (!think._.has(data, 'mediaId') || !think._.has(data, 'openId')) {
       return this.fail()
     }
     const {mediaId, openId} = data
+    console.log(openId)
     const {accessToken} = await this.getAccessToken()
+    console.log(accessToken)
     // await this.got('')
     const query = queryString.stringify({
       appid: this.config.appId
@@ -275,6 +279,7 @@ module.exports = class extends Base {
           const base64 = this.base64_encode(riceFile)
           resolve(base64)
         } else {
+          console.log('扫-扫。。。。 errror')
           reject('error')
         }
       })
