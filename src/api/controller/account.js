@@ -146,8 +146,8 @@ module.exports = class extends Base {
       })
     console.log('REQUEST CHECK LOGIN STATUS ...')
     // console.log('CHECK LOGIN STATUS ...')
-    console.log(userInfo)
-    return JSON.parse(userInfo)
+    console.log(userInfo.body)
+    return JSON.parse(userInfo.body)
   }
 
   /**
