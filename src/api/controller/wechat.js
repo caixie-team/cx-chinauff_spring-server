@@ -285,6 +285,8 @@ module.exports = class extends Base {
           reject('error')
         }
       })
+      console.log('errorr.....')
+      reject('error')
     }).then(
       async (base64Data) => {
         const aiService = think.service('ai', 'common', this.aiServer, {
@@ -312,7 +314,8 @@ module.exports = class extends Base {
         }
         if (res.error_code) {
           think.logger.error(res)
-          return this.success({score: new Date().getTime()})
+          return this.success({score: 100})
+          // return this.success({score: new Date().getTime()})
         }
       },
       ({message}) => {
