@@ -526,6 +526,7 @@ module.exports = class extends Base {
    * @returns {Promise<void>}
    */
   async sendCouponByActivity (openId, code) {
+    console.log('SEND COUPON ...')
     // http://demo.micvs.com/crmSession/console/api/
     // coupon/
     // sendCouponByActivity?channel=5&deviceDate=2018-04-16 11:50:00&merNo=2109&shopNo=210999999998&deviceNo=210999999998&version=1.0&token=B0A8DB136921E59A6573A3F732FC754C014361DFC5F5F677894765C28C25A5731DEBCE0DE84B5964&orderNo=Li20180416005&transCode=A016&amount=oQJYBw_H_E3FRVj1jsHSHG__AmKQ&type=2&couponJson=[{couponType:584,couponNum:1},{couponType:581,couponNum:2}]
@@ -551,6 +552,8 @@ module.exports = class extends Base {
       // couponJson: JSON.stringify(queryConfig.couponJson)
       couponJson: JSON.stringify(couponJson)
     }
+    console.log('SEND COUPON PARAM ...')
+    console.log(queryInfo)
     const query = queryString.stringify(queryInfo)
 
     // console.log(query)
@@ -561,7 +564,8 @@ module.exports = class extends Base {
         query
       }
     )).body
-    // console.log(payload)
+    console.log('SEND COUPON RETURN ...')
+    console.log(payload)
     return JSON.parse(payload)
   }
 

@@ -107,6 +107,8 @@ module.exports = class extends Base {
    * @returns {Promise<*>}
    */
   async checkUserLoginStatus (openId) {
+    console.log('REQUEST CHECK LOGIN ...')
+
     const queryConfig = think.config('proxyQueryString')
     const queryInfo = {
       merNo: queryConfig.merNo,
@@ -120,7 +122,7 @@ module.exports = class extends Base {
       device_no: queryConfig.deviceNo,
       openId
     }
-    console.log('PARAMS ...')
+    console.log('REQUEST CHECK LOGIN PARAMS ...')
     console.log(queryInfo)
     const query = queryString.stringify(queryInfo)
     const userInfo = (await this.got(
@@ -130,7 +132,8 @@ module.exports = class extends Base {
         query
       }
     )).body
-    console.log('CHECK LOGIN STATUS ...')
+    console.log('REQUEST CHECK LOGIN STATUS ...')
+    // console.log('CHECK LOGIN STATUS ...')
     console.log(userInfo)
     return JSON.parse(userInfo)
   }
