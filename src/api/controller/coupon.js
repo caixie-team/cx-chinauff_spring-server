@@ -35,9 +35,14 @@ module.exports = class extends Base {
     if (!think.isEmpty(data.encrypt)) {
       data.openId = decrypt(data.openId, this.key)
     }
+    console.log('查询 活动账户')
+
+    console.log(data.openId)
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
     const chinauffAccount = await chinauffAccountModel.where({openId: data.openId}).find();
+    console.log('查询 活动账户')
+    console.log(chinauffAccount)
     if (think.isEmpty(chinauffAccount)) {
       return this.fail(1004, '活动账户不存在')
     }
@@ -281,6 +286,7 @@ module.exports = class extends Base {
       cycle: cycleData.cycle
     }).count('id');
     if (conponCycleTotal >= (cycleData.master_total + cycleData.spare_total)) {
+      console.log('没奖品了。。。。')
       return this.fail(1007, '奖品已被领完');
     }
 
@@ -306,7 +312,10 @@ module.exports = class extends Base {
       //优惠券奖品列表
       const coupons = await this.getCoupons(cycleData, stockMark);
       coupon = await this.lottery(coupons);
-
+      console.log('优惠劵奖品列表')
+      console.log(coupons)
+      console.log('优惠劵')
+      console.log(coupon)
       //1.如果周期内，某类型券的发放券数用完，那么该券停止发放；
       const couponCount = await couponUserModel.where({
         coupon_id: coupon.id,
