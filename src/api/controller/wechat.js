@@ -213,9 +213,9 @@ module.exports = class extends Base {
       // appid: 'wxa8299eb7fc27ef04'
       appid: 'wxb44ce8b8c5cfdc0a'
     })
-    // console.log('REQUEST ACCESS TOKEN...')
-    // console.log('REQUEST PARMS...')
-    // console.log(query)
+    console.log('REQUEST ACCESS TOKEN...')
+    console.log('REQUEST PARMS...')
+    console.log(query)
     const payload = await this.got(
       '/console/activity/weChat/accessToken',
       {
@@ -223,6 +223,7 @@ module.exports = class extends Base {
         query
       }
     )
+    console.log(payload)
     const data = JSON.parse(payload.body)
     let accessToken = null
     if (data.errcode == 0) {
