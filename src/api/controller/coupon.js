@@ -35,6 +35,7 @@ module.exports = class extends Base {
     if (!think.isEmpty(data.encrypt)) {
       data.openId = decrypt(data.openId, this.key)
     }
+    console.log(data.openId)
     console.log('查询 活动账户')
 
     console.log(data.openId)
