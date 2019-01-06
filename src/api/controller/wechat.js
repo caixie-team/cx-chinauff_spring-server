@@ -144,11 +144,14 @@ module.exports = class extends Base {
     // console.log(mediaId)
     // const longpic = await this.spiderImage(pic, uploadPath, name);
     // paths = longpic;
-    console.log(accessToken)
-    console.log(mediaId)
+    // console.log(accessToken)
+    // console.log(mediaId)
     const mediaInfo = await getMedia(request, accessToken, mediaId)
     mediaInfo.pipe(fs.createWriteStream(riceFile))
-    console.log(mediaInfo)
+    mediaInfo.on('finish', () => {
+      console.log('完成啦。。。。')
+    })
+    // console.log(mediaInfo)
     return this.success({score: 100})
     //
     // // /Users/basil/development/chinauff-server/screenshot/test.jpg
