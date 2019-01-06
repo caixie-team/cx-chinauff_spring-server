@@ -45,9 +45,9 @@ module.exports = class extends Base {
     const analyticsModel = this.model('analytics')
     const dayView = await analyticsModel.getDayPageView()
     const allView = await analyticsModel.getAllPageView()
-    console.log('---- day view ----')
+    // console.log('---- day view ----')
     console.log(dayView)
-    console.log('---- alll view ----')
-    console.log(allView)
+    // console.log('---- alll view ----')
+    // console.log(allView)
   }
 }

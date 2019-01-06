@@ -374,7 +374,7 @@ module.exports = class extends Base {
         }
       )).body
 
-      console.log(payload)
+      // console.log(payload)
       return this.success(payload)
     }
     // https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=ACCESS_TOKEN
