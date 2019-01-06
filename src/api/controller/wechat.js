@@ -159,13 +159,11 @@ module.exports = class extends Base {
               return this.success({score: 100})
             } else {
               return this.success({score: new Date().getTime()})
-              // deferred.resolve({score: new Date().getTime()});
             }
           }
         }
         if (res.error_code) {
           think.logger.error(res)
-          // deferred.resolve({score: 100});
           return this.success({score: 100})
         }
       }
