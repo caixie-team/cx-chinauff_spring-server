@@ -141,7 +141,7 @@ module.exports = class extends Base {
     const mediaInfo = await getMedia(request, accessToken, mediaId)
 
     const writeStream = mediaInfo.pipe(fs.createWriteStream(riceFile))
-    const data = await writeStream.on('finish', () => {
+    const success = await writeStream.on('finish', () => {
       const deferred = think.defer();
 
       if (think.isFile(riceFile)) {
@@ -171,7 +171,7 @@ module.exports = class extends Base {
       }
       return deferred.promise;
     })
-    return this.success(data)
+    return this.success(success)
   }
 
   /**
