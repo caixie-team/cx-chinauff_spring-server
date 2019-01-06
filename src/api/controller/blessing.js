@@ -204,6 +204,7 @@ module.exports = class extends Base {
    */
   async helpAction () {
     const data = this.post();
+    console.log(data)
     //助力者openId
     if (think.isEmpty(data.openId)) {
       return this.fail('请求参数错误')
@@ -213,7 +214,6 @@ module.exports = class extends Base {
       return this.fail('请求参数错误')
     }
     const beOpenId = decrypt(data.beOpenId, this.key)
-
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
     const helpChinauffAccount = await chinauffAccountModel.where({openId: data.openId}).find();
@@ -234,7 +234,9 @@ module.exports = class extends Base {
     }
 
     await helpModel.add({
+      // 被助力者
       be_openid: beOpenId,
+      // 助力者
       openid: data.openId,
       status: 1,	//助力使用状态 1未使用 , 2已使用
       create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
