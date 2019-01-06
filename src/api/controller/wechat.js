@@ -140,36 +140,36 @@ module.exports = class extends Base {
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
     const mediaInfo = await getMedia(request, accessToken, mediaId)
 
-    mediaInfo.pipe(fs.createWriteStream(riceFile))
-    // return writeStream.on('finish', async () => {
-    // const deferred = think.defer();
-    if (think.isFile(riceFile)) {
-      console.log('is File')
-      const base64Data = this.base64_encode(riceFile)
-      const aiService = think.service('ai', 'common', this.aiServer, {
-        app_id: this.appId,
-        key: this.appKey,
-        secret: this.appSecret
-      });
-      const res = await aiService.image(base64Data)
-      console.log(res)
-      if (res.result_num > 0) {
-        for (let item of res.result) {
-          if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
-            return this.success({score: 100})
-          } else {
-            return this.success({score: new Date().getTime()})
+    const writeStream = mediaInfo.pipe(fs.createWriteStream(riceFile))
+    writeStream.on('finish', async () => {
+      // const deferred = think.defer();
+      if (think.isFile(riceFile)) {
+        console.log('is File')
+        const base64Data = this.base64_encode(riceFile)
+        const aiService = think.service('ai', 'common', this.aiServer, {
+          app_id: this.appId,
+          key: this.appKey,
+          secret: this.appSecret
+        });
+        const res = await aiService.image(base64Data)
+        console.log(res)
+        if (res.result_num > 0) {
+          for (let item of res.result) {
+            if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
+              return this.success({score: 100})
+            } else {
+              return this.success({score: new Date().getTime()})
+            }
           }
         }
+        if (res.error_code) {
+          // think.logger.error(res)
+          return this.success({score: 100})
+        }
       }
-      if (res.error_code) {
-        think.logger.error(res)
-        return this.success({score: 100})
-      }
-    }
-    return this.success({score: 100})
-    // return deferred.promise;
-    // })
+      return this.success({score: 100})
+      // return deferred.promise;
+    })
     // return this.success(success)
   }
 
