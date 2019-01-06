@@ -142,7 +142,7 @@ module.exports = class extends Base {
     // const deferred = think.defer();
 
     const writeStream = mediaInfo.pipe(fs.createWriteStream(riceFile))
-    const deferred = think.defer();
+    // const deferred = think.defer();
 
     writeStream.on('finish', async () => {
       if (think.isFile(riceFile)) {
