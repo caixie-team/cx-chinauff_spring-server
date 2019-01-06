@@ -112,7 +112,23 @@ module.exports = class extends Base {
       accessToken
     }
   }
-
+  getImage () {
+    const deferred = think.defer();
+    superagent
+      .get(imgUrl) // 这里的URL也可以是绝对路径
+      .end(function(req, res) {
+        if (name.indexOf('.') == -1) {
+          filePath = filePath + name + '.jpg';
+        } else {
+          filePath = filePath + name;
+        }
+        // console.log(filePath);
+        // console.log(res.body);
+        fs.writeFileSync(filePath, res.body);
+        deferred.resolve(filePath);
+      });
+    return deferred.promise;
+  }
   /**
    * 获取临时素材
    * 详情请见：<http://mp.weixin.qq.com/wiki/11/07b6b76a6b6e8848e855a435d5e34a5f.html>
@@ -138,20 +154,11 @@ module.exports = class extends Base {
     think.mkdir(uploadPath);
 
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
-    // console.log('微信的token')
-    // console.log(accessToken)
-    // console.log('媒体id')
-    // console.log(mediaId)
-    // const longpic = await this.spiderImage(pic, uploadPath, name);
-    // paths = longpic;
-    // console.log(accessToken)
-    // console.log(mediaId)
     const mediaInfo = await getMedia(request, accessToken, mediaId)
-    mediaInfo.pipe(fs.createWriteStream(riceFile))
-    mediaInfo.on('finish', () => {
-      console.log('完成啦。。。。')
+    const writeStream = mediaInfo.pipe(fs.createWriteStream(riceFile))
+    writeStream.on('finish', () => {
+      console.log('aaaa-a--a-')
     })
-    // console.log(mediaInfo)
     return this.success({score: 100})
     //
     // // /Users/basil/development/chinauff-server/screenshot/test.jpg
