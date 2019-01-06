@@ -151,14 +151,12 @@ module.exports = class extends Base {
           resolve(base64)
         } else {
           console.log('noew file...')
-          // console.log('扫-扫。。。。 errror')
           reject('error')
         }
       })
-      // console.log('errorr.....')
-      reject('error')
     }).then(
       async (base64Data) => {
+        console.log('........')
         const aiService = think.service('ai', 'common', this.aiServer, {
           app_id: this.appId,
           key: this.appKey,
@@ -175,12 +173,6 @@ module.exports = class extends Base {
             } else {
               return this.success({score: new Date().getTime()})
             }
-            // if (item.score > 0.4 && item.keyword.includes('米')) {
-            // 返回置信度
-            // return this.success({score: item.score * 100})
-            // console.log(item.score)
-            // resolve({score: item.score * 100});
-            // }
           }
         }
         if (res.error_code) {
