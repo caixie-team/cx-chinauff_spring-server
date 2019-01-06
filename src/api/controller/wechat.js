@@ -276,10 +276,10 @@ module.exports = class extends Base {
     think.mkdir(uploadPath);
 
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
-    // console.log('微信的token')
-    // console.log(accessToken)
-    // console.log('媒体id')
-    // console.log(mediaId)
+    console.log('微信的token')
+    console.log(accessToken)
+    console.log('媒体id')
+    console.log(mediaId)
 
     // /Users/basil/development/chinauff-server/screenshot/test.jpg
     return new Promise((resolve, reject) => {
