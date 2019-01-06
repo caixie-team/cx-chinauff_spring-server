@@ -147,9 +147,7 @@ module.exports = class extends Base {
       console.log(stream)
       stream.on('finish', () => {
         if (think.isFile(riceFile)) {
-          console.log('fiel.....')
           const base64 = this.base64_encode(riceFile)
-          console.log(base64)
           resolve(base64)
         } else {
           console.log('noew file...')
@@ -166,6 +164,7 @@ module.exports = class extends Base {
           key: this.appKey,
           secret: this.appSecret
         });
+        console.log('识别中。。。')
         const res = await aiService.image(base64Data)
         console.log('开启百度云识别。。。。。。。。。')
         console.log(res)
