@@ -161,8 +161,12 @@ module.exports = class extends Base {
 		`
     const peopleNumber = await blessingUserModel.query(sql)
     const myblessingNumber = await blessingUserModel.where({openid: data.openId}).count('id');
+    let pNubmer = 0
+    if (think.isEmpty(peopleNumber) && peopleNumber.length > 0) {
+      pNubmer = peopleNumber[0].nums
+    }
     return this.success({
-      peopleNumber: peopleNumber[0].nums,	//集满福的总人数
+      peopleNumber: pNubmer,	//集满福的总人数
       myblessingNumber: myblessingNumber	//我的集满福个数
     })
   }
