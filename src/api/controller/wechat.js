@@ -139,6 +139,8 @@ module.exports = class extends Base {
     // console.log(mediaId)
     // const longpic = await this.spiderImage(pic, uploadPath, name);
     // paths = longpic;
+    console.log(accessToken)
+    console.log(mediaId)
     const mediaInfo = await getMedia(accessToken, mediaId)
     console.log(mediaInfo)
     return this.success({score: 100})
