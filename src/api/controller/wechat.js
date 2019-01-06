@@ -141,9 +141,8 @@ module.exports = class extends Base {
     const mediaInfo = await getMedia(request, accessToken, mediaId)
 
     const writeStream = mediaInfo.pipe(fs.createWriteStream(riceFile))
-    const success = await writeStream.on('finish', async () => {
-      const deferred = think.defer();
-
+    return writeStream.on('finish', async () => {
+      // const deferred = think.defer();
       if (think.isFile(riceFile)) {
         console.log('is File')
         const base64Data = this.base64_encode(riceFile)
@@ -157,21 +156,23 @@ module.exports = class extends Base {
         if (res.result_num > 0) {
           for (let item of res.result) {
             if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
-              deferred.resolve({score: 100});
+              return this.success({score: 100})
             } else {
-              deferred.resolve({score: new Date().getTime()});
+              return this.success({score: new Date().getTime()})
+              // deferred.resolve({score: new Date().getTime()});
             }
           }
         }
         if (res.error_code) {
           think.logger.error(res)
-          deferred.resolve({score: 100});
-          // return this.success({score: 100})
+          // deferred.resolve({score: 100});
+          return this.success({score: 100})
         }
       }
-      return deferred.promise;
+      return this.success({score: 100})
+      // return deferred.promise;
     })
-    return this.success(success)
+    // return this.success(success)
   }
 
   /**
