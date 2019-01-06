@@ -141,7 +141,7 @@ module.exports = class extends Base {
     const mediaInfo = await getMedia(request, accessToken, mediaId)
 
     const writeStream = mediaInfo.pipe(fs.createWriteStream(riceFile))
-    const res = await writeStream.on('finish', async () => {
+    const data = await writeStream.on('finish', () => {
       const deferred = think.defer();
 
       if (think.isFile(riceFile)) {
@@ -152,7 +152,7 @@ module.exports = class extends Base {
           key: this.appKey,
           secret: this.appSecret
         });
-        const res = await aiService.image(base64Data)
+        const res = aiService.image(base64Data)
         console.log(res)
         if (res.result_num > 0) {
           for (let item of res.result) {
@@ -171,7 +171,7 @@ module.exports = class extends Base {
       }
       return deferred.promise;
     })
-    return this.success(res)
+    return this.success(data)
   }
 
   /**
