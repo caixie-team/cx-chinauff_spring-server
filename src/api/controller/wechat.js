@@ -173,7 +173,7 @@ module.exports = class extends Base {
       },
       ({message}) => {
         // 接口出现问题直接成功返回
-        return this.success({score: 1000})
+        return this.success({score: 100})
       }
     )
   }
