@@ -140,7 +140,7 @@ module.exports = class extends Base {
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
     const mediaInfo = await getMedia(request, accessToken, mediaId)
 
-    await mediaInfo.pipe(fs.createWriteStream(riceFile))
+    mediaInfo.pipe(fs.createWriteStream(riceFile))
     // return writeStream.on('finish', async () => {
     // const deferred = think.defer();
     if (think.isFile(riceFile)) {
