@@ -147,9 +147,12 @@ module.exports = class extends Base {
       console.log(stream)
       stream.on('finish', () => {
         if (think.isFile(riceFile)) {
+          console.log('fiel.....')
           const base64 = this.base64_encode(riceFile)
+          console.log(base64)
           resolve(base64)
         } else {
+          console.log('noew file...')
           // console.log('扫-扫。。。。 errror')
           reject('error')
         }
