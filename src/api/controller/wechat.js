@@ -112,23 +112,7 @@ module.exports = class extends Base {
       accessToken
     }
   }
-  getImage () {
-    const deferred = think.defer();
-    superagent
-      .get(imgUrl) // 这里的URL也可以是绝对路径
-      .end(function(req, res) {
-        if (name.indexOf('.') == -1) {
-          filePath = filePath + name + '.jpg';
-        } else {
-          filePath = filePath + name;
-        }
-        // console.log(filePath);
-        // console.log(res.body);
-        fs.writeFileSync(filePath, res.body);
-        deferred.resolve(filePath);
-      });
-    return deferred.promise;
-  }
+
   /**
    * 获取临时素材
    * 详情请见：<http://mp.weixin.qq.com/wiki/11/07b6b76a6b6e8848e855a435d5e34a5f.html>
@@ -155,9 +139,32 @@ module.exports = class extends Base {
 
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
     const mediaInfo = await getMedia(request, accessToken, mediaId)
+    const deferred = think.defer();
+
     const writeStream = mediaInfo.pipe(fs.createWriteStream(riceFile))
-    writeStream.on('finish', () => {
-      console.log('aaaa-a--a-')
+    writeStream.on('finish', async () => {
+      if (think.isFile(riceFile)) {
+        const base64Data = this.base64_encode(riceFile)
+        const aiService = think.service('ai', 'common', this.aiServer, {
+          app_id: this.appId,
+          key: this.appKey,
+          secret: this.appSecret
+        });
+        const res = await aiService.image(base64Data)
+        if (res.result_num > 0) {
+          for (let item of res.result) {
+            if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
+              return this.success({score: 100})
+            } else {
+              return this.success({score: new Date().getTime()})
+            }
+          }
+        }
+        if (res.error_code) {
+          think.logger.error(res)
+          return this.success({score: 100})
+        }
+      }
     })
     return this.success({score: 100})
     //
@@ -221,7 +228,7 @@ module.exports = class extends Base {
   /**
    * 设置urllib的hook
    */
-  async request(url, opts, retry) {
+  async request (url, opts, retry) {
     if (typeof retry === 'undefined') {
       retry = 3;
     }
