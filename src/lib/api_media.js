@@ -22,9 +22,9 @@ const formstream = require('formstream');
  */
 exports.getMedia = async function (accessToken, mediaId) {
   // const { accessToken } = await this.ensureAccessToken();
-  this.prefix = 'https://api.weixin.qq.com/cgi-bin/';
-  var url = this.prefix + 'media/get?access_token=' + accessToken + '&media_id=' + mediaId;
-  var opts = {
+  const prefix = 'https://api.weixin.qq.com/cgi-bin/';
+  const url = prefix + 'media/get?access_token=' + accessToken + '&media_id=' + mediaId;
+  const opts = {
     timeout: 60000 // 60秒超时
   };
   return this.request(url, opts);
