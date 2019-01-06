@@ -20,13 +20,13 @@ const formstream = require('formstream');
  * - `res`, HTTP响应对象
  * @param {String} mediaId 媒体文件的ID
  */
-exports.getMedia = async function (accessToken, mediaId) {
+exports.getMedia = async function (request, accessToken, mediaId) {
   // const { accessToken } = await this.ensureAccessToken();
   const prefix = 'https://api.weixin.qq.com/cgi-bin/';
   const url = prefix + 'media/get?access_token=' + accessToken + '&media_id=' + mediaId;
   const opts = {
     timeout: 60000 // 60秒超时
   };
-  return this.request(url, opts);
+  return request(url, opts);
 };
 

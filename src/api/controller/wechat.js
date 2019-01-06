@@ -42,6 +42,11 @@ const wechatConfig = {
     'appSecret': 'mp_app_secret',
   }
 }
+// 本文件用于wechat API，基础文件，主要用于Token的处理和mixin机制
+const httpx = require('httpx');
+const liburl = require('url');
+const JSONbig = require('json-bigint');
+
 const wx = new Wechat(wechatConfig);
 const rp = require('request-promise');
 module.exports = class extends Base {
@@ -141,7 +146,7 @@ module.exports = class extends Base {
     // paths = longpic;
     console.log(accessToken)
     console.log(mediaId)
-    const mediaInfo = await getMedia(accessToken, mediaId)
+    const mediaInfo = await getMedia(request, accessToken, mediaId)
     console.log(mediaInfo)
     return this.success({score: 100})
     //
@@ -201,5 +206,78 @@ module.exports = class extends Base {
     // );
     // return this.success({score: 100})
   }
+
+  /**
+   * 设置urllib的hook
+   */
+  async request(url, opts, retry) {
+    if (typeof retry === 'undefined') {
+      retry = 3;
+    }
+
+    var options = {};
+    Object.assign(options, this.defaults);
+    opts || (opts = {});
+    var keys = Object.keys(opts);
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      if (key !== 'headers') {
+        options[key] = opts[key];
+      } else {
+        if (opts.headers) {
+          options.headers = options.headers || {};
+          Object.assign(options.headers, opts.headers);
+        }
+      }
+    }
+
+    var res = await httpx.request(url, options);
+    if (res.statusCode < 200 || res.statusCode > 204) {
+      var err = new Error(`url: ${url}, status code: ${res.statusCode}`);
+      err.name = 'WeChatAPIError';
+      throw err;
+    }
+
+    var buffer = await httpx.read(res);
+    var contentType = res.headers['content-type'] || '';
+    if (contentType.indexOf('application/json') !== -1) {
+      var data;
+      var origin = buffer.toString();
+      try {
+        data = JSONbig.parse(replaceJSONCtlChars(origin));
+      } catch (ex) {
+        let err = new Error('JSON.parse error. buffer is ' + origin);
+        err.name = 'WeChatAPIError';
+        throw err;
+      }
+
+      if (data && data.errcode) {
+        let err = new Error(data.errmsg);
+        err.name = 'WeChatAPIError';
+        err.code = data.errcode;
+
+        if ((err.code === 40001 || err.code === 42001) && retry > 0 && !this.tokenFromCustom) {
+          // 销毁已过期的token
+          await this.saveToken(null);
+          let token = await this.getAccessToken();
+          let urlobj = liburl.parse(url, true);
+
+          if (urlobj.query && urlobj.query.access_token) {
+            urlobj.query.access_token = token.accessToken;
+            delete urlobj.search;
+          }
+
+          return this.request(liburl.format(urlobj), opts, retry - 1);
+        }
+
+        throw err;
+      }
+
+      return data;
+    }
+
+    return buffer;
+  }
+
 
 }
