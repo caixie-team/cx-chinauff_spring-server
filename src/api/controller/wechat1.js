@@ -284,7 +284,7 @@ module.exports = class extends Base {
     // console.log(mediaId)
     // const longpic = await this.spiderImage(pic, uploadPath, name);
     // paths = longpic;
-    const mediaInfo = getMedia()
+    // const mediaInfo = getMedia()
     // /Users/basil/development/chinauff-server/screenshot/test.jpg
     return new Promise((resolve, reject) => {
       const stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token=' + accessToken + '&media_id=' + mediaId)
