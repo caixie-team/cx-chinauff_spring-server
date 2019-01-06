@@ -146,8 +146,8 @@ module.exports = class extends Base {
     // paths = longpic;
     console.log(accessToken)
     console.log(mediaId)
-    const mediaInfo = await getMedia(request, accessToken, mediaId).pipe(fs.createWriteStream(riceFile))
-
+    const mediaInfo = await getMedia(request, accessToken, mediaId)
+    mediaInfo.pipe(fs.createWriteStream(riceFile))
     console.log(mediaInfo)
     return this.success({score: 100})
     //
