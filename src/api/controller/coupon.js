@@ -23,11 +23,14 @@ module.exports = class extends Base {
   async hitAction () {
 
     await this.validateActivityDate(); //验证活动时间
-
+    console.log('HIT ACITON.....')
     const data = this.post()
+    console.log(data)
     if (think.isEmpty(data.openId)) {
+      console.log('error .....')
       return this.fail('请求参数错误')
     }
+
     // 如果是被加密的，进行解密（用于助力时传过来的 beOpenId）
     if (!think.isEmpty(data.encrypt)) {
       data.openId = decrypt(data.openId, this.key)
