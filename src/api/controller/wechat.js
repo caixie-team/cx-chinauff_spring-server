@@ -139,11 +139,14 @@ module.exports = class extends Base {
 
     const riceFile = uploadPath + '/' + openId + '_rice.jpg'
     const mediaInfo = await getMedia(request, accessToken, mediaId)
-    const deferred = think.defer();
+    // const deferred = think.defer();
 
     const writeStream = mediaInfo.pipe(fs.createWriteStream(riceFile))
+    const deferred = think.defer();
+
     writeStream.on('finish', async () => {
       if (think.isFile(riceFile)) {
+        console.log('is File')
         const base64Data = this.base64_encode(riceFile)
         const aiService = think.service('ai', 'common', this.aiServer, {
           app_id: this.appId,
