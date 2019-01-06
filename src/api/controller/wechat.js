@@ -168,7 +168,7 @@ module.exports = class extends Base {
         }
         if (res.error_code) {
           think.logger.error(res)
-          return this.success({score: 100})
+          return this.success({score: 1000})
         }
       },
       ({message}) => {
