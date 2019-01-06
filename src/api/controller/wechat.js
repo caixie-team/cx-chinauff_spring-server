@@ -126,8 +126,6 @@ module.exports = class extends Base {
    */
   async oneMediaAction () {
     const data = this.post()
-    // console.log('扫-扫。。。。')
-    // console.log(data)
     if (!think._.has(data, 'mediaId') || !think._.has(data, 'openId')) {
       return this.fail()
     }
@@ -142,30 +140,23 @@ module.exports = class extends Base {
 
     return new Promise((resolve, reject) => {
       const stream = mediaInfo.pipe(fs.createWriteStream(riceFile))
-      // const stream = request('https://api.weixin.qq.com/cgi-bin/media/get?access_token=' + accessToken + '&media_id=' + mediaId)
-      //   .pipe(fs.createWriteStream(riceFile));
-      console.log(stream)
       stream.on('finish', () => {
         if (think.isFile(riceFile)) {
           const base64 = this.base64_encode(riceFile)
           resolve(base64)
         } else {
-          console.log('noew file...')
           reject('error')
         }
       })
     }).then(
       async (base64Data) => {
-        console.log('........')
+        console.log('百度AI识别中')
         const aiService = think.service('ai', 'common', this.aiServer, {
           app_id: this.appId,
           key: this.appKey,
           secret: this.appSecret
         });
-        console.log('识别中。。。')
         const res = await aiService.image(base64Data)
-        console.log('开启百度云识别。。。。。。。。。')
-        console.log(res)
         if (res.result_num > 0) {
           for (let item of res.result) {
             if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
@@ -178,46 +169,13 @@ module.exports = class extends Base {
         if (res.error_code) {
           think.logger.error(res)
           return this.success({score: 100})
-          // return this.success({score: new Date().getTime()})
         }
       },
       ({message}) => {
-        // console.log(message)
-        // this.fail(message)
         // 接口出现问题直接成功返回
         return this.success({score: 1000})
       }
     )
-    // writeStream.on('finish', async () => {
-    //   // const deferred = think.defer();
-    //   if (think.isFile(riceFile)) {
-    //     console.log('is File')
-    //     const base64Data = this.base64_encode(riceFile)
-    //     const aiService = think.service('ai', 'common', this.aiServer, {
-    //       app_id: this.appId,
-    //       key: this.appKey,
-    //       secret: this.appSecret
-    //     });
-    //     const res = await aiService.image(base64Data)
-    //     console.log(res)
-    //     if (res.result_num > 0) {
-    //       for (let item of res.result) {
-    //         if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
-    //           return this.success({score: 100})
-    //         } else {
-    //           return this.success({score: new Date().getTime()})
-    //         }
-    //       }
-    //     }
-    //     if (res.error_code) {
-    //       // think.logger.error(res)
-    //       return this.success({score: 100})
-    //     }
-    //   }
-    //   return this.success({score: 100})
-    //   // return deferred.promise;
-    // })
-    // return this.success(success)
   }
 
   /**
