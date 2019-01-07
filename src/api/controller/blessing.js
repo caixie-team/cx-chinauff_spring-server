@@ -59,13 +59,26 @@ module.exports = class extends Base {
       })
     }
 
+    const currentDate = moment(new Date()).format('YYYY-MM-DD');
+    console.log(`******** 当前日期: ${currentDate} *******`)
+    const cycleData = await this.getCycle(currentDate);
+    if (think.isEmpty(cycleData)) { //如果参与集福的时间不在活动范围内，直接返回没有奖品
+      return this.success({
+        blessing: {}
+      })
+    }
+
     //查询福池是否有奖
     const blessingPoolModel = this.model('activity_blessing_pool');
     let nowTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
-    const pools = await blessingPoolModel.where({
-      release_time: {'<=': nowTime},
-      last_quantity: {'>': 0}
-    }).limit(1).select();
+
+    let _sqlWhere = `
+        release_time <= '${nowTime}'
+        AND last_quantity > 0
+        AND DATE_FORMAT(release_time, '%Y-%m-%d') >= '${cycleData.startDate}'
+        AND DATE_FORMAT(release_time, '%Y-%m-%d') <= '${cycleData.endDate}'
+    `
+    const pools = await blessingPoolModel.where(_sqlWhere).limit(1).select();
 
     if (think.isEmpty(pools)) { //没有字奖品
       return this.success({
@@ -138,6 +151,71 @@ module.exports = class extends Base {
       blessing_josn.full = true;
     }
     return this.success(blessing_josn)
+  }
+
+  /**
+   * 获取周期日期
+   * @param {当前日期} currentDate
+   */
+  async getCycle (currentDate) {
+    //第一阶段
+    const one_start_date = '2019-01-05';
+    const one_end_date = '2019-01-09';
+
+    //第二阶段
+    const two_start_date = '2019-01-10';
+    const two_end_date = '2019-01-15';
+
+    //第三阶段
+    const three_start_date = '2019-01-16';
+    const three_end_date = '2019-01-21';
+
+    //第四阶段
+    const four_start_date = '2019-01-22';
+    const four_end_date = '2019-01-26';
+
+    //第五阶段
+    const five_start_date = '2019-01-27';
+    const five_end_date = '2019-02-01';
+
+    //第六阶段
+    const six_start_date = '2019-02-02';
+    const six_end_date = '2019-02-04';
+
+    let data = null;
+
+    if (currentDate >= one_start_date && currentDate <= one_end_date) {//第一周期
+      data = {
+        startDate: one_start_date,
+        endDate: one_end_date,
+      }
+    } else if (currentDate >= two_start_date && currentDate <= two_end_date) {//第二周期
+      data = {
+        startDate: two_start_date,
+        endDate: two_end_date
+      }
+    } else if (currentDate >= three_start_date && currentDate <= three_end_date) {//第三周期
+      data = {
+        startDate: three_start_date,
+        endDate: three_end_date
+      }
+    } else if (currentDate >= four_start_date && currentDate <= four_end_date) {//第四周期
+      data = {
+        startDate: four_start_date,
+        endDate: four_end_date
+      }
+    } else if (currentDate >= five_start_date && currentDate <= five_end_date) {//第五周期
+      data = {
+        startDate: five_start_date,
+        endDate: five_end_date
+      }
+    } else if (currentDate >= six_start_date && currentDate <= six_end_date) {//第六周期
+      data = {
+        startDate: six_start_date,
+        endDate: six_end_date
+      }
+    }
+    return data;
   }
 
   /**
