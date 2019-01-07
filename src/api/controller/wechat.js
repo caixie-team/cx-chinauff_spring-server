@@ -260,8 +260,8 @@ module.exports = class extends Base {
   async signatureAction () {
     if (this.isPost) {
       const data = this.post()
-      // console.log(data)
-      // console.log(encodeURIComponent(data.url))
+      console.log(data)
+      console.log(encodeURIComponent(data.url))
       if (!think.isEmpty(data)) {
         const query = queryString.stringify({
           appid: data.appid,

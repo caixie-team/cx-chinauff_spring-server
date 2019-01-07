@@ -26,8 +26,8 @@ module.exports = class extends Base {
       //   "cardNo": "210900000004036335"
       // }
       const userPayload = await this.checkUserLoginStatus(data.openId)
-      // console.log('LOGIN......')
-      // console.log(userPayload)
+      console.log('LOGIN......')
+      console.log(userPayload)
       // 已查询用户状态
       if (userPayload.errcode === 0) { // 如果已登录， 查询用户信息
         // 用 cardNo 获取用户信息
@@ -35,11 +35,11 @@ module.exports = class extends Base {
         if (think.isEmpty(accountInfo.cardNo)) {
           const cardPayload = await this.getCardInfo(userPayload.cardNo)
           console.log('REQUEST CARD INFO DATA')
-          console.log(cardPayload)
+          // console.log(cardPayload)
           if (cardPayload) {
             accountInfo = await this.model('account').save(data.openId, cardPayload)
           }
-          console.log(accountInfo)
+          // console.log(accountInfo)
         } else {
           console.log('UPDATE ACCOUNT LGOIN TIME  SUCCESS')
           accountInfo = await this.model('account').save(data.openId, {
@@ -47,6 +47,8 @@ module.exports = class extends Base {
           })
         }
         accountInfo.status = 1
+        accountInfo.cardNo = userPayload.cardNo
+        // accountInfo.userId = userPayload.userId
       } else { // 更新最后登录时间
         console.log('NOINFO UPDATE ACCOUNT LGOIN TIME  SUCCESS')
         accountInfo = await this.model('account').save(data.openId, {
