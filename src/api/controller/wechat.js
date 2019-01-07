@@ -252,4 +252,67 @@ module.exports = class extends Base {
   }
 
 
+  /**
+   * 获取签名配置信息
+   *
+   * @returns {Promise<any>}
+   */
+  async signatureAction () {
+    // console.log('签名')
+    const queryUrl = this.post('url')
+    // console.log(queryUrl)
+    if (queryUrl) {
+      const query = queryString.stringify({
+        // appid: 'wxa8299eb7fc27ef04'
+        appid: 'wxb44ce8b8c5cfdc0a'
+      })
+      const payload = await this.got.post(
+        '/console/activity/weChat/getConfigMessage',
+        {
+          baseUrl: think.config('proxyActivityApi'),
+          query
+        }
+      )
+      let data = JSON.parse(payload.body)
+      if (data.errcode == 0) {
+        let jssdkConfig = {
+          // appId: 'wx40f58df735cd2868',
+          // appId: 'wxb44ce8b8c5cfdc0a',
+          // 老娘舅测试
+          // appId: 'wxa8299eb7fc27ef04',
+          // 老娘舅正式ID
+          appId: 'wxb44ce8b8c5cfdc0a',
+          // nonceStr: '',
+          // signature: '',
+          jsApiList: [
+            'hideMenuItems',
+            'onMenuShareTimeline',
+            'getLocation',
+            'chooseImage',
+            'previewImage',
+            'uploadImage',
+            'downloadImage'
+            // 'chooseCard',
+            // 'addCard',
+            // 'openCard',
+            // 'chooseWXPay'
+            // 'updateAppMessageShareData',
+            // 'updateTimelineShareData',
+          ],
+          // url: ''
+        }
+        // const remoteConfig = JSON.parse(data.data)
+        jssdkConfig = Object.assign({}, data.data, jssdkConfig)
+        data.data = jssdkConfig
+        // data =
+        return this.json(data)
+        // return this.success(data)
+      }
+      // let accessToken = null
+      // if (data.errcode == 0) {
+      //   accessToken = data.data
+        // return data.data
+      // }
+    }
+  }
 }
