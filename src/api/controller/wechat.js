@@ -264,7 +264,8 @@ module.exports = class extends Base {
     if (queryUrl) {
       const query = queryString.stringify({
         // appid: 'wxa8299eb7fc27ef04'
-        appid: 'wxb44ce8b8c5cfdc0a'
+        appid: 'wxb44ce8b8c5cfdc0a',
+        url: encodeURIComponent(queryUrl)
       })
       const payload = await this.got.post(
         '/console/activity/weChat/getConfigMessage',
