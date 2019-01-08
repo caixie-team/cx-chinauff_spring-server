@@ -5,7 +5,7 @@
 {% import "../../_components/_dropdowns.html" as dropdowns %}
 
 {% block content %}
-    {% set toolbar = {
+{#    {% set toolbar = {
         primary: [{
             text: '添加',
             url: '/admin/action/add',
@@ -29,7 +29,7 @@
             attribute: 'target-form="items"',
             classes: 'ajax-post confirm',
             icon: 'icon-trash-alt'
-        }]} %}
+        }]} %}#}
 
     {% set rowItems = [] %}
     {% for item in list %}
