@@ -70,7 +70,7 @@
                                 {% endif %}
                                 <ul class="nav nav-group-sub">
                                     {% for c in v.children %}
-                                        {#{{ controller.active }}#}
+                                        {{ controller.active }}
                                         {#{{ c.url }}#}
                                         <li class="nav-item">
                                             <a class="nav-link {% if controller.active == c.url %}active{% endif %}"
