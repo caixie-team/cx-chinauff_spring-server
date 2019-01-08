@@ -26,7 +26,7 @@ module.exports = class extends think.common.Admin {
    */
   async cardAction () {
     const cardUserModel = this.model('activity_card_user');
-    const data = await cardUserModel.field(['address', 'recipient_name', 'openid', 'phone_number', 'receive_time', 'card_code', 'create_time'])
+    const data = await cardUserModel.field(['id', 'address', 'recipient_name', 'openid', 'phone_number', 'receive_time', 'card_code', 'create_time'])
       .page(this.get('page') || 1, 20)
       .order('create_time DESC')
       .countSelect();
