@@ -1,8 +1,7 @@
 module.exports = class extends think.common.Admin {
   constructor (ctx) {
     super(ctx); // 调用父级的 constructor 方法，并把 ctx 传递进去
-    // 其他额外的操作
-    this.tactive = 'order';
+    // this.tactive = 'order';
   }
 
   /**
@@ -25,8 +24,17 @@ module.exports = class extends think.common.Admin {
    * 发卡数据
    * @returns {*}
    */
-  cardAction () {
+  async cardAction () {
+    const cardUserModel = this.model('activity_card_user');
+    const data = await cardUserModel.field(['id', 'address', 'recipient_name', 'openid', 'phone_number', 'receive_time', 'card_code', 'create_time'])
+      .page(this.get('page') || 1, 20)
+      .order('create_time DESC')
+      .countSelect();
+    const html = this.pagination(data);
+    this.assign('pagerData', html); // 分页展示使用
+    this.assign('list', data.data); // 分页展示使用
     return this.display()
+    // return this.success(data)
   }
 
   /**
@@ -34,16 +42,11 @@ module.exports = class extends think.common.Admin {
    * @returns {*}
    */
   async trafficAction () {
-    console.log('traffic action ....')
+    // this.active = 'traffic'
     const analyticsModel = this.model('analytics')
     const data = await analyticsModel.getAllPageView(this.get('page') || 1, 20)
-    // console.log(data)
     const html = this.pagination(data);
-    // console.log('---page ....')
-    // console.log(html)
-    // console.log('x-x-x-x-x-x--------------')
     this.assign('pagerData', html); // 分页展示使用
-    // console.log(data.data)
     this.assign('list', data.data); // 分页展示使用
     return this.display()
   }

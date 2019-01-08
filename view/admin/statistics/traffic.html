@@ -5,7 +5,7 @@
 {% import "../../_components/_dropdowns.html" as dropdowns %}
 
 {% block content %}
-    {% set toolbar = {
+{#    {% set toolbar = {
         primary: [{
             text: '查询',
             url: '/admin/action/add',
@@ -34,13 +34,14 @@
             text: '添加',
             url: '/admin/action/add',
             icon: 'icon-add'
-        }]} %}
+        }]} %}#}
 
     {% set rowItems = [] %}
     {% for item in list %}
         {% set rowItems = (rowItems.push({cells: [
             { html: loop.index},
             { html: item.date},
+            { html: item.page_path},
             { html: item.title},
             { html: item.pv},
             { html: item.uv}
@@ -55,7 +56,10 @@
             html: '时间'
         },
         {
-            html: '页面类别'
+            html: '页面路径'
+        },
+        {
+            html: '页面标题'
         },
         {
             html: 'PV'
@@ -66,7 +70,6 @@
     ] %}
 
     {% set pager = (pagerData | safe) %}
-    {{ pagerData }}
     {% set content = cards.grid(theader, rowItems, pager) %}
 
     {{ pages.content(toolbar, content) }}
