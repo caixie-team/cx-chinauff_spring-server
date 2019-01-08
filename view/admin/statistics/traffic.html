@@ -42,6 +42,7 @@
             { html: loop.index},
             { html: item.date},
             { html: item.title},
+            { html: item.page_path},
             { html: item.pv},
             { html: item.uv}
         ]}), rowItems) %}
@@ -55,7 +56,10 @@
             html: '时间'
         },
         {
-            html: '页面类别'
+            html: '页面路径'
+        },
+        {
+            html: '页面标题'
         },
         {
             html: 'PV'

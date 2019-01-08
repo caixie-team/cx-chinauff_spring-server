@@ -34,16 +34,10 @@ module.exports = class extends think.common.Admin {
    * @returns {*}
    */
   async trafficAction () {
-    console.log('traffic action ....')
     const analyticsModel = this.model('analytics')
     const data = await analyticsModel.getAllPageView(this.get('page') || 1, 20)
-    // console.log(data)
     const html = this.pagination(data);
-    // console.log('---page ....')
-    // console.log(html)
-    // console.log('x-x-x-x-x-x--------------')
     this.assign('pagerData', html); // 分页展示使用
-    // console.log(data.data)
     this.assign('list', data.data); // 分页展示使用
     return this.display()
   }
