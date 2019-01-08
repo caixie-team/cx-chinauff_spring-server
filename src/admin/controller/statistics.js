@@ -27,7 +27,7 @@ module.exports = class extends think.common.Admin {
    */
   async cardAction () {
     const cardUserModel = this.model('activity_card_user');
-    const data = await cardUserModel.where({}).page(this.get('page') || 1, 20).order('create_time DESC').countSelect();
+    const data = await cardUserModel.page(this.get('page') || 1, 20).order('create_time DESC').countSelect();
     const html = this.pagination(data);
     this.assign('pagerData', html); // 分页展示使用
     return this.display()
