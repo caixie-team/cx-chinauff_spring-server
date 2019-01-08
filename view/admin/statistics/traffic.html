@@ -5,7 +5,7 @@
 {% import "../../_components/_dropdowns.html" as dropdowns %}
 
 {% block content %}
-    {% set toolbar = {
+{#    {% set toolbar = {
         primary: [{
             text: '查询',
             url: '/admin/action/add',
@@ -34,7 +34,7 @@
             text: '添加',
             url: '/admin/action/add',
             icon: 'icon-add'
-        }]} %}
+        }]} %}#}
 
     {% set rowItems = [] %}
     {% for item in list %}
@@ -66,7 +66,6 @@
     ] %}
 
     {% set pager = (pagerData | safe) %}
-    {{ pagerData }}
     {% set content = cards.grid(theader, rowItems, pager) %}
 
     {{ pages.content(toolbar, content) }}
