@@ -9,7 +9,7 @@ const FormData = require('form-data');
  * @type {module.exports}
  */
 module.exports = class extends Base {
-  constructor (ctx) {
+  constructor(ctx) {
     super(ctx); // 调用父级的 constructor 方法，并把 ctx 传递进去
     // 其他额外的操作
     this.db = this.model('activity_coupon');
@@ -20,7 +20,7 @@ module.exports = class extends Base {
   /**
    * 抽奖
    */
-  async hitAction () {
+  async hitAction() {
 
     await this.validateActivityDate(); //验证活动时间
     console.log('HIT ACITON.....')
@@ -41,7 +41,7 @@ module.exports = class extends Base {
     console.log(data.openId)
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
-    const chinauffAccount = await chinauffAccountModel.where({openId: data.openId}).find();
+    const chinauffAccount = await chinauffAccountModel.where({ openId: data.openId }).find();
     console.log('查询 活动账户')
     console.log(chinauffAccount)
     if (think.isEmpty(chinauffAccount)) {
@@ -51,8 +51,8 @@ module.exports = class extends Base {
     /***************************************************/
     //step1 判断该活动账户是否有未领取的优惠券，如果有，则把未领取的优惠券返给他
 
-    //未领取的充值卡
-    await this.unreceived(data.openId);
+    //未领取的优惠券  todo 该限制以去掉
+    //await this.unreceived(data.openId);
 
     /***************************************************/
     //step2 判断当前时间是否在 2019.01.10-2019.01.20周期内
@@ -71,13 +71,16 @@ module.exports = class extends Base {
       return this.fail(1005, '不在活动期间')
     }
 
+    //判断当前是否有到达发福字的条件
+    await this.getRule(data.openId, cycleData.cycle, cycleData.rate)
+
     await this.getCoupon(data.openId, cycleData);
   }
 
   /**
    * 验证活动日期
    */
-  async validateActivityDate () {
+  async validateActivityDate() {
     const currentDate = moment(new Date()).format('YYYY-MM-DD');
     if (currentDate < '2019-01-05') {
       return this.fail(1002, '活动未开始');
@@ -90,7 +93,7 @@ module.exports = class extends Base {
    * 未领取的优惠券
    * @param {微信openId} openId
    */
-  async unreceived (openId) {
+  async unreceived(openId) {
     const couponUserModel = this.model('activity_coupon_user')
     let sql = `
             SELECT 
@@ -117,7 +120,7 @@ module.exports = class extends Base {
    * 发充值卡
    * @param {微信openId} openId
    */
-  async sendCard (openId) {
+  async sendCard(openId) {
     const couponUserModel = this.model('activity_coupon_user')
     const cardModel = this.model('activity_card');
     const cardUserModel = this.model('activity_card_user');
@@ -192,7 +195,7 @@ module.exports = class extends Base {
    * 获取周期日期
    * @param {当前日期} currentDate
    */
-  async getCycle (currentDate) {
+  async getCycle(currentDate) {
     //第一阶段
     const one_start_date = '2019-01-05';
     const one_end_date = '2019-01-09';
@@ -225,7 +228,8 @@ module.exports = class extends Base {
         endDate: one_end_date,
         master_total: 150000,
         spare_total: 50349,
-        cycle: 1
+        cycle: 1,
+        rate: 5
       }
     } else if (currentDate >= two_start_date && currentDate <= two_end_date) {//第二周期
       data = {
@@ -233,7 +237,8 @@ module.exports = class extends Base {
         endDate: two_end_date,
         master_total: 160000,
         spare_total: 60349,
-        cycle: 2
+        cycle: 2,
+        rate: 8
       }
     } else if (currentDate >= three_start_date && currentDate <= three_end_date) {//第三周期
       data = {
@@ -241,7 +246,8 @@ module.exports = class extends Base {
         endDate: three_end_date,
         master_total: 130000,
         spare_total: 50349,
-        cycle: 3
+        cycle: 3,
+        rate: 8
       }
     } else if (currentDate >= four_start_date && currentDate <= four_end_date) {//第四周期
       data = {
@@ -249,7 +255,8 @@ module.exports = class extends Base {
         endDate: four_end_date,
         master_total: 120000,
         spare_total: 60349,
-        cycle: 4
+        cycle: 4,
+        rate: 8
       }
     } else if (currentDate >= five_start_date && currentDate <= five_end_date) {//第五周期
       data = {
@@ -257,7 +264,8 @@ module.exports = class extends Base {
         endDate: five_end_date,
         master_total: 130000,
         spare_total: 50349,
-        cycle: 5
+        cycle: 5,
+        rate: 5
       }
     } else if (currentDate >= six_start_date && currentDate <= six_end_date) {//第六周期
       data = {
@@ -265,18 +273,40 @@ module.exports = class extends Base {
         endDate: six_end_date,
         master_total: 63626,
         spare_total: 63626,
-        cycle: 6
+        cycle: 6,
+        rate: 12
       }
     }
     return data;
   }
 
   /**
+   * 获取规则
+   */
+  async getRule(openId, cycle, rate) {
+    const ruleRecordModel = this.model('activity_rule_record');
+    const count = await ruleRecordModel.where({
+      cycle: cycle
+    }).count('id');
+
+    if ((count + 1) % rate == 0) {//可以发福字
+      const ruleModel = this.model('activity_rule');
+      await ruleModel.add({
+        openid: openId,
+        cycle: cycle,
+        status: 1,//可发福字状态 1可发字 2不可发字
+        create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+      })
+    }
+  }
+
+
+  /**
    * 获取优惠券
    * @param {微信openId} openId
    * @param {startDate,endDate,master_total,spare_total, cycle} cycleData
    */
-  async getCoupon (openId, cycleData) {
+  async getCoupon(openId, cycleData) {
     let coupon = {};
     const couponUserModel = this.model('activity_coupon_user')
 
@@ -356,7 +386,7 @@ module.exports = class extends Base {
    * @param {startDate 开始时间,endDate 结束时间,master_total 主库存,spare_total 备用库存, cycle 周期} cycleData
    * @param {库存标识 1主库存 2备用库存} stockMark
    */
-  async getCoupons (cycleData, stockMark) {
+  async getCoupons(cycleData, stockMark) {
     let sql = `
             SELECT 
             id,coupon_name,type_code,rate
@@ -392,7 +422,7 @@ module.exports = class extends Base {
    * 获取奖品
    * @param {*} coupons
    */
-  async lottery (coupons) {
+  async lottery(coupons) {
     let total = 0;  //奖品总数
     for (let item of coupons) {
       total += item.num;
@@ -419,7 +449,7 @@ module.exports = class extends Base {
    * @param {第几周期 1,2...} cycle
    * @param {库存标识 1主库存 2备用库存} stockMark
    */
-  async hitHandle (openId, coupon = {}, cycle, stockMark) {
+  async hitHandle(openId, coupon = {}, cycle, stockMark) {
     const coupon_code = Generate.id();
     const couponUserModel = this.model('activity_coupon_user')
     //将获得的优惠券关联到活动账户下，状态为 未领取
@@ -433,6 +463,16 @@ module.exports = class extends Base {
       coupon_code: coupon_code,  //券码(仅用于更新用户所拥有的优惠券)
       cycle: cycle,
       stock_mark: stockMark,
+      create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+    });
+    
+    const ruleRecordModel = this.model('activity_rule_record');
+    await ruleRecordModel.add({
+      openid: openId,
+      coupon_id: coupon.id,
+      type_code: coupon.type_code,
+      coupon_code: coupon_code,
+      cycle: cycle,
       create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
     });
 
@@ -450,7 +490,7 @@ module.exports = class extends Base {
   /**
    * 领取会员充值卡
    */
-  async receiveCardAction () {
+  async receiveCardAction() {
     const data = this.post()
     if (think.isEmpty(data.card_code)) {
       return this.fail(1000, '请求参数错误')
@@ -466,7 +506,7 @@ module.exports = class extends Base {
     }
 
     const cardUserModel = this.model('activity_card_user');
-    const cardUserData = await cardUserModel.where({card_code: data.card_code}).find();
+    const cardUserData = await cardUserModel.where({ card_code: data.card_code }).find();
     if (think.isEmpty(cardUserData)) {
       return this.fail(1004, '会员充值卡不存在')
     }
@@ -487,7 +527,7 @@ module.exports = class extends Base {
   /**
    * 领取优惠券
    */
-  async receiveCouponAction () {
+  async receiveCouponAction() {
     const data = this.post()
     // console.log(data)
     if (think.isEmpty(data.coupon_code)) {
@@ -539,7 +579,7 @@ module.exports = class extends Base {
    * 只用登录成功的用户可以发劵
    * @returns {Promise<void>}
    */
-  async sendCouponByActivity (openId, code) {
+  async sendCouponByActivity(openId, code) {
     console.log('SEND COUPON ...')
     // http://demo.micvs.com/crmSession/console/api/
     // coupon/
@@ -588,7 +628,7 @@ module.exports = class extends Base {
   /**
    * 初始化当天的数据 用于测试
    */
-  async initTodayAction () {
+  async initTodayAction() {
     const couponPoolModel = this.model('activity_coupon_pool');
     //主库存
     for (let i = 0; i < 10; i++) {
