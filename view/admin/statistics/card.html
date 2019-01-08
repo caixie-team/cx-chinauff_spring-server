@@ -35,24 +35,12 @@
     {% for item in list %}
         {% set rowItems = (rowItems.push({cells: [
             { html: item.id},
-            { html: item.name},
-            { html: '<a data-id="'+ item.id + '" href="/admin/action/edit?id='+ item.id +'" class="">' + item.title +'</a>'},
-            { html: item.type|get_action_type},
-            { html: item.remark},
-            { html: '<a href="/admin/action/setstatus/ids/'+ item.id +'/status?1-item.status" class="active ajax-get" data-toggle="class">
-                        <i class="fa '+( "fa-check text-success text-active" if item.status else "fa-times text-danger text") +'"></i></a>', classes: 'text-center'},
+            { html: item.receive_time},
+            { html: '50元会员充值卡'},
+            { html: item.recipient_name},
+            { html: item.phone_number},
+            { html: item.address},
 
-            { classes: 'text-center',
-                html: dropdowns.menu([{
-                url: '/admin/action/edit?id='+ item.id,
-                icon: 'icon-pencil7',
-                text: '修改'
-            }, {
-                url: '/admin/action/setstatus?ids='+ item.id +'&status=-1',
-                icon: 'icon-trash-alt',
-                classes: 'ajax-get',
-                text: '删除'
-            }])}
         ]}), rowItems) %}
     {% endfor %}
 
