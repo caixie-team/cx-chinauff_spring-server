@@ -19,17 +19,17 @@ module.exports = {
   mysql: {
     logConnect: isDev,
     handle: mysql,
-    database: 'cmswing',
+    database: 'spring',
     prefix: 'picker_',
     connectionLimit: 1, // 连接池的连接个数，默认为 1
     // charset: 'UTF8MB4',
     charset: 'UTF8MB4_GENERAL_CI',
     // debug: true,
-    host: isDev ? 'picker.cc' : '192.168.25.147',
+    host: isDev ? '119.3.87.146' : '192.168.25.147',
     // host: isDev ? '119.3.87.146' : '119.3.87.146',
-    port: isDev ? '3366' : '3306',
+    port: isDev ? '3306' : '3306',
     user: 'root',
-    password: isDev ? 'ub08JASJQy9s' : 'Lnjhi%M5py',
+    password: isDev ? 'Lnjhi%M5py' : 'Lnjhi%M5py',
     dateStrings: true,
     cache: { // 额外的缓存配置
       type: 'file',
