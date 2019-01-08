@@ -34,6 +34,7 @@ module.exports = class extends think.common.Admin {
    * @returns {*}
    */
   async trafficAction () {
+    this.active = 'traffic'
     const analyticsModel = this.model('analytics')
     const data = await analyticsModel.getAllPageView(this.get('page') || 1, 20)
     const html = this.pagination(data);
