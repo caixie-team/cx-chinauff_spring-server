@@ -25,7 +25,7 @@ module.exports = class extends Base {
     await this.validateActivityDate(); //验证活动时间
     console.log('HIT ACITON.....')
     const data = this.post()
-    console.log(data)
+    // console.log(data)
     if (think.isEmpty(data.openId)) {
       console.log('error .....')
       return this.fail('请求参数错误')
@@ -35,15 +35,15 @@ module.exports = class extends Base {
     if (!think.isEmpty(data.encrypt)) {
       data.openId = decrypt(data.openId, this.key)
     }
-    console.log(data.openId)
-    console.log('查询 活动账户')
+    // console.log(data.openId)
+    // console.log('查询 活动账户')
 
-    console.log(data.openId)
+    // console.log(data.openId)
     //判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
     const chinauffAccount = await chinauffAccountModel.where({ openId: data.openId }).find();
-    console.log('查询 活动账户')
-    console.log(chinauffAccount)
+    // console.log('查询 活动账户')
+    // console.log(chinauffAccount)
     if (think.isEmpty(chinauffAccount)) {
       return this.fail(1004, '活动账户不存在')
     }
@@ -344,9 +344,9 @@ module.exports = class extends Base {
       const coupons = await this.getCoupons(cycleData, stockMark);
       coupon = await this.lottery(coupons);
       console.log('优惠劵奖品列表')
-      console.log(coupons)
+      // console.log(coupons)
       console.log('优惠劵')
-      console.log(coupon)
+      // console.log(coupon)
       //1.如果周期内，某类型券的发放券数用完，那么该券停止发放；
       const couponCount = await couponUserModel.where({
         coupon_id: coupon.id,
@@ -465,7 +465,7 @@ module.exports = class extends Base {
       stock_mark: stockMark,
       create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
     });
-    
+
     const ruleRecordModel = this.model('activity_rule_record');
     await ruleRecordModel.add({
       openid: openId,
@@ -607,7 +607,7 @@ module.exports = class extends Base {
       couponJson: JSON.stringify(couponJson)
     }
     console.log('SEND COUPON PARAM ...')
-    console.log(queryInfo)
+    // console.log(queryInfo)
     const query = queryString.stringify(queryInfo)
 
     // console.log(query)
@@ -619,7 +619,7 @@ module.exports = class extends Base {
       }
     )).body
     console.log('SEND COUPON RETURN ...')
-    console.log(payload)
+    // console.log(payload)
     return JSON.parse(payload)
   }
 
