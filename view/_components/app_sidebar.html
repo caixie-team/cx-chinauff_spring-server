@@ -111,7 +111,7 @@
                         {% for v in controller.adminmenu[i] %}
                             <li class="nav-item {% if v.children %}  nav-item-submenu {% endif %}">
                                 {% if v.ico %}
-                                    <a class="nav-link" {% if controller.active == v.url %}active {% endif %}"
+                                    <a class="nav-link {% if controller.active == v.url %}active {% endif %}"
                                        href="/{{ v.url }}">
                                         <i class="fa {{ v.ico }}"></i>
                                         <span>{{ v.title }}</span>
