@@ -33,8 +33,8 @@ module.exports = class extends think.common.Admin {
     const html = this.pagination(data);
     this.assign('pagerData', html); // 分页展示使用
     this.assign('list', data.data); // 分页展示使用
-    // return this.display()
-    return this.success(data)
+    return this.display()
+    // return this.success(data)
   }
 
   /**
