@@ -431,8 +431,8 @@ module.exports = class extends Base {
 
     await reserveModel.add({
       shop_id: data.shop_id,
-      // reserve_date: moment(data.reserve_date).format('YYYY-MM-DD'),
-      reserve_date: new Date(data.reserve_date),
+      reserve_date: moment(data.reserve_date).format('YYYY-MM-DD'),
+      // reserve_date: new Date(data.reserve_date),
       openid: data.openId,
       blessing_code: data.blessing_code,
       status: 1, //预约状态

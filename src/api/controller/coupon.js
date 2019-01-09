@@ -561,7 +561,7 @@ module.exports = class extends Base {
         coupon_code: data.coupon_code
       }).update({
         crm_coupon_code,
-        receive_status: 2,// 领取状态(1未领取 2已领取)
+        receive_status: 2, // 领取状态(1未领取 2已领取)
         receive_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')  // 领取时间
       })
       return this.success({
