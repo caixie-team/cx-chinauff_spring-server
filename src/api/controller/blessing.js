@@ -23,9 +23,11 @@ module.exports = class extends Base {
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误')
     }
+    let isHelp = false;
     // 如果是被加密的，进行解密（用于助力时传过来的 beOpenIdproxyCrmApi）
     if (!think.isEmpty(data.encrypt)) {
-      data.openId = decrypt(data.openId, this.key)
+      data.openId = decrypt(data.openId, this.key);
+      isHelp = true;
     }
 
     //判断openid是否存在
@@ -35,28 +37,41 @@ module.exports = class extends Base {
       return this.fail(1001, '活动账户不存在')
     }
 
-    const nowDate = moment(new Date()).format('YYYY-MM-DD')
-    //检测是否有助力
-    const helpModel = this.model('activity_help')
-    const helpInfo = await helpModel.where({ be_openid: data.openId, status: 1 }).limit(1).find();
-
-    if (think.isEmpty(helpInfo)) { //没有助力
-      //是否到达参与限制
-      const blessingTimesModel = this.model('activity_blessing_times');
-      const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
-      if (times >= 3) {
-        return this.fail(1002, '今日可参与次数已用完')
-      } else {
-        //记录参与一次
-        await blessingTimesModel.add({
-          openid: data.openId,
-          join_date: nowDate
-        });
-      }
-    } else { //有助力
-      await helpModel.where({ id: helpInfo.id }).update({
-        status: 2 	//助力已使用
+    const blessingUserModel = this.model('activity_blessing_user');
+    const fuCount = await blessingUserModel.where({
+      openid: data.openId
+    }).count('id');
+    console.log(`******** 满福累计: ${fuCount} *******`)
+    if(fuCount >= 3){
+      //已经够3个福字
+      return this.success({
+        blessing: {}
       })
+    }
+
+    const nowDate = moment(new Date()).format('YYYY-MM-DD')
+    if (!isHelp) {
+      //检测是否有助力
+      const helpModel = this.model('activity_help')
+      const helpInfo = await helpModel.where({ be_openid: data.openId, status: 1 }).limit(1).find();
+      if (think.isEmpty(helpInfo)) { //没有助力
+        //是否到达参与限制
+        const blessingTimesModel = this.model('activity_blessing_times');
+        const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
+        if (times >= 3) {
+          return this.fail(1002, '今日可参与次数已用完')
+        } else {
+          //记录参与一次
+          await blessingTimesModel.add({
+            openid: data.openId,
+            join_date: nowDate
+          });
+        }
+      } else { //有助力
+        await helpModel.where({ id: helpInfo.id }).update({
+          status: 2 	//助力已使用
+        })
+      }
     }
 
     const currentDate = moment(new Date()).format('YYYY-MM-DD');
@@ -142,7 +157,6 @@ module.exports = class extends Base {
 
     if (!think.isEmpty(records) && records.length === 4) {//集满福
       //生成福码
-      const blessingUserModel = this.model('activity_blessing_user');
       const icon_num = parseInt(Math.random() * 11, 10) + 1;				//1~11的随机数
       const blessing_code = Generate.id();
       await blessingUserModel.add({
@@ -308,7 +322,6 @@ module.exports = class extends Base {
    */
   async helpAction() {
     const data = this.post();
-    console.log(data)
     //助力者openId
     if (think.isEmpty(data.openId)) {
       return this.fail('请求参数错误')
