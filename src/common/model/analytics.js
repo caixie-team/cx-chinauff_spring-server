@@ -21,11 +21,24 @@ module.exports = class extends think.Model {
   async getAllPageView (page, pageSize) {
     const eventModel = this.model('ahoy_event')
     // 统计总数用于分页
-    const total = await eventModel.field(`COUNT(DISTINCT FROM_UNIXTIME(time, '%Y-%m-%d'), properties->>'$.page') as count`).where({
+    // const total = await eventModel.field(`COUNT(DISTINCT FROM_UNIXTIME(time, '%Y-%m-%d'), properties->>'$.page') as count`).where({
+    //   name: '$view'
+    // }).find()
+    const total = await eventModel.field(`COUNT(DISTINCT FROM_UNIXTIME(time, '%Y-%m-%d'), page_virtual) as count`).where({
       name: '$view'
     }).find()
+    // SELECT FROM_UNIXTIME(time, "%Y-%m-%d") AS date, page_virtual as page_path, title_virtual as title, name, count(page_virtual) as pv, count(DISTINCT visit_id) as uv FROM `picker_ahoy_event` WHERE ( name = "$view" ) GROUP BY date DESC, page_path ASC,title ASC LIMIT 0,20;
 
     const viewsData = await eventModel
+      .field('FROM_UNIXTIME(time, "%Y-%m-%d") AS date, page_virtual as page_path, ' +
+        'title_virtual as title, ' +
+        'name, count(*) as pv, ' +
+        'count(DISTINCT visit_id) as uv')
+      .where(`name = "$view"`)
+      .group(['date DESC', 'page_path ASC', 'title ASC'])
+      .page(page, pageSize)
+      .countSelect(total.count)
+/*    const viewsData = await eventModel
       .field('FROM_UNIXTIME(time, "%Y-%m-%d") AS date, JSON_UNQUOTE( JSON_EXTRACT(properties, "$.page") ) as page_path, ' +
         'JSON_UNQUOTE( JSON_EXTRACT(properties, "$.title") ) as title, ' +
         'name, count(*) as pv, ' +
@@ -33,16 +46,16 @@ module.exports = class extends think.Model {
       .where(`name = "$view"`)
       .group(['date DESC', 'page_path ASC', 'title ASC'])
       .page(page, pageSize)
-      .countSelect(total.count)
+      .countSelect(total.count)*/
     return viewsData
   }
 
-  async allPages (flat) {
-    const pages = await think.cache('page-list', () => {
-      return this.getAllPages()
-    }, {timeout: 365 * 24 * 3600})
-    return pages
-  }
+  // async allPages (flat) {
+  //   const pages = await think.cache('page-list', () => {
+  //     return this.getAllPages()
+  //   }, {timeout: 365 * 24 * 3600})
+  //   return pages
+  // }
 
   // async getAllPages () {
   //   const where = {}
