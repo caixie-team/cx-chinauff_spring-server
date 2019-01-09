@@ -860,7 +860,7 @@ module.exports = class extends think.common.Admin {
         }
         let where = `r.reserve_date = '${nowDate}' `
         if (!think.isEmpty(data.shop_code)) {
-            where+=` and r.shop_id= ${data.shop_code}` ;
+            where += ` and r.shop_id= ${data.shop_code}`;
         }
         let sql = `
             SELECT 
@@ -887,16 +887,16 @@ module.exports = class extends think.common.Admin {
         let list = await reserveModel.query(sql);
 
         const shopModel = this.model('chinauff_shop');
-        const shops = await shopModel.select();           
+        const shops = await shopModel.select();
         this.assign('list', list);
         this.assign('shops', shops);
         this.assign('data', data);
         return this.display();
     }
 
-     /**
-     * 导出门店配货
-     */
+    /**
+    * 导出门店配货
+    */
     async exportAllocationAction() {
         let nowDate = null;
         let data = this.post();
@@ -910,7 +910,7 @@ module.exports = class extends think.common.Admin {
         }
         let where = `r.reserve_date = '${nowDate}' `
         if (!think.isEmpty(data.shop_code)) {
-            where+=` and r.shop_id= ${data.shop_code}` ;
+            where += ` and r.shop_id= ${data.shop_code}`;
         }
         let sql = `
             SELECT 
@@ -965,6 +965,32 @@ module.exports = class extends think.common.Admin {
         this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
         this.ctx.set("Content-Disposition", "attachment; filename=allocation.xlsx");
         this.ctx.body = buffer;
+    }
+
+    /**
+     * 更新库存
+     */
+    async updateshopAction() {
+        const shopModel = this.model('chinauff_shop');
+        if (this.isPost) {
+            const data = this.post();
+            let updateData = null;
+            if (!think.isEmpty(data.add_num)) {
+                updateData = ['exp', `num+${parseInt(data.add_num)}`]
+            } else if (!think.isEmpty(data.subtract_num)) {
+                updateData = ['exp', `num-${parseInt(data.subtract_num)}`]
+            }
+            await shopModel.where({
+                shop_code: data.shop_code
+            }).update({
+                num: updateData
+            });
+            return this.redirect('/admin/blessing/allocation')
+        } else {
+            const shops = await shopModel.select();
+            this.assign('shops', shops);
+            return this.display();
+        }
     }
 
 }

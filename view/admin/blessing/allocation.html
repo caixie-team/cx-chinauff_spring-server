@@ -46,7 +46,16 @@
             </div>
     </form>
 </div>
-<button type="button" class="btn btn-success" onclick="submitAction(1)" style="margin-bottom:20px;">管理库存</button>
+
+{% set actions = {
+    primary: [{
+        url: '/' + ctx.module + '/' + ctx.controller + '/updateshop',
+        toggle: true,
+        icon: 'icon-add',
+        text: '库存管理'
+    }]
+} %}
+
     {% set rowItems = [] %}
     {% for item in list %}
         {% set rowItems = (rowItems.push({cells: [
@@ -71,7 +80,7 @@
     {% set pager = (pagerData | safe) %}
     {% set content = cards.grid(theader, rowItems, pager) %}
 
-    {{ pages.content(null, content) }}
+    {{ pages.content(actions, content) }}
 
 {% endblock %}
 {% block script %}
