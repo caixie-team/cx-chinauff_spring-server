@@ -21,7 +21,7 @@ module.exports = {
     handle: mysql,
     database: 'spring',
     prefix: 'picker_',
-    connectionLimit: 1, // 连接池的连接个数，默认为 1
+    connectionLimit: 10, // 连接池的连接个数，默认为 1
     // charset: 'UTF8MB4',
     charset: 'UTF8MB4_GENERAL_CI',
     // debug: true,
