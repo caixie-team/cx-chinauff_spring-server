@@ -415,12 +415,12 @@ module.exports = class extends Base {
 
     //判断预约兑换日期非空
     if (think.isEmpty(data.reserve_date)) {
-      return this.fail('请求参数错误')
+      return this.fail('兑换日期错误，请重新填写')
     }
 
     //判断门店信息非空
     if (think.isEmpty(data.shop_id)) {
-      return this.fail('请求参数错误')
+      return this.fail('门店信息错误，请重新选择')
     }
 
     const reserveModel = this.model('activity_reserve')
