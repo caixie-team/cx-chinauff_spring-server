@@ -395,7 +395,7 @@ module.exports = class extends Base {
     }
 
     const data = this.post()
-    // console.log(data)
+    console.log(data)
     //openId
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误, 没有openId')
