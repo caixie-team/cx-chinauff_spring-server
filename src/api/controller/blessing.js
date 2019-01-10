@@ -492,7 +492,7 @@ module.exports = class extends Base {
 				picker_activity_reserve r
 					LEFT JOIN
 				picker_chinauff_shop s ON r.shop_id = s.shop_code
-				where r.blessing_code='${data.blessing_code}';`;
+				where r.blessing_code='${data.blessing_code}' and r.status=1;`;
     const list = await reserveModel.query(sql);
     return this.success(list.length > 0 ? list[0] : {});
   }
