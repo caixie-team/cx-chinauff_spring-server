@@ -186,11 +186,26 @@ module.exports = class extends think.common.Admin {
         }
 
         const reserveModel = this.model('activity_reserve');
+        const reserveInfo = await reserveModel.where({
+            id:data.id
+        }).find();
+        if (think.isEmpty(reserveInfo)) {
+            return this.fail('信息不存在')
+        }
+
         await reserveModel.where({
             id: data.id
         }).update({
             status: 2
         });
+
+        const blessingUserModel = this.model('activity_blessing_user');
+        await blessingUserModel.where({
+            blessing_code:reserveInfo.blessing_code
+        }).update({
+            status:1
+        });
+
         return this.redirect('/admin/blessing/reserve')
     }
 
