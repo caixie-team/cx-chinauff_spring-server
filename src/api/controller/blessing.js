@@ -445,15 +445,18 @@ module.exports = class extends Base {
       shop_code: data.shop_id,
       num: { '>': 0 }
     }).update({ num: ['exp', 'num-1'] })
-
+    const updateTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
     //status 福码状态(1:待预约 2:待兑换 3:已兑换)
-    await blessingUserModel.where({ blessing_code: data.blessing_code }).update({
+    const res = await blessingUserModel.where({ blessing_code: data.blessing_code }).update({
       status: 2,
-      update_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+      update_time: updateTime,
     })
-    return this.success({
-      reserve_date: data.reserve_date
-    });
+    if (res) {
+      return this.success({
+        status: 1, //预约状态
+        reserve_date: updateTime
+      });
+    }
   }
 
   /**
