@@ -45,7 +45,8 @@ module.exports = class extends Base {
     if(fuCount >= 3){
       //已经够3个福字
       return this.success({
-        blessing: {}
+        blessing_type: 0
+        // blessing: {}
       })
     }
 
@@ -79,7 +80,8 @@ module.exports = class extends Base {
     const cycleData = await this.getCycle(currentDate);
     if (think.isEmpty(cycleData)) { //如果参与集福的时间不在活动范围内，直接返回没有奖品
       return this.success({
-        blessing: {}
+        blessing_type: 0
+        // blessing: {}
       })
     }
 
@@ -93,7 +95,8 @@ module.exports = class extends Base {
       // console.log(`********没有集福机会*******`)
       //没集到福字
       return this.success({
-        blessing: {}
+        blessing_type: 0
+        // blessing: {}
       })
     } else {
       await ruleModel.where({
@@ -117,7 +120,8 @@ module.exports = class extends Base {
 
     if (think.isEmpty(pools)) { //没有字奖品
       return this.success({
-        blessing: {}
+        blessing_type: 0
+        // blessing: {}
       })
     }
     const updateBlessingPool = await blessingPoolModel.where({
@@ -126,7 +130,8 @@ module.exports = class extends Base {
     }).update({ last_quantity: ['exp', 'last_quantity-1'] })
     if (updateBlessingPool <= 0) { //奖品已被别人领走
       return this.success({
-        blessing: {}
+        // blessing: {}
+        blessing_type: 0
       })
     }
 

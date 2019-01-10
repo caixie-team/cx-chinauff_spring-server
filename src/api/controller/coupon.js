@@ -2,7 +2,7 @@ const Base = require('./base')
 const moment = require('moment');
 const _ = require('lodash');
 const queryString = require('query-string')
-const FormData = require('form-data');
+// const FormData = require('form-data');
 
 /**
  * 优惠券 API
