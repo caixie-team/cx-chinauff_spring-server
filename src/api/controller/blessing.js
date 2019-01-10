@@ -41,7 +41,7 @@ module.exports = class extends Base {
     const fuCount = await blessingUserModel.where({
       openid: data.openId
     }).count('id');
-    console.log(`******** 满福累计: ${fuCount} *******`)
+    // console.log(`******** 满福累计: ${fuCount} *******`)
     if(fuCount >= 3){
       //已经够3个福字
       return this.success({
@@ -75,7 +75,7 @@ module.exports = class extends Base {
     }
 
     const currentDate = moment(new Date()).format('YYYY-MM-DD');
-    console.log(`******** 当前日期: ${currentDate} *******`)
+    // console.log(`******** 当前日期: ${currentDate} *******`)
     const cycleData = await this.getCycle(currentDate);
     if (think.isEmpty(cycleData)) { //如果参与集福的时间不在活动范围内，直接返回没有奖品
       return this.success({
@@ -90,7 +90,7 @@ module.exports = class extends Base {
       status: 1 //可发福字状态 1可发字 2不可发字 3 已使用
     }).find();
     if (think.isEmpty(ruleData)) {
-      console.log(`********没有集福机会*******`)
+      // console.log(`********没有集福机会*******`)
       //没集到福字
       return this.success({
         blessing: {}
@@ -381,7 +381,7 @@ module.exports = class extends Base {
    * 预约兑换
    */
   async reserveAction() {
-    console.log('reserver ......')
+    // console.log('reserver ......')
     let now = new Date().getTime();
     let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
     let endTime = new Date('2019-02-01 23:59:59').getTime();//可提交预约结束时间
@@ -390,7 +390,7 @@ module.exports = class extends Base {
     }
 
     const data = this.post()
-    console.log(data)
+    // console.log(data)
     //openId
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误, 没有openId')

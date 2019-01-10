@@ -150,14 +150,14 @@ module.exports = class extends Base {
       })
     }).then(
       async (base64Data) => {
-        console.log('百度AI识别中')
+        // console.log('百度AI识别中')
         const aiService = think.service('ai', 'common', this.aiServer, {
           app_id: this.appId,
           key: this.appKey,
           secret: this.appSecret
         });
         const res = await aiService.image(base64Data)
-        console.log(res)
+        // console.log(res)
         if (res.result_num > 0) {
           for (let item of res.result) {
             if (item.keyword.includes('米') || item.root.includes('食品') || item.root.includes('食物')) {
@@ -260,8 +260,8 @@ module.exports = class extends Base {
   async signatureAction () {
     if (this.isPost) {
       const data = this.post()
-      console.log(data)
-      console.log(encodeURIComponent(data.url))
+      // console.log(data)
+      // console.log(encodeURIComponent(data.url))
       if (!think.isEmpty(data)) {
         const query = queryString.stringify({
           appid: data.appid,
