@@ -452,6 +452,7 @@ module.exports = class extends Base {
       update_time: updateTime,
     })
     if (res) {
+      // return this.fail(1003, '已预约')
       return this.success({
         status: 1, //预约状态
         reserve_date: updateTime
