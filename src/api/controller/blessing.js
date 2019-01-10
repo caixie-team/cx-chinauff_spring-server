@@ -415,7 +415,7 @@ module.exports = class extends Base {
 
     //判断预约兑换日期非空
     if (think.isEmpty(data.reserve_date)) {
-      return this.fail('兑换日期错误，请重新填写')
+      return this.fail('请选择距今两天以后的日期')
     }
 
     //判断门店信息非空
