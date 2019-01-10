@@ -316,7 +316,7 @@ module.exports = class extends Base {
     const conponCycleTotal = await couponUserModel.where({
       cycle: cycleData.cycle
     }).count('id');
-    if (conponCycleTotal >= cycleData.master_total + cycleData.spare_total) {
+    if (conponCycleTotal >= (cycleData.master_total + cycleData.spare_total)) {
       // console.log('没奖品了。。。。')
       return this.fail(1007, '奖品已被领完');
     }
