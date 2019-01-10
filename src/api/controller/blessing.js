@@ -433,7 +433,7 @@ module.exports = class extends Base {
     }
 
     const reserveModel = this.model('activity_reserve')
-    const reserveInfo = await reserveModel.where({ 
+    const reserveInfo = await reserveModel.where({
       blessing_code: data.blessing_code,
       status:1
      }).find();
@@ -695,7 +695,7 @@ module.exports = class extends Base {
       return this.fail()
     }
     const blessingUserModel = this.model('activity_blessing_user')
-    const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code }).find();
+    const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code}).find();
     if (think.isEmpty(blessingUserInfo)) {
       return this.fail(1001, '兑换码无效')
     }
