@@ -41,7 +41,7 @@ module.exports = class extends Base {
     const fuCount = await blessingUserModel.where({
       openid: data.openId
     }).count('id');
-    console.log(`******** 满福累计: ${fuCount} *******`)
+    // console.log(`******** 满福累计: ${fuCount} *******`)
     if (fuCount >= 3) {
       //已经够3个福字
       return this.success({
@@ -395,7 +395,7 @@ module.exports = class extends Base {
     }
 
     const data = this.post()
-    console.log(data)
+    // console.log(data)
     //openId
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误, 没有openId')
@@ -856,7 +856,7 @@ module.exports = class extends Base {
     // }
     const data = this.post();
     let total = parseInt(data.total);
-    
+
     let blessingPool = [];
     for (let i = 0; i < total; i++) {
       blessingPool.push({
@@ -869,7 +869,7 @@ module.exports = class extends Base {
 
     let startTime = new Date().getTime()
     let endTime = new Date('2019-02-04 23:59:59').getTime()
-   
+
     let time = endTime - startTime;
     console.log(`startTime:${startTime}  endTime:${endTime} time:${time}`)
 
