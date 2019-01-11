@@ -73,19 +73,18 @@ module.exports = class extends Base {
    * @apiVersion 1.0.0
    */
   async getAction () {
-    // 检查兑换时间 1004
-    // return 1004 未在可兑换时段
-    await this._checkTime()
     // 检查请求参数
     // return 1000 请求参数错误
     const data = await this._checkParams()
-    console.log(data)
+    // console.log(data)
     // const data = this.post()
     //判断福码非空
     // if (think.isEmpty(data.blessing_code) || think.isEmpty(data.shop_code)) {
     //   return this.fail('请求参数错误')
     // }
-
+    // 检查兑换时间 1004
+    // return 1004 未在可兑换时段
+    await this._checkTime(data.blessing_code)
     // 校验福码合法性
     // return 1001 兑换码无效
     // return 1002 已被兑换
@@ -260,14 +259,16 @@ module.exports = class extends Base {
     }
   }
 
-  async _checkTime () {
+  async _checkTime (blessing_code) {
     let now = new Date().getTime();
-    // let startTime = new Date('2019-01-05 00:00:00').getTime(); //可到店兑换开始时间
-    // let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
-    // TODO 上线前测试时间
-    let startTime = new Date('2019-01-04 00:00:00').getTime(); //可提交预约开始时间
+    // let startTime = new Date('2019-01-04 00:00:00').getTime(); //可提交预约开始时间
     let endTime = new Date('2019-02-04 13:59:59').getTime();//可到店兑换结束时间
-    if (now < startTime || now > endTime) {
+    const reserveModel = this.model('activity_reserve')
+    const reserveInfo = await reserveModel.where({
+      blessing_code: blessing_code,
+      status: 1
+    }).find();
+    if (now < new Date(reserveInfo.reserve_date).getTime() || now > endTime) {
       return this.fail(1004, '未在可兑换时间段');
     }
   }
