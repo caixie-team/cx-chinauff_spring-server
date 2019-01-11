@@ -29,7 +29,7 @@ module.exports = class extends Base {
     }).find()
     // console.log(visitor)
     const eventModel = this.model('ahoy_event')
-    if (think._.has(data, 'event_json')) {
+    if (think._.has(data, 'events_json')) {
       const eventData = JSON.parse(data.events_json)[0]
       const properties = eventData.properties
       // console.log(properties)
