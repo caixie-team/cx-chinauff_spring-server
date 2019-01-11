@@ -148,7 +148,7 @@ module.exports = class extends Base {
             type: 2,     // 1 优惠券 2 充值卡
             card: {
               openid: openId,
-              card_type: cardData.card_type,
+              card_type: Number(cardData.card_type),
               card_name: cardData.card_name,
               card_code: cardUserData.card_code
             }
@@ -179,7 +179,7 @@ module.exports = class extends Base {
             type: 2,     // 1 优惠券 2 充值卡
             card: {
               openid: openId,
-              card_type: cards[0].card_type,
+              card_type: Number(cards[0].card_type),
               card_name: cards[0].card_name,
               card_code: card_code
             }
