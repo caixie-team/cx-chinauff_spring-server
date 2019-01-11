@@ -60,6 +60,9 @@ module.exports = class extends think.common.Admin {
                     case 2:
                         item.reserve_status_label = '已取消';
                         break;
+                    default:
+                        item.reserve_status_label = '';
+                        break;
                 }
                 switch (item.status) {
                     case 2:
@@ -68,6 +71,10 @@ module.exports = class extends think.common.Admin {
                     case 3:
                         item.status_label = '已兑换';
                         break;
+                    default:
+                        item.status_label = '';
+                        break;
+
                 }
             }
         }
@@ -186,11 +193,26 @@ module.exports = class extends think.common.Admin {
         }
 
         const reserveModel = this.model('activity_reserve');
+        const reserveInfo = await reserveModel.where({
+            id: data.id
+        }).find();
+        if (think.isEmpty(reserveInfo)) {
+            return this.fail('信息不存在')
+        }
+
         await reserveModel.where({
             id: data.id
         }).update({
             status: 2
         });
+
+        const blessingUserModel = this.model('activity_blessing_user');
+        await blessingUserModel.where({
+            blessing_code: reserveInfo.blessing_code
+        }).update({
+            status: 1
+        });
+
         return this.redirect('/admin/blessing/reserve')
     }
 

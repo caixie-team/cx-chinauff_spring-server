@@ -45,7 +45,8 @@ module.exports = class extends Base {
     if (fuCount >= 3) {
       //已经够3个福字
       return this.success({
-        blessing: {}
+        blessing_type: 0
+        // blessing: {}
       })
     }
 
@@ -75,11 +76,12 @@ module.exports = class extends Base {
     }
 
     const currentDate = moment(new Date()).format('YYYY-MM-DD');
-    console.log(`******** 当前日期: ${currentDate} *******`)
+    // console.log(`******** 当前日期: ${currentDate} *******`)
     const cycleData = await this.getCycle(currentDate);
     if (think.isEmpty(cycleData)) { //如果参与集福的时间不在活动范围内，直接返回没有奖品
       return this.success({
-        blessing: {}
+        blessing_type: 0
+        // blessing: {}
       })
     }
 
@@ -90,10 +92,11 @@ module.exports = class extends Base {
       status: 1 //可发福字状态 1可发字 2不可发字 3 已使用
     }).find();
     if (think.isEmpty(ruleData)) {
-      console.log(`********没有集福机会*******`)
+      // console.log(`********没有集福机会*******`)
       //没集到福字
       return this.success({
-        blessing: {}
+        blessing_type: 0
+        // blessing: {}
       })
     } else {
       await ruleModel.where({
@@ -117,7 +120,8 @@ module.exports = class extends Base {
 
     if (think.isEmpty(pools)) { //没有字奖品
       return this.success({
-        blessing: {}
+        blessing_type: 0
+        // blessing: {}
       })
     }
     const updateBlessingPool = await blessingPoolModel.where({
@@ -126,7 +130,8 @@ module.exports = class extends Base {
     }).update({ last_quantity: ['exp', 'last_quantity-1'] })
     if (updateBlessingPool <= 0) { //奖品已被别人领走
       return this.success({
-        blessing: {}
+        // blessing: {}
+        blessing_type: 0
       })
     }
 
@@ -381,7 +386,7 @@ module.exports = class extends Base {
    * 预约兑换
    */
   async reserveAction() {
-    console.log('reserver ......')
+    // console.log('reserver ......')
     let now = new Date().getTime();
     let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
     let endTime = new Date('2019-02-01 23:59:59').getTime();//可提交预约结束时间
@@ -415,16 +420,23 @@ module.exports = class extends Base {
 
     //判断预约兑换日期非空
     if (think.isEmpty(data.reserve_date)) {
-      return this.fail('请求参数错误')
+      return this.fail('请选择距今两天以后的日期')
     }
 
+    const days = (new Date(data.reserve_date) - new Date(new Date())) / 1000 / 60 / 60 / 24
+    if (days < 1) {
+      return this.fail('请选择距今两天以后的日期')
+    }
     //判断门店信息非空
     if (think.isEmpty(data.shop_id)) {
-      return this.fail('请求参数错误')
+      return this.fail('门店信息错误，请重新选择')
     }
 
     const reserveModel = this.model('activity_reserve')
-    const reserveInfo = await reserveModel.where({ blessing_code: data.blessing_code }).find();
+    const reserveInfo = await reserveModel.where({
+      blessing_code: data.blessing_code,
+      status:1
+     }).find();
     if (!think.isEmpty(reserveInfo)) {
       return this.fail(1003, '已预约')
     }
@@ -432,6 +444,7 @@ module.exports = class extends Base {
     await reserveModel.add({
       shop_id: data.shop_id,
       reserve_date: moment(data.reserve_date).format('YYYY-MM-DD'),
+      // reserve_date: new Date(data.reserve_date),
       openid: data.openId,
       blessing_code: data.blessing_code,
       status: 1, //预约状态
@@ -444,15 +457,19 @@ module.exports = class extends Base {
       shop_code: data.shop_id,
       num: { '>': 0 }
     }).update({ num: ['exp', 'num-1'] })
-
+    const updateTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
     //status 福码状态(1:待预约 2:待兑换 3:已兑换)
-    await blessingUserModel.where({ blessing_code: data.blessing_code }).update({
+    const res = await blessingUserModel.where({ blessing_code: data.blessing_code }).update({
       status: 2,
-      update_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+      update_time: updateTime,
     })
-    return this.success({
-      reserve_date: data.reserve_date
-    });
+    if (res) {
+      // return this.fail(1003, '已预约')
+      return this.success({
+        status: 1, //预约状态
+        reserve_date: updateTime
+      });
+    }
   }
 
   /**
@@ -475,7 +492,7 @@ module.exports = class extends Base {
 				picker_activity_reserve r
 					LEFT JOIN
 				picker_chinauff_shop s ON r.shop_id = s.shop_code
-				where r.blessing_code='${data.blessing_code}';`;
+				where r.blessing_code='${data.blessing_code}' and r.status=1;`;
     const list = await reserveModel.query(sql);
     return this.success(list.length > 0 ? list[0] : {});
   }
@@ -678,7 +695,7 @@ module.exports = class extends Base {
       return this.fail()
     }
     const blessingUserModel = this.model('activity_blessing_user')
-    const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code }).find();
+    const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code}).find();
     if (think.isEmpty(blessingUserInfo)) {
       return this.fail(1001, '兑换码无效')
     }

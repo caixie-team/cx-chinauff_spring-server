@@ -10,7 +10,7 @@ module.exports = class extends Base {
     super(ctx); // 调用父级的 constructor 方法，并把 ctx 传递进去
     // 其他额外的操作
     this.db = this.model('activity_blessing');
-    this.key = 'bacd$!#@'; //秘钥
+    // this.key = 'bacd$!#@'; //秘钥
   }
 
   /**
