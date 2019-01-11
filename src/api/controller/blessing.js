@@ -424,7 +424,7 @@ module.exports = class extends Base {
     }
 
     const days = (new Date(data.reserve_date) - new Date(new Date())) / 1000 / 60 / 60 / 24
-    if (days < 3) {
+    if (days < 1) {
       return this.fail('请选择距今两天以后的日期')
     }
     //判断门店信息非空
