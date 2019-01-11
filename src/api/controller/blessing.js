@@ -42,7 +42,7 @@ module.exports = class extends Base {
       openid: data.openId
     }).count('id');
     console.log(`******** 满福累计: ${fuCount} *******`)
-    if(fuCount >= 3){
+    if (fuCount >= 3) {
       //已经够3个福字
       return this.success({
         blessing: {}
@@ -789,6 +789,78 @@ module.exports = class extends Base {
     let time = endTime - startTime;
     let n = time;
     let m = bLength;
+    let average = Math.floor(n / m); // average >= 1
+    let max = 0;
+    let left = n;
+    let arr = [];
+    for (let i = 0; i < m; i++) {
+      // 这里是关键，每次随机得到一个大于0的值，但必须确保余下的数足够剩下的元素分配
+      // 一开始我使用的是 Math.random() * (left - (m - i - 1))，但是效果不好
+      // 会导致随机性很差，大数都集中在前面的元素中，而后面的元素往往都是1
+      // 这是由于最初的算法在开始时的随机空间很大，所以也容易得到较大的数的原因，而越到后面，剩下的可分配的值越小
+      // 后来我改进了算法，加了一个average，用来平均每次的随机空间，测试下来效果挺不错
+      arr[i] = i == m - 1 ? left
+        : Math.floor(Math.random() * (left - (m - i - 1) * average)) + 1;
+      left -= arr[i];
+      if (arr[i] > arr[max]) {
+        max = i;
+      } else if (arr[i] == arr[max] && arr[i] >= average) { // 这里用来修正最大值，确保最大值的元素只有一个
+        arr[i]--;
+        arr[max]++;
+      }
+    }
+
+    const blessingPoolModel = this.model('activity_blessing_pool');
+    let t = new Date('2019-02-02 00:00:00').getTime()
+    for (let i = 0; i < arr.length; i++) {
+      t = t + arr[i];
+      let tempTime = new Date()
+      tempTime.setTime(t)
+      let release_time = moment(tempTime).format('YYYY-MM-DD HH:mm:ss')
+
+      const blessingInfo = blessingArr[i]
+      await blessingPoolModel.add({
+        name: blessingInfo.name,
+        blessing_type: blessingInfo.blessing_type,
+        blessing_id: blessingInfo.id,
+        release_time: release_time,
+        last_quantity: 1,
+        code: blessingInfo.code
+      })
+    }
+    return this.success(blessingArr)
+  }
+
+
+  async init2Action() {
+
+    // if (true) {
+    //   return this.fail('没有需要生成的福字信息')
+    // }
+    const data = this.post();
+    let total = parseInt(data.total);
+    
+    let blessingPool = [];
+    for (let i = 0; i < total; i++) {
+      blessingPool.push({
+        id: 8,
+        name: '田',
+        blessing_type: 4,
+        code: Generate.id()
+      })
+    }
+
+    let startTime = new Date().getTime()
+    let endTime = new Date('2019-02-04 23:59:59').getTime()
+   
+    let time = endTime - startTime;
+    console.log(`startTime:${startTime}  endTime:${endTime} time:${time}`)
+
+    return this.success(blessingPool)
+
+
+    let n = time;
+    let m = total;
     let average = Math.floor(n / m); // average >= 1
     let max = 0;
     let left = n;

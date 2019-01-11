@@ -1,5 +1,7 @@
+const xlsx = require('node-xlsx');
+
 module.exports = class extends think.common.Admin {
-  constructor (ctx) {
+  constructor(ctx) {
     super(ctx); // 调用父级的 constructor 方法，并把 ctx 传递进去
     // this.tactive = 'order';
   }
@@ -8,7 +10,7 @@ module.exports = class extends think.common.Admin {
    * 福字数据
    * @returns {*}
    */
-  fuziAction () {
+  fuziAction() {
     return this.display()
   }
 
@@ -16,7 +18,7 @@ module.exports = class extends think.common.Admin {
    * 发劵数据
    * @returns {*}
    */
-  couponAction () {
+  couponAction() {
     return this.display()
   }
 
@@ -24,24 +26,91 @@ module.exports = class extends think.common.Admin {
    * 发卡数据
    * @returns {*}
    */
-  async cardAction () {
+  async cardAction() {
+    let data = this.get()
+    let page = this.get('page') || 1;
+    let whereSql = ` 1=1 `;
+    if (!think.isEmpty(data.reserve_time)) {
+      whereSql += ` and DATE_FORMAT(receive_time, '%Y-%m-%d') = '${data.reserve_time}' `
+    }
+    if (!think.isEmpty(data.recipient_name)) {
+      whereSql += ` and recipient_name = '${data.recipient_name}' `
+    }
+    if (!think.isEmpty(data.phone_number)) {
+      whereSql += ` and phone_number = '${data.phone_number}' `
+    }
     const cardUserModel = this.model('activity_card_user');
-    const data = await cardUserModel.field(['id', 'address', 'recipient_name', 'openid', 'phone_number', 'receive_time', 'card_code', 'create_time'])
-      .page(this.get('page') || 1, 20)
+    const res = await cardUserModel.field(['id', 'address', 'recipient_name', 'openid', 'phone_number', 'receive_time', 'card_code', 'create_time'])
+      .where(whereSql)
+      .page(page, 20)
       .order('create_time DESC')
       .countSelect();
-    const html = this.pagination(data);
+    const html = this.pagination(res);
     this.assign('pagerData', html); // 分页展示使用
-    this.assign('list', data.data); // 分页展示使用
+    this.assign('list', res.data); // 分页展示使用
+    this.assign('data', data);
     return this.display()
-    // return this.success(data)
   }
+
+  /**
+    * 导出发卡数据
+    */
+  async exportCardAction() {
+    let data = this.get()
+    let whereSql = ` 1=1 `;
+    if (!think.isEmpty(data.reserve_time)) {
+      whereSql += ` and DATE_FORMAT(receive_time, '%Y-%m-%d') = '${data.reserve_time}' `
+    }
+    if (!think.isEmpty(data.recipient_name)) {
+      whereSql += ` and recipient_name = '${data.recipient_name}' `
+    }
+    if (!think.isEmpty(data.phone_number)) {
+      whereSql += ` and phone_number = '${data.phone_number}' `
+    }
+    const cardUserModel = this.model('activity_card_user');
+    const list = await cardUserModel.field(['id', 'address', 'recipient_name', 'openid', 'phone_number', 'receive_time', 'card_code', 'create_time'])
+      .where(whereSql)
+      .select();
+    
+    let datas = [
+      {
+        name: '发卡数据',
+        data: [
+          [
+            '领取时间',
+            '充值卡类别',
+            '收件人',
+            '手机号码',
+            '收件地址'
+          ]
+        ]
+      }
+    ]
+    if (!think.isEmpty(list)) {
+      for (let item of list) {
+        datas[0].data.push([
+          item.receive_time,
+          '50元会员充值卡',
+          item.recipient_name,
+          item.phone_number,
+          item.address
+        ])
+      }
+    }
+    // 写xlsx
+    let buffer = xlsx.build(datas);
+    this.ctx.set('Content-Type', 'application/vnd.openxmlformats');
+    this.ctx.set("Content-Disposition", "attachment; filename=card.xlsx");
+    this.ctx.body = buffer;
+  }
+
+
 
   /**
    * 流量数据
    * @returns {*}
    */
-  async trafficAction () {
+  async trafficAction() {
     // this.active = 'traffic'
     const analyticsModel = this.model('analytics')
     const data = await analyticsModel.getAllPageView(this.get('page') || 1, 10)
@@ -55,7 +124,7 @@ module.exports = class extends think.common.Admin {
    * 兑换
    * @returns {*}
    */
-  exchangeAction () {
+  exchangeAction() {
     return this.display()
   }
 
@@ -63,7 +132,7 @@ module.exports = class extends think.common.Admin {
    * 礼品配货
    * @returns {*}
    */
-  allocationAction () {
+  allocationAction() {
     return this.display()
   }
 
@@ -71,14 +140,14 @@ module.exports = class extends think.common.Admin {
    * index action
    * @return {Promise} []
    */
-  indexAction () {
+  indexAction() {
     // auto render template file index_index.html
 
     return this.display();
   }
 
   // 订单列表
-  async listAction () {
+  async listAction() {
     const status = this.get('status');
     const map = {};
     if (!think.isEmpty(status)) {
@@ -109,7 +178,7 @@ module.exports = class extends think.common.Admin {
           val.channel = '银行汇款';
           break;
         default:
-          val.channel = await this.model('pingxx').where({id: val.payment}).getField('title', true);
+          val.channel = await this.model('pingxx').where({ id: val.payment }).getField('title', true);
       }
     }
     this.assign('list', data.data);
@@ -120,13 +189,13 @@ module.exports = class extends think.common.Admin {
   /**
    * 审核订单
    */
-  async auditAction () {
+  async auditAction() {
     if (this.isPost) {
       const id = this.post('id');
       const admin_remark = this.post('admin_remark');
-      const audit = await this.model('order').where({id: id}).update({status: 3, admin_remark: admin_remark});
+      const audit = await this.model('order').where({ id: id }).update({ status: 3, admin_remark: admin_remark });
       if (audit) {
-        return this.success({name: '审核成功！', url: this.referer()});
+        return this.success({ name: '审核成功！', url: this.referer() });
       } else {
         return this.fail('审核失败！');
       }
@@ -141,12 +210,12 @@ module.exports = class extends think.common.Admin {
   /**
    * 删除订单
    */
-  async delAction () {
+  async delAction() {
     const id = this.get('id');
     // 作废的订单才能删除
-    const res = await this.model('order').where({id: id, status: 6}).delete();
+    const res = await this.model('order').where({ id: id, status: 6 }).delete();
     if (res) {
-      return this.success({name: '删除成功！'});
+      return this.success({ name: '删除成功！' });
     } else {
       return this.fail('删除失败！');
     }
@@ -155,7 +224,7 @@ module.exports = class extends think.common.Admin {
   /**
    * 作废订单
    */
-  async voidAction () {
+  async voidAction() {
     if (this.isPost) {
       const id = this.post('id');
       const admin_remark = this.post('admin_remark');
@@ -164,7 +233,7 @@ module.exports = class extends think.common.Admin {
       if (voids) {
         // 释放库存
         await this.model('cmswing/order').stock(id, false);
-        return this.success({name: '操作成功！', url: this.referer()});
+        return this.success({ name: '操作成功！', url: this.referer() });
       } else {
         return this.fail('操作失败！');
       }
@@ -179,13 +248,13 @@ module.exports = class extends think.common.Admin {
   /**
    * 完成订单
    */
-  async finishAction () {
+  async finishAction() {
     if (this.isPost) {
       const id = this.post('id');
       const admin_remark = this.post('admin_remark');
-      const finish = await this.model('order').where({id: id}).update({status: 4, admin_remark: admin_remark});
+      const finish = await this.model('order').where({ id: id }).update({ status: 4, admin_remark: admin_remark });
       if (finish) {
-        return this.success({name: '操作成功！', url: this.referer()});
+        return this.success({ name: '操作成功！', url: this.referer() });
       } else {
         return this.fail('操作失败！');
       }
@@ -200,13 +269,13 @@ module.exports = class extends think.common.Admin {
   /**
    * 备注订单
    */
-  async remarkAction () {
+  async remarkAction() {
     if (this.isPost) {
       const id = this.post('id');
       const admin_remark = this.post('admin_remark');
-      const remark = await this.model('order').where({id: id}).update({admin_remark: admin_remark});
+      const remark = await this.model('order').where({ id: id }).update({ admin_remark: admin_remark });
       if (remark) {
-        return this.success({name: '操作成功！', url: this.referer()});
+        return this.success({ name: '操作成功！', url: this.referer() });
       } else {
         return this.fail('操作失败！');
       }
@@ -222,14 +291,14 @@ module.exports = class extends think.common.Admin {
    * 查看订单
    * @returns {*}
    */
-  async seeAction () {
+  async seeAction() {
     const id = this.get('id');
     // console.log(id);
     this.meta_title = '查看订单';
     // 获取订单信息
     const order = await this.model('order').find(id);
     // 购物清单
-    const goods = await this.model('order_goods').where({order_id: id}).select();
+    const goods = await this.model('order_goods').where({ order_id: id }).select();
     let sum = [];
     for (const val of goods) {
       val.title = JSON.parse(val.prom_goods).title;
@@ -254,7 +323,7 @@ module.exports = class extends think.common.Admin {
         order.payment = '货到付款';
         break;
       default:
-        order.payment = await this.model('pingxx').where({id: order.payment}).getField('title', true);
+        order.payment = await this.model('pingxx').where({ id: order.payment }).getField('title', true);
     }
     this.assign('order', order);
     // 获取 快递公司
@@ -266,9 +335,9 @@ module.exports = class extends think.common.Admin {
      */
     const olde_order_amount = order.real_amount + order.real_freight;
     this.assign('olde_order_amount', olde_order_amount);
-    const province = await this.model('area').where({parent_id: 0}).select();
-    const city = await this.model('area').where({parent_id: order.province}).select();
-    const county = await this.model('area').where({parent_id: order.city}).select();
+    const province = await this.model('area').where({ parent_id: 0 }).select();
+    const city = await this.model('area').where({ parent_id: order.province }).select();
+    const county = await this.model('area').where({ parent_id: order.city }).select();
     this.assign('province', province);
     this.assign('city', city);
     this.assign('county', county);
@@ -278,7 +347,7 @@ module.exports = class extends think.common.Admin {
   /**
    * 编辑订单
    */
-  async editAction () {
+  async editAction() {
     if (this.isPost) {
       const data = this.post();
 
@@ -300,7 +369,7 @@ module.exports = class extends think.common.Admin {
         }
 
         await this.model('cmswing/action').log('order', 'order', log, this.user.uid, this.ip, this.ctx.url);
-        return this.success({name: '编辑成功！'});
+        return this.success({ name: '编辑成功！' });
       } else {
         return this.fail('编辑失败！');
       }
@@ -316,7 +385,7 @@ module.exports = class extends think.common.Admin {
       }
 
       // 购物清单
-      const goods = await this.model('order_goods').where({order_id: id}).select();
+      const goods = await this.model('order_goods').where({ order_id: id }).select();
       let sum = [];
       for (const val of goods) {
         val.title = JSON.parse(val.prom_goods).title;
@@ -342,7 +411,7 @@ module.exports = class extends think.common.Admin {
           order.payment = '货到付款';
           break;
         default:
-          order.payment = await this.model('pingxx').where({id: order.payment}).getField('title', true);
+          order.payment = await this.model('pingxx').where({ id: order.payment }).getField('title', true);
       }
       this.assign('order', order);
       // 获取 快递公司
@@ -354,9 +423,9 @@ module.exports = class extends think.common.Admin {
        */
       const olde_order_amount = order.real_amount + order.real_freight;
       this.assign('olde_order_amount', olde_order_amount);
-      const province = await this.model('area').where({parent_id: 0}).select();
-      const city = await this.model('area').where({parent_id: order.province}).select();
-      const county = await this.model('area').where({parent_id: order.city}).select();
+      const province = await this.model('area').where({ parent_id: 0 }).select();
+      const city = await this.model('area').where({ parent_id: order.province }).select();
+      const county = await this.model('area').where({ parent_id: order.city }).select();
       this.assign('province', province);
       this.assign('city', city);
       this.assign('county', county);
@@ -367,7 +436,7 @@ module.exports = class extends think.common.Admin {
   /**
    * 发货设置
    */
-  async shipAction () {
+  async shipAction() {
     if (this.isPost) {
       const data = this.post();
       data.admin = await get_nickname(this.user.uid);
@@ -378,9 +447,9 @@ module.exports = class extends think.common.Admin {
       data.create_time = new Date().getTime();
       const res = await this.model('doc_invoice').add(data);
       if (res) {
-        await this.model('order').where({id: data.order_id}).update({delivery_status: 1});
+        await this.model('order').where({ id: data.order_id }).update({ delivery_status: 1 });
       }
-      return this.success({'name': '发货成功！', 'url': this.referer()});
+      return this.success({ 'name': '发货成功！', 'url': this.referer() });
     } else {
       const id = this.get('id');
       const order = await this.model('order').find(id);
@@ -395,10 +464,10 @@ module.exports = class extends think.common.Admin {
           order.payment = '货到付款';
           break;
         default:
-          order.payment = await this.model('pingxx').where({id: order.payment}).getField('title', true);
+          order.payment = await this.model('pingxx').where({ id: order.payment }).getField('title', true);
       }
       // 购物清单
-      const goods = await this.model('order_goods').where({order_id: id}).select();
+      const goods = await this.model('order_goods').where({ order_id: id }).select();
       let sum = [];
       for (const val of goods) {
         val.title = JSON.parse(val.prom_goods).title;
@@ -414,9 +483,9 @@ module.exports = class extends think.common.Admin {
       const express_company = await this.model('express_company').order('sort ASC').select();
       this.assign('express_company', express_company);
       // 获取省份
-      const province = await this.model('area').where({parent_id: 0}).select();
-      const city = await this.model('area').where({parent_id: order.province}).select();
-      const county = await this.model('area').where({parent_id: order.city}).select();
+      const province = await this.model('area').where({ parent_id: 0 }).select();
+      const city = await this.model('area').where({ parent_id: order.province }).select();
+      const county = await this.model('area').where({ parent_id: order.city }).select();
       this.assign('province', province);
       this.assign('city', city);
       this.assign('county', county);
@@ -434,7 +503,7 @@ module.exports = class extends think.common.Admin {
   /**
    * 查看订单
    */
-  vieworderAction () {
+  vieworderAction() {
     const list = [1, 2, 3];
     this.assign('list', list);
     return this.display();
@@ -444,7 +513,7 @@ module.exports = class extends think.common.Admin {
    * 收款单
    */
 
-  async receivingAction () {
+  async receivingAction() {
     const data = await this.model('doc_receiving').page(this.get('page')).order('create_time DESC').countSelect();
     const html = this.pagination(data);
     this.assign('pagerData', html); // 分页展示使用
@@ -459,9 +528,9 @@ module.exports = class extends think.common.Admin {
           val.channel = '货到付款';
           break;
         default:
-          val.channel = await this.model('pingxx').where({id: val.payment_id}).getField('title', true);
+          val.channel = await this.model('pingxx').where({ id: val.payment_id }).getField('title', true);
       }
-      val.order_id = await this.model('order').where({id: val.order_id}).getField('order_no', true);
+      val.order_id = await this.model('order').where({ id: val.order_id }).getField('order_no', true);
     }
     this.assign('list', data.data);
     // this.active="admin/order/receiving"
@@ -472,12 +541,12 @@ module.exports = class extends think.common.Admin {
   /**
    * 发货单
    */
-  async invoiceAction () {
+  async invoiceAction() {
     const data = await this.model('doc_invoice').page(this.get('page')).order('create_time DESC').countSelect();
     const html = this.pagination(data);
     this.assign('pagerData', html); // 分页展示使用
     for (const v of data.data) {
-      v.express_company_id = await this.model('express_company').where({id: v.express_company_id}).getField('name', true);
+      v.express_company_id = await this.model('express_company').where({ id: v.express_company_id }).getField('name', true);
     }
     this.assign('list', data.data);
     this.active = 'admin/order/receiving';
@@ -489,7 +558,7 @@ module.exports = class extends think.common.Admin {
    * 退款单
    */
 
-  refundAction () {
+  refundAction() {
     this.active = 'admin/order/receiving';
     this.meta_title = '退款单';
     return this.display();
