@@ -32,7 +32,7 @@ module.exports = class extends Base {
       if (userPayload.errcode === 0) { // 如果已登录， 查询用户信息
         // 用 cardNo 获取用户信息
         console.log('REQUEST CARD INFO')
-        // 如果不为空
+        // 如果当前活动账户的会员信息不为空
         if (think.isEmpty(accountInfo.cardNo)) {
           const cardPayload = await this.getCardInfo(userPayload.cardNo)
           console.log('REQUEST CARD INFO DATA')
