@@ -546,7 +546,7 @@ module.exports = class extends Base {
         return this.fail('请求参数错误')
       }
       // const helpModel = this.model('activity_help')
-      //status 助力使用状态(1 未使用 2已使用)
+      // status 助力使用状态(1 未使用 2已使用)
       // const helpNum = await helpModel.where({ be_openid: data.openId, status: 1 }).count('id');
 
       const nowDate = moment(new Date()).format('YYYY-MM-DD')
