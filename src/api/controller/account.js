@@ -33,7 +33,7 @@ module.exports = class extends Base {
         // 用 cardNo 获取用户信息
         console.log('REQUEST CARD INFO')
         // 如果不为空
-        if (!think.isEmpty(accountInfo.cardNo)) {
+        if (think.isEmpty(accountInfo.cardNo)) {
           const cardPayload = await this.getCardInfo(userPayload.cardNo)
           console.log('REQUEST CARD INFO DATA')
           // console.log(cardPayload)
