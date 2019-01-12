@@ -545,16 +545,17 @@ module.exports = class extends Base {
       if (think.isEmpty(data.openId)) {
         return this.fail('请求参数错误')
       }
-      const helpModel = this.model('activity_help')
+      // const helpModel = this.model('activity_help')
       //status 助力使用状态(1 未使用 2已使用)
-      const helpNum = await helpModel.where({ be_openid: data.openId, status: 1 }).count('id');
+      // const helpNum = await helpModel.where({ be_openid: data.openId, status: 1 }).count('id');
 
       const nowDate = moment(new Date()).format('YYYY-MM-DD')
       //获取今日已参与次数
       const blessingTimesModel = this.model('activity_blessing_times');
       const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
       return this.success({
-        times: helpNum + (3 - times)
+        times: 3 - times
+        // times: helpNum + (3 - times)
       })
     }
   }
