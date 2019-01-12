@@ -1,0 +1,53 @@
+@startuml
+start
+:"微信用户";
+:"到达活动系统";
+if ("服务器SESSION中是否包含活动信息") then (no)
+    if ("请求地址参数是否包含 openId 参数") then (no)
+        :调用crm 获取openId的接口：
+        /activity/weChat/openId?callback=${encodeURI};
+    stop
+    else (yes)
+        :"创建或加载活动账户信息";
+        :"调用CRM 会员状态查询接口:
+        /console/dcApi/member/isLogin";
+           if ("已登录，返回信息中包含 cardNo") then (yes)
+               :"调用CRM 获取用户信息接口:
+               /console/api/card/getInfo";
+               if("返回会员信息") then (yes)
+                    :"更新活动账户会员信息";
+               else (no)
+                    :"更新活动账户最后登录时间";
+                    :"添加活动账户登录状态";
+                    :"添加活动账户 cardNo 信息";
+               endif
+           else (no)
+               :"更新活动账户最后登录时间";
+           endif
+        :"RETURN 活动账户登录成功";
+        :"活动账户信息写入 session";
+    endif
+else(yes)
+endif
+:"进入活动前端流程";
+if ("领取到了优惠券") then (yes)
+    if("用户为登录状态 && 用户信息包含 carNo") then(yes)
+        :"进入活动系统服务端处理";
+        :"调用活动领劵 api";
+        :"调用 CRM 发劵接口
+        coupon/sendCouponByActivity";
+        if ("发劵成功") then (yes)
+           :"更新领取状态";
+           :"更新领取时间";
+        else (no)
+            :"CRM 系统发劵失败信息";
+            stop
+        endif
+    else (no)
+        :"调用 crm 登录接口:
+        loginPage?callback2=${encodeURIComponent(locationHref)}&isAutoRegister=1&channel2=18";
+    endif
+    stop
+else(no)
+stop
+@enduml

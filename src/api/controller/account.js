@@ -32,7 +32,8 @@ module.exports = class extends Base {
       if (userPayload.errcode === 0) { // 如果已登录， 查询用户信息
         // 用 cardNo 获取用户信息
         console.log('REQUEST CARD INFO')
-        if (think.isEmpty(accountInfo.cardNo)) {
+        // 如果不为空
+        if (!think.isEmpty(accountInfo.cardNo)) {
           const cardPayload = await this.getCardInfo(userPayload.cardNo)
           console.log('REQUEST CARD INFO DATA')
           // console.log(cardPayload)
@@ -47,8 +48,7 @@ module.exports = class extends Base {
           })
         }
         accountInfo.status = 1
-        accountInfo.cardNo = userPayload.cardNo
-        // accountInfo.userId = userPayload.userId
+        accountInfo.cardNo = think.isEmpty(userPayload.cardNo) ? 0 : userPayload.cardNo
       } else { // 更新最后登录时间
         console.log('NOINFO UPDATE ACCOUNT LGOIN TIME  SUCCESS')
         accountInfo = await this.model('account').save(data.openId, {
