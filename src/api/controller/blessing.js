@@ -529,7 +529,6 @@ module.exports = class extends Base {
 			spring.picker_activity_blessing_record
 		WHERE
 			openid = '${data.openId}'
-				AND status = 1
 		GROUP BY blessing_type ORDER BY blessing_type ASC;`
     const records = await recordModel.query(sql);
     return this.success(records);
