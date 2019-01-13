@@ -606,7 +606,8 @@ module.exports = class extends Base {
     const isCardNo = await this.model('account').field(['cardNo']).where({
       openId: openId
     }).find()
-
+    console.warn('会员信息----')
+    console.warn(isCardNo)
     if (!think.isEmpty(isCardNo)) {
       const queryConfig = think.config('proxyQueryStringForCoupon')
       const couponJson = [{
