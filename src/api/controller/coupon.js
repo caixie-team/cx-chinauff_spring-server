@@ -31,21 +31,29 @@ module.exports = class extends Base {
       return this.fail('请求参数错误')
     }
 
-    // 如果是被加密的，进行解密（用于助力时传过来的 beOpenId）
+    let isHelp = false;
+    // 如果是被加密的，进行解密（用于助力时传过来的 beOpenIdproxyCrmApi）
     if (!think.isEmpty(data.encrypt)) {
-      data.openId = decrypt(data.openId, this.key)
+      //暂时没有用
+      data.beOpenId = decrypt(data.beOpenId, this.key);
+      isHelp = true;
     }
-    // console.log(data.openId)
-    // console.log('查询 活动账户')
 
-    // console.log(data.openId)
     // 判断openid是否存在
     const chinauffAccountModel = this.model('chinauff_account')
     const chinauffAccount = await chinauffAccountModel.where({openId: data.openId}).find();
-    // console.log('查询 活动账户')
-    // console.log(chinauffAccount)
     if (think.isEmpty(chinauffAccount)) {
       return this.fail(1004, '活动账户不存在')
+    }
+
+    const nowDate = moment(new Date()).format('YYYY-MM-DD')
+    if (!isHelp) { //走正常逻辑
+      //是否到达参与限制
+      const blessingTimesModel = this.model('activity_blessing_times');
+      const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
+      if (times >= 3) {
+        return this.fail('今日可参与次数已用完')
+      }
     }
 
     /** *************************************************/
