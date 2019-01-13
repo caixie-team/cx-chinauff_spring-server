@@ -57,8 +57,8 @@ module.exports = class extends Base {
     /** *************************************************/
     // step2 判断当前时间是否在 2019.01.10-2019.01.20周期内
 
-    // 发会员充值卡
-    await this.sendCard(data.openId);
+    // 发会员充值卡 (2019-01-13 去掉发卡功能)
+    // await this.sendCard(data.openId);
 
     /** *************************************************/
     // step3 走正常的优惠券领取流程
@@ -506,6 +506,11 @@ module.exports = class extends Base {
     }
 
     const cardUserModel = this.model('activity_card_user');
+    const num = await cardUserModel.where('phone_number is not NULL').count('id');
+    if(num >= 1000){
+      return this.fail(1005, '会员卡超过领取时间')
+    }
+
     const cardUserData = await cardUserModel.where({card_code: data.card_code}).find();
     if (think.isEmpty(cardUserData)) {
       return this.fail(1004, '会员充值卡不存在')
