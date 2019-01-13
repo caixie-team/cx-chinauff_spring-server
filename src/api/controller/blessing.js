@@ -19,14 +19,14 @@ module.exports = class extends Base {
    * 扫一扫 (福字)
    */
   async scanAction() {
-    const data = this.post()
+    let data = this.post()
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误')
     }
     let isHelp = false;
     // 如果是被加密的，进行解密（用于助力时传过来的 beOpenIdproxyCrmApi）
     if (!think.isEmpty(data.encrypt)) {
-      data.openId = decrypt(data.openId, this.key);
+      data.beOpenId = decrypt(data.beOpenId, this.key);
       isHelp = true;
     }
 
@@ -49,30 +49,28 @@ module.exports = class extends Base {
         // blessing: {}
       })
     }
-
+    const helpModel = this.model('activity_help')
     const nowDate = moment(new Date()).format('YYYY-MM-DD')
-    if (!isHelp) {
-      //检测是否有助力
-      const helpModel = this.model('activity_help')
-      const helpInfo = await helpModel.where({ be_openid: data.openId, status: 1 }).limit(1).find();
-      if (think.isEmpty(helpInfo)) { //没有助力
-        //是否到达参与限制
-        const blessingTimesModel = this.model('activity_blessing_times');
-        const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
-        if (times >= 3) {
-          return this.fail(1002, '今日可参与次数已用完')
-        } else {
-          //记录参与一次
-          await blessingTimesModel.add({
-            openid: data.openId,
-            join_date: nowDate
-          });
-        }
-      } else { //有助力
-        await helpModel.where({ id: helpInfo.id }).update({
-          status: 2 	//助力已使用
-        })
+    if (!isHelp) { //走正常集福逻辑
+      //是否到达参与限制
+      const blessingTimesModel = this.model('activity_blessing_times');
+      const times = await blessingTimesModel.where({ join_date: nowDate, openid: data.openId }).count('id');
+      if (times >= 3) {
+        return this.fail(1002, '今日可参与次数已用完')
+      } else {
+        //记录参与一次
+        await blessingTimesModel.add({
+          openid: data.openId,
+          join_date: nowDate
+        });
       }
+    } else {//走助力逻辑 更改助力状态
+      await helpModel.where({
+        be_openid: data.beOpenId,
+        openid: data.openId
+      }).update({
+        status: 2 	//助力已使用
+      })
     }
 
     const currentDate = moment(new Date()).format('YYYY-MM-DD');
@@ -435,8 +433,8 @@ module.exports = class extends Base {
     const reserveModel = this.model('activity_reserve')
     const reserveInfo = await reserveModel.where({
       blessing_code: data.blessing_code,
-      status:1
-     }).find();
+      status: 1
+    }).find();
     if (!think.isEmpty(reserveInfo)) {
       return this.fail(1003, '已预约')
     }
@@ -695,7 +693,7 @@ module.exports = class extends Base {
       return this.fail()
     }
     const blessingUserModel = this.model('activity_blessing_user')
-    const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code}).find();
+    const blessingUserInfo = await blessingUserModel.where({ blessing_code: data.blessing_code }).find();
     if (think.isEmpty(blessingUserInfo)) {
       return this.fail(1001, '兑换码无效')
     }
