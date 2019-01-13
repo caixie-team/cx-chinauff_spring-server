@@ -89,7 +89,7 @@ exports.logger = {
   },
   dateFile: {
     handle: DateFile,
-    level: 'ALL',
+    level: 'WARN',
     absolute: true,
     pattern: '-yyyy-MM-dd',
     alwaysIncludePattern: true,
