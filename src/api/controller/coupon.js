@@ -24,7 +24,7 @@ module.exports = class extends Base {
 
     await this.validateActivityDate(); // 验证活动时间
     // console.log('HIT ACITON.....')
-    const data = this.post()
+    let data = this.post()
     // console.log(data)
     if (think.isEmpty(data.openId)) {
       // console.log('error .....')
