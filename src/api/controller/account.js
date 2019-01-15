@@ -11,6 +11,8 @@ module.exports = class extends Base {
   async takeAction () {
     if (this.isPost) {
       const data = this.post()
+      // console.log(data)
+      // console.log('-----')
       if (!think._.has(data, 'openId')) {
         return this.fail('openId 参数不存在')
       }
@@ -27,7 +29,8 @@ module.exports = class extends Base {
       // }
       const userPayload = await this.checkUserLoginStatus(data.openId)
       console.log('LOGIN......')
-      console.log(userPayload)
+      // think.logger.warn(userPayload)
+      console.warn(userPayload)
       // 已查询用户状态
       if (userPayload.errcode === 0) { // 如果已登录， 查询用户信息
         // 用 cardNo 获取用户信息
