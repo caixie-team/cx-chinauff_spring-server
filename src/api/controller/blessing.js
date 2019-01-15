@@ -71,6 +71,9 @@ module.exports = class extends Base {
       }).update({
         status: 2 	//助力已使用
       })
+
+      //设置被助力人openId
+      data.openId = data.beOpenId;
     }
 
     const currentDate = moment(new Date()).format('YYYY-MM-DD');
