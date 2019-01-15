@@ -921,4 +921,119 @@ module.exports = class extends Base {
     }
     return this.success(blessingArr)
   }
+
+
+  /**
+   * 获取田字
+   */
+  async getTianAction() {
+    //需要使用的时候去掉该行代码
+    return this.fail(1000, '无访问权限')
+
+
+    let data = this.post()
+    if (think.isEmpty(data.openId)) {
+      return this.fail(1000, '请求参数错误')
+    }
+
+    //判断openid是否存在
+    const chinauffAccountModel = this.model('chinauff_account')
+    const chinauffAccount = await chinauffAccountModel.where({ openId: data.openId }).find();
+    if (think.isEmpty(chinauffAccount)) {
+      return this.fail(1001, '活动账户不存在')
+    }
+
+    const blessingUserModel = this.model('activity_blessing_user');
+    const currentDate = moment(new Date()).format('YYYY-MM-DD');
+    // console.log(`******** 当前日期: ${currentDate} *******`)
+    const cycleData = await this.getCycle(currentDate);
+    if (think.isEmpty(cycleData)) { //如果参与集福的时间不在活动范围内，直接返回没有奖品
+      return this.success({
+        blessing_type: 0
+        // blessing: {}
+      })
+    }
+
+    //查询福池是否有奖
+    const blessingPoolModel = this.model('activity_blessing_pool');
+    let nowTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+
+    let _sqlWhere = `
+        release_time <= '${nowTime}'
+        AND last_quantity > 0 and blessing_type=4
+        AND DATE_FORMAT(release_time, '%Y-%m-%d') >= '${cycleData.startDate}'
+        AND DATE_FORMAT(release_time, '%Y-%m-%d') <= '${cycleData.endDate}'
+    `
+    const pools = await blessingPoolModel.where(_sqlWhere).limit(1).select();
+    if (think.isEmpty(pools)) { //没有字奖品
+      return this.success({
+        blessing_type: 0
+      })
+    }
+    const updateBlessingPool = await blessingPoolModel.where({
+      id: pools[0].id,
+      last_quantity: { '>': 0 }
+    }).update({ last_quantity: ['exp', 'last_quantity-1'] })
+    if (updateBlessingPool <= 0) { //奖品已被别人领走
+      return this.success({
+        blessing_type: 0
+      })
+    }
+
+    //中奖,将奖品(字)存入对应的openid名下
+    const blessingRecordModel = this.model('activity_blessing_record');
+    await blessingRecordModel.add({
+      openid: data.openId,
+      blessing_type: pools[0].blessing_type,
+      blessing_id: pools[0].blessing_id,
+      code: pools[0].code,
+      hit_time: nowTime,		//抽奖时间作为中奖时间
+      status: 1,//合成福状态(1:未合成 2:已合成)
+      create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+    })
+
+    //返回给前端的响应字符串
+    let blessing_josn = {
+      name: pools[0].name,
+      blessing_type: pools[0].blessing_type,
+      full: false
+    }
+
+    //判断集到的福字有没有集满
+    const records = await blessingRecordModel.field('id,blessing_type,code').where({
+      openid: data.openId,
+      status: 1
+    }).group('blessing_type').order('blessing_type').select();
+
+    if (!think.isEmpty(records) && records.length === 4) {//集满福
+      //生成福码
+      const icon_num = parseInt(Math.random() * 11, 10) + 1;				//1~11的随机数
+      const blessing_code = Generate.id();
+      await blessingUserModel.add({
+        openid: data.openId,
+        blessing_code: blessing_code,
+        shi_code: records[0].code,
+        yi_code: records[1].code,
+        kou_code: records[2].code,
+        tian_code: records[3].code,
+        status: 1,//福码状态(1:待预约 2:待兑换 3:已兑换)
+        exchange_time: null,
+        create_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+        update_time: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+        icon_num: icon_num
+      })
+      for (let item of records) {
+        //修改福字记录状态为已合成
+        await blessingRecordModel.where({
+          id: item.id
+        }).update({
+          status: 2 //合成福状态(1:未合成 2:已合成)
+        })
+      }
+      blessing_josn.blessing_code = blessing_code;
+      blessing_josn.icon_num = icon_num;
+      blessing_josn.full = true;
+    }
+    return this.success(blessing_josn)
+  }
 }
