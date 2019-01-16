@@ -392,7 +392,8 @@ module.exports = class extends Base {
     let startTime = new Date('2019-01-05 00:00:00').getTime(); //可提交预约开始时间
     let endTime = new Date('2019-02-01 23:59:59').getTime();//可提交预约结束时间
     if (now < startTime || now > endTime) {
-      return this.fail('可提交预约时间:2019年1月5日00:00:00 - 2019年2月1日23:59:59');
+      // return this.fail('可提交预约时间:2019年1月5日00:00:00 - 2019年2月1日23:59:59');
+      return this.fail('兑换预约截止至 2019年2月1日23:59:59 感谢您的参与!');
     }
 
     const data = this.post()
