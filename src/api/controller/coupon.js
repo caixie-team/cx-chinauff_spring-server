@@ -333,7 +333,8 @@ module.exports = class extends Base {
     do {
       // 库存是否还有优惠券奖品
       const stockCount = await couponUserModel.where({
-        stock_mark: stockMark
+        stock_mark: stockMark,
+        cycle: cycleData.cycle
       }).count('id');
       if (stockMark == 1) { // 主库存
         if (stockCount >= cycleData.master_total) {
@@ -349,38 +350,40 @@ module.exports = class extends Base {
       }
 
       // 优惠券奖品列表
-      const coupons = await this.getCoupons(cycleData, stockMark);
+      const coupons = await this.getCoupons(cycleData, stockMark,openId);
       coupon = await this.lottery(coupons);
       // console.log('优惠劵奖品列表')
       // console.log(coupons)
       // console.log('优惠劵')
       // console.log(coupon)
-      // 1.如果周期内，某类型券的发放券数用完，那么该券停止发放；
-      const couponCount = await couponUserModel.where({
-        coupon_id: coupon.id,
-        cycle: cycleData.cycle
-      }).count('id');
 
-      if (coupon.num <= couponCount) { // 该优惠券奖品已经用完
-        coupon = {}
-        continue; // 继续下一轮抽奖,一直抽到符合条件为止
-      }
+
+      // 1.如果周期内，某类型券的发放券数用完，那么该券停止发放；
+      // const couponCount = await couponUserModel.where({
+      //   coupon_id: coupon.id,
+      //   cycle: cycleData.cycle
+      // }).count('id');
+
+      // if (coupon.num <= couponCount) { // 该优惠券奖品已经用完
+      //   coupon = {}
+      //   continue; // 继续下一轮抽奖,一直抽到符合条件为止
+      // }
 
       // 2.要求整个活动期，同一用户免费券同一类最多2张，其他券同一类最多3张
-      const couponLimitNum = await couponUserModel.where({
-        coupon_id: coupon.id,
-        openid: openId
-      }).count('id');
+      // const couponLimitNum = await couponUserModel.where({
+      //   coupon_id: coupon.id,
+      //   openid: openId
+      // }).count('id');
 
-      if (coupon.type_code == 3409 && couponLimitNum >= 2) { // 免费券
-        // console.log(`******* 整个活动期，同一用户免费券同一类最多2张 ******`)
-        coupon = {}
-        continue; // 继续下一轮抽奖,一直抽到符合条件为止
-      } else if (couponLimitNum >= 3) {
-        // console.log(`******* 整个活动期，同一用户其他券同一类最多3张 ******`)
-        coupon = {}
-        continue; // 继续下一轮抽奖,一直抽到符合条件为止
-      }
+      // if (coupon.type_code == 3409 && couponLimitNum >= 2) { // 免费券
+      //   // console.log(`******* 整个活动期，同一用户免费券同一类最多2张 ******`)
+      //   coupon = {}
+      //   continue; // 继续下一轮抽奖,一直抽到符合条件为止
+      // } else if (couponLimitNum >= 3) {
+      //   // console.log(`******* 整个活动期，同一用户其他券同一类最多3张 ******`)
+      //   coupon = {}
+      //   continue; // 继续下一轮抽奖,一直抽到符合条件为止
+      // }
 
       // console.log(`******* 优惠券奖品正常 ******`)
       break;
@@ -394,36 +397,85 @@ module.exports = class extends Base {
    * @param {startDate 开始时间,endDate 结束时间,master_total 主库存,spare_total 备用库存, cycle 周期} cycleData
    * @param {库存标识 1主库存 2备用库存} stockMark
    */
-  async getCoupons (cycleData, stockMark) {
-    const sql = `
-            SELECT 
-            id,coupon_name,type_code,rate
-            FROM
-                picker_activity_coupon
-            WHERE
-                stock_mark = ${stockMark}
-                    AND start_date >= '${cycleData.startDate}'
-                    AND end_date <= '${cycleData.endDate}';
-        `
-    const list = await this.db.query(sql); // 获取优惠券奖品列表
-    if (think.isEmpty(list)) {
-      return null;
-    }
+  async getCoupons (cycleData, stockMark,openId) {
+    // const sql = `
+    //         SELECT 
+    //         id,coupon_name,type_code,rate
+    //         FROM
+    //             picker_activity_coupon
+    //         WHERE
+    //             stock_mark = ${stockMark}
+    //                 AND start_date >= '${cycleData.startDate}'
+    //                 AND end_date <= '${cycleData.endDate}';
+    //     `
 
-    const coupons = [];
-    for (const item of list) {
-      if (item.rate > 0) { // 奖池里只有概率大于0的奖品
-        const num = stockMark == 1 ? parseInt(item.rate * cycleData.master_total) : parseInt(item.rate * cycleData.spare_total);
-        coupons.push({
-          id: item.id,
-          coupon_name: item.coupon_name,
-          type_code: item.type_code,
-          rate: item.rate,
-          num: num
-        })
-      }
-    }
-    return coupons;
+    let sql = `    
+      SELECT 
+        *
+        FROM
+        (SELECT 
+            c.id,
+                c.coupon_name,
+                c.type_code,
+                c.rate,
+                CAST(50349 * c.rate AS SIGNED) AS num,
+                (SELECT 
+                          COUNT(1)
+                    FROM
+                        picker_activity_coupon_user cu
+                    WHERE
+                        c.id = cu.coupon_id) AS tempCount,
+                        (SELECT 
+                        COUNT(1)
+                    FROM
+                        picker_activity_coupon_user cu
+                    WHERE
+                        c.id = cu.coupon_id 
+                        and 
+                        cu.openid='${openId}' 
+                        and cu.type_code = 3409
+                        ) AS couponLimitNum,
+                          (SELECT 
+                        COUNT(1)
+                    FROM
+                        picker_activity_coupon_user cu
+                    WHERE
+                        c.type_code = cu.type_code 
+                        and 
+                        cu.openid='${openId}' 
+                        ) AS couponLimitCount
+        FROM
+            picker_activity_coupon c
+        WHERE
+            c.stock_mark = ${stockMark}
+                AND c.start_date >= '${cycleData.startDate}'
+                AND c.end_date <= '${cycleData.endDate}'
+                AND c.rate > 0
+        GROUP BY c.id) t
+        WHERE
+        num > tempCount and couponLimitNum<2 and couponLimitCount<3;
+    `
+
+    const list = await this.db.query(sql); // 获取优惠券奖品列表
+    return list;
+    // if (think.isEmpty(list)) {
+    //   return null;
+    // }
+
+    // const coupons = [];
+    // for (const item of list) {
+    //   if (item.rate > 0) { // 奖池里只有概率大于0的奖品
+    //     const num = stockMark == 1 ? parseInt(item.rate * cycleData.master_total) : parseInt(item.rate * cycleData.spare_total);
+    //     coupons.push({
+    //       id: item.id,
+    //       coupon_name: item.coupon_name,
+    //       type_code: item.type_code,
+    //       rate: item.rate,
+    //       num: num
+    //     })
+    //   }
+    // }
+    // return coupons;
   }
 
   /**
