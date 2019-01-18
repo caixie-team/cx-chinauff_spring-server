@@ -408,7 +408,7 @@ module.exports = class extends Base {
     //                 AND start_date >= '${cycleData.startDate}'
     //                 AND end_date <= '${cycleData.endDate}';
     //     `
-
+    const total = stockMark == 1 ?cycleData.master_total : cycleData.spare_total;
     let sql = `    
       SELECT 
         *
@@ -418,7 +418,7 @@ module.exports = class extends Base {
                 c.coupon_name,
                 c.type_code,
                 c.rate,
-                CAST(50349 * c.rate AS SIGNED) AS num,
+                CAST(${total} * c.rate AS SIGNED) AS num,
                 (SELECT 
                           COUNT(1)
                     FROM
