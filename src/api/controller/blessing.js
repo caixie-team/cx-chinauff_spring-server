@@ -19,6 +19,14 @@ module.exports = class extends Base {
    * 扫一扫 (福字)
    */
   async scanAction() {
+    //2019-02-01月以后不发任何字
+    const _tempDate = moment(new Date()).format('YYYY-MM-DD');
+    if(_tempDate == '2019-02-01'){
+      return this.success({
+        blessing_type: 0
+      })
+    }
+
     let data = this.post()
     if (think.isEmpty(data.openId)) {
       return this.fail(1000, '请求参数错误')
