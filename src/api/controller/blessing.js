@@ -21,7 +21,7 @@ module.exports = class extends Base {
     async scanAction() {
         //2019-02-01月以后不发任何字
         const _tempDate = moment(new Date()).format('YYYY-MM-DD');
-        if (_tempDate == '2019-02-02') {
+        if (_tempDate > '2019-02-01') {
             return this.success({
                 blessing_type: 0
             })
