@@ -147,7 +147,7 @@ module.exports = class extends Base {
 
     const code = this.get('code')
     const key = await this.ctx.session('openid');
-    const tokenInfo = await wx.oauth.getUserBaseInfo(code)
+    const tokenInfo = await wx.oauth.getUserBaseInfo(code, key)
     if (!think.isEmpty(tokenInfo)) {
       await this.ctx.session('openid', tokenInfo.openid)
       if (redirect) {
